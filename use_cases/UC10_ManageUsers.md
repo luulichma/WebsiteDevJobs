@@ -22,7 +22,7 @@ Admin (đã đăng nhập)
 4. Admin chọn user vi phạm, nhấn **"Xóa"**
 5. Hệ thống yêu cầu xác nhận: "Nhập email để xóa"
 6. Admin nhập email
-7. Hệ thống xóa user (soft delete: status='deleted')
+7. Hệ thống xóa user
 8. Thông báo: **"Đã xóa user"**
 
 ---
