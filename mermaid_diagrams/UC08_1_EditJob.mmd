@@ -1,0 +1,47 @@
+sequenceDiagram
+    actor Recruiter as 👔 Nhà tuyển dụng<br/>(Recruiter)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Recruiter,DB: UC08.1: Xem danh sách & Chỉnh sửa tin
+
+    %% Xem danh sách
+    Recruiter->>UI: 1. Truy cập "Quản lý tin tuyển dụng"
+    UI->>Server: 2. GET /api/recruiter/jobs
+    Server->>DB: 3. SELECT * FROM Jobs<br/>WHERE company_id = ?<br/>ORDER BY created_at DESC
+    DB-->>Server: 4. Trả về danh sách jobs
+    Server-->>UI: 5. Trả về dữ liệu jobs
+    UI-->>Recruiter: 6. Hiển thị bảng danh sách jobs<br/>(Title, Posted, Expiry, Applications, Status, Actions)
+
+    %% Chọn hành động - Edit Job
+    Recruiter->>UI: 7. Nhấn nút "Edit" trên 1 job
+    UI->>Server: 8. GET /api/jobs/:id
+    Server->>DB: 9. SELECT * FROM Jobs<br/>WHERE id = ? AND company_id = ?
+    DB-->>Server: 10. Trả về thông tin job
+    Server-->>UI: 11. Trả về data
+    UI-->>Recruiter: 12. Hiển thị form chỉnh sửa<br/>(pre-fill dữ liệu)
+
+    %% Chỉnh sửa và lưu
+    Recruiter->>UI: 13. Chỉnh sửa thông tin<br/>(Title, Description, Salary, Location...)
+    Recruiter->>UI: 14. Nhấn "Lưu thay đổi"
+    
+    UI->>Server: 15. PUT /api/jobs/:id<br/>(Updated data)
+    
+    Server->>Server: 16. Validate dữ liệu<br/>(Title not empty, Expiry > Today,<br/>Salary min <= max)
+    
+    alt Validation thành công
+        Server->>DB: 17. UPDATE Jobs<br/>SET title=?, description=?, salary_min=?,<br/>salary_max=?, location=?, updated_at=NOW()<br/>WHERE id=? AND company_id=?
+        DB-->>Server: 18. Xác nhận cập nhật
+        
+        Server->>DB: 19. INSERT INTO JobLogs<br/>(job_id, action, admin_id, details)
+        DB-->>Server: 20. Log đã lưu
+        
+        Server-->>UI: 21. Trả về success
+        UI-->>Recruiter: 22. ✅ "Cập nhật tin thành công"
+        UI->>UI: 23. Quay lại danh sách
+        
+    else Validation thất bại
+        Server-->>UI: ❌ Lỗi validation<br/>(Title trống, Expiry < Today...)
+        UI-->>Recruiter: Hiển thị thông báo lỗi<br/>tại các trường không hợp lệ
+    end

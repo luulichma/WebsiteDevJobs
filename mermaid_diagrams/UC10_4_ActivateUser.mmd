@@ -1,0 +1,25 @@
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Email as 📧 Email Service
+
+    Note over Admin,Email: UC10.4: Mở khóa tài khoản
+
+    Admin->>UI: 1. Click "Mở khóa" trên user Suspended
+    UI-->>Admin: 2. Hộp thoại xác nhận<br/>"Bạn muốn mở khóa tài khoản này?"
+    Admin->>UI: 3. Nhấn "Xác nhận"
+    
+    UI->>Server: 4. POST /api/admin/users/{id}/activate
+    Server->>DB: 5. UPDATE Users<br/>SET status = 'active'<br/>WHERE user_id = ?
+    DB-->>Server: 6. Cập nhật thành công
+    
+    Server->>DB: 7. INSERT INTO AdminLogs<br/>(admin_id, action, target_user)
+    DB-->>Server: 8. Log saved
+    
+    Server->>Email: 9. Gửi email thông báo<br/>Subject: "Tài khoản đã được mở khóa"<br/>Message: "Bạn có thể đăng nhập lại"
+    Email-->>Server: 10. Email sent
+    
+    Server-->>UI: 11. Success
+    UI-->>Admin: 12. ✅ "Đã mở khóa tài khoản"<br/>User có thể đăng nhập lại

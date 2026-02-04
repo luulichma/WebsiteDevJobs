@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Email as 📧 Email Service
+
+    Note over Admin,Email: UC10.3: Khóa tài khoản
+
+    Admin->>UI: 1. Click "Khóa" trên user Active
+    UI-->>Admin: 2. Hiển thị form nhập lý do<br/>(Vi phạm chính sách, Spam, Gian lận, Khác)
+    Admin->>UI: 3. Chọn/Nhập lý do
+    Admin->>UI: 4. Nhấn "Xác nhận khóa"
+    
+    UI->>Server: 5. POST /api/admin/users/{id}/suspend<br/>(reason: "...")
+    Server->>DB: 6. UPDATE Users<br/>SET status = 'suspended'<br/>WHERE user_id = ?
+    DB-->>Server: 7. Cập nhật thành công
+    
+    Server->>DB: 8. INSERT INTO AdminLogs<br/>(admin_id, action, target_user, reason)
+    DB-->>Server: 9. Log saved
+    
+    Server->>Email: 10. Gửi email thông báo<br/>Subject: "Tài khoản bị khóa"<br/>Reason: [lý do]
+    Email-->>Server: 11. Email sent
+    
+    Server-->>UI: 12. Success
+    UI-->>Admin: 13. ✅ "Đã khóa tài khoản"<br/>User không thể đăng nhập
