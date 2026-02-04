@@ -1,0 +1,38 @@
+sequenceDiagram
+    actor C as Candidate
+    participant UI as User Interface
+    participant S as System
+    participant FS as File Storage
+    participant DB as Database
+    
+    C->>UI: Xem chi tiết Job
+    UI->>C: Hiển thị Job Detail
+    C->>UI: Nhấn "Apply Now"
+    UI->>S: Kiểm tra đã đăng nhập?
+    S-->>UI: OK
+    UI->>C: Hiển thị form nộp hồ sơ
+    
+    C->>UI: Tải file CV (PDF/DOCX)
+    UI->>S: Validate file (format <5MB)
+    
+    alt File không hợp lệ
+        S-->>UI: Lỗi file
+        UI->>C: "File không hợp lệ hoặc quá lớn"
+    else File hợp lệ
+        S->>DB: Kiểm tra đã nộp đơn chưa?
+        
+        alt Đã nộp rồi
+            DB-->>S: Đã tồn tại
+            S-->>UI: "Bạn đã ứng tuyển vị trí này"
+        else Chưa nộp
+            C->>UI: Viết Cover Letter
+            C->>UI: Nhấn "Nộp hồ sơ"
+            UI->>S: Gửi dữ liệu
+            S->>FS: Upload CV (Cloudinary/S3)
+            FS-->>S: URL file
+            S->>DB: INSERT Applications (cv_url, status=Pending)
+            DB-->>S: Success
+            S-->>UI: Thành công
+            UI->>C: "Nộp đơn thành công"
+        end
+    end
