@@ -1,0 +1,354 @@
+{
+    "database": "DevJobs",
+    "tables": [
+        {
+            "name": "Users",
+            "columns": [
+                {
+                    "name": "user_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "email",
+                    "type": "VARCHAR(255)",
+                    "unique": true,
+                    "notNull": true
+                },
+                {
+                    "name": "password_hash",
+                    "type": "VARCHAR(255)",
+                    "notNull": true
+                },
+                {
+                    "name": "full_name",
+                    "type": "VARCHAR(255)",
+                    "notNull": true
+                },
+                {
+                    "name": "phone",
+                    "type": "VARCHAR(20)"
+                },
+                {
+                    "name": "role",
+                    "type": "ENUM('candidate','recruiter','admin')",
+                    "notNull": true
+                },
+                {
+                    "name": "status",
+                    "type": "ENUM('active','suspended','deleted')",
+                    "default": "active"
+                },
+                {
+                    "name": "cv_url",
+                    "type": "VARCHAR(500)"
+                },
+                {
+                    "name": "skills",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "created_at",
+                    "type": "DATETIME"
+                },
+                {
+                    "name": "updated_at",
+                    "type": "DATETIME"
+                },
+                {
+                    "name": "last_login",
+                    "type": "DATETIME"
+                }
+            ]
+        },
+        {
+            "name": "Companies",
+            "columns": [
+                {
+                    "name": "company_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "company_name",
+                    "type": "VARCHAR(255)",
+                    "notNull": true
+                },
+                {
+                    "name": "description",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "website",
+                    "type": "VARCHAR(255)"
+                },
+                {
+                    "name": "logo_url",
+                    "type": "VARCHAR(500)"
+                },
+                {
+                    "name": "address",
+                    "type": "VARCHAR(500)"
+                },
+                {
+                    "name": "status",
+                    "type": "ENUM('pending','active','suspended')",
+                    "default": "pending"
+                },
+                {
+                    "name": "created_by",
+                    "type": "INT",
+                    "foreignKey": {
+                        "table": "Users",
+                        "column": "user_id"
+                    }
+                },
+                {
+                    "name": "created_at",
+                    "type": "DATETIME"
+                }
+            ]
+        },
+        {
+            "name": "Jobs",
+            "columns": [
+                {
+                    "name": "job_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "company_id",
+                    "type": "INT",
+                    "notNull": true,
+                    "foreignKey": {
+                        "table": "Companies",
+                        "column": "company_id"
+                    }
+                },
+                {
+                    "name": "recruiter_id",
+                    "type": "INT",
+                    "notNull": true,
+                    "foreignKey": {
+                        "table": "Users",
+                        "column": "user_id"
+                    }
+                },
+                {
+                    "name": "title",
+                    "type": "VARCHAR(255)",
+                    "notNull": true
+                },
+                {
+                    "name": "description",
+                    "type": "TEXT",
+                    "notNull": true
+                },
+                {
+                    "name": "requirements",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "salary_min",
+                    "type": "DECIMAL(10,2)"
+                },
+                {
+                    "name": "salary_max",
+                    "type": "DECIMAL(10,2)"
+                },
+                {
+                    "name": "location",
+                    "type": "VARCHAR(255)"
+                },
+                {
+                    "name": "job_type",
+                    "type": "ENUM('full-time','part-time','remote','contract')"
+                },
+                {
+                    "name": "status",
+                    "type": "ENUM('pending','active','closed','rejected','expired')",
+                    "default": "pending"
+                },
+                {
+                    "name": "expiry_date",
+                    "type": "DATE"
+                },
+                {
+                    "name": "approved_by",
+                    "type": "INT",
+                    "foreignKey": {
+                        "table": "Users",
+                        "column": "user_id"
+                    }
+                },
+                {
+                    "name": "created_at",
+                    "type": "DATETIME"
+                }
+            ]
+        },
+        {
+            "name": "Applications",
+            "columns": [
+                {
+                    "name": "application_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "job_id",
+                    "type": "INT",
+                    "notNull": true,
+                    "foreignKey": {
+                        "table": "Jobs",
+                        "column": "job_id"
+                    }
+                },
+                {
+                    "name": "candidate_id",
+                    "type": "INT",
+                    "notNull": true,
+                    "foreignKey": {
+                        "table": "Users",
+                        "column": "user_id"
+                    }
+                },
+                {
+                    "name": "cv_url",
+                    "type": "VARCHAR(500)",
+                    "notNull": true
+                },
+                {
+                    "name": "cover_letter",
+                    "type": "TEXT"
+                },
+                {
+                    "name": "status",
+                    "type": "ENUM('pending','viewed','shortlisted','interview','accepted','rejected')",
+                    "default": "pending"
+                },
+                {
+                    "name": "applied_at",
+                    "type": "DATETIME"
+                },
+                {
+                    "name": "reviewed_by",
+                    "type": "INT",
+                    "foreignKey": {
+                        "table": "Users",
+                        "column": "user_id"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Skills",
+            "columns": [
+                {
+                    "name": "skill_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "autoIncrement": true
+                },
+                {
+                    "name": "skill_name",
+                    "type": "VARCHAR(100)",
+                    "unique": true,
+                    "notNull": true
+                },
+                {
+                    "name": "category",
+                    "type": "VARCHAR(50)"
+                },
+                {
+                    "name": "created_at",
+                    "type": "DATETIME"
+                }
+            ]
+        },
+        {
+            "name": "Job_Skills",
+            "columns": [
+                {
+                    "name": "job_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "foreignKey": {
+                        "table": "Jobs",
+                        "column": "job_id"
+                    }
+                },
+                {
+                    "name": "skill_id",
+                    "type": "INT",
+                    "primaryKey": true,
+                    "foreignKey": {
+                        "table": "Skills",
+                        "column": "skill_id"
+                    }
+                }
+            ]
+        }
+    ],
+    "relationships": [
+        {
+            "from": "Companies",
+            "to": "Users",
+            "type": "many-to-one",
+            "foreignKey": "created_by"
+        },
+        {
+            "from": "Jobs",
+            "to": "Companies",
+            "type": "many-to-one",
+            "foreignKey": "company_id"
+        },
+        {
+            "from": "Jobs",
+            "to": "Users",
+            "type": "many-to-one",
+            "foreignKey": "recruiter_id"
+        },
+        {
+            "from": "Jobs",
+            "to": "Users",
+            "type": "many-to-one",
+            "foreignKey": "approved_by"
+        },
+        {
+            "from": "Applications",
+            "to": "Jobs",
+            "type": "many-to-one",
+            "foreignKey": "job_id"
+        },
+        {
+            "from": "Applications",
+            "to": "Users",
+            "type": "many-to-one",
+            "foreignKey": "candidate_id"
+        },
+        {
+            "from": "Applications",
+            "to": "Users",
+            "type": "many-to-one",
+            "foreignKey": "reviewed_by"
+        },
+        {
+            "from": "Job_Skills",
+            "to": "Jobs",
+            "type": "many-to-one",
+            "foreignKey": "job_id"
+        },
+        {
+            "from": "Job_Skills",
+            "to": "Skills",
+            "type": "many-to-one",
+            "foreignKey": "skill_id"
+        }
+    ]
+}

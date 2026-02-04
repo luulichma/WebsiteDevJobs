@@ -4,129 +4,100 @@ sequenceDiagram
     participant Server as ⚙️ Server<br/>(Backend)
     participant DB as 💾 Database
     participant Email as 📧 Email Service
-    participant Log as 📝 Admin Logs
 
-    Note over Admin,Log: UC10: Quản lý người dùng
+    Note over Admin,Email: UC10: Quản lý người dùng
 
     %% Xem danh sách users
     Admin->>UI: 1. Truy cập "Quản lý người dùng"
-    UI->>Server: 2. GET /api/admin/users?page=1&limit=50
-    Server->>DB: 3. SELECT u.id, u.full_name, u.email,<br/>u.role, u.status, u.created_at,<br/>COUNT(applications) as activity_count<br/>FROM Users u<br/>LEFT JOIN Applications/Jobs<br/>GROUP BY u.id<br/>LIMIT 50 OFFSET 0
+    UI->>Server: 2. GET /api/admin/users
+    Server->>DB: 3. SELECT * FROM Users
     DB-->>Server: 4. Trả về danh sách users
-    Server-->>UI: 5. Trả về dữ liệu users
-    UI-->>Admin: 6. Hiển thị bảng danh sách<br/>(ID, Name, Email, Role, Status,<br/>Created, Last Login, Activity, Actions)
+    Server-->>UI: 5. Trả về dữ liệu
+    UI-->>Admin: 6. Hiển thị bảng danh sách
 
-    %% Tìm kiếm và lọc
-    rect rgb(240, 248, 255)
-        Note over Admin,Log: Alternative Flow: Tìm kiếm/Lọc
-        Admin->>UI: A1. Nhập từ khóa hoặc chọn bộ lọc<br/>(Role, Status, Date range)
-        UI->>Server: A2. GET /api/admin/users?search=...&role=...&status=...
-        Server->>DB: A3. SELECT với điều kiện WHERE
-        DB-->>Server: A4. Kết quả phù hợp
-        Server-->>UI: A5. Trả về
-        UI-->>Admin: A6. Hiển thị [N] kết quả
+    %% Tìm kiếm
+    Admin->>UI: 7. Nhập từ khóa tìm kiếm
+    UI->>Server: 8. GET /api/admin/users?search=...&role=...
+    Server->>DB: 9. SELECT với WHERE điều kiện
+    DB-->>Server: 10. Trả về kết quả
+    Server-->>UI: 11. Trả về dữ liệu
+    UI-->>Admin: 12. Hiển thị kết quả
+
+    %% Xem chi tiết
+    rect rgb(220, 240, 255)
+        Note over Admin,DB: Xem chi tiết user
+        Admin->>UI: 13. Click "Xem chi tiết"
+        UI->>Server: 14. GET /api/admin/users/{id}
+        Server->>DB: 15. SELECT user, history
+        DB-->>Server: 16. Trả về thông tin
+        Server-->>UI: 17. Trả về dữ liệu
+        UI-->>Admin: 18. Hiển thị chi tiết
     end
 
-    %% Xem chi tiết user
-    Admin->>UI: 7. Nhấn "View Details" trên 1 user
-    UI->>Server: 8. GET /api/admin/users/:id
-    Server->>DB: 9. SELECT u.*, c.company_name,<br/>login_history, activity_logs<br/>FROM Users u<br/>LEFT JOIN Companies c<br/>WHERE u.id = ?
-    DB-->>Server: 10. Thông tin chi tiết user
-    Server-->>UI: 11. Trả về data
-    UI-->>Admin: 12. Modal hiển thị chi tiết<br/>(Info, CV/Jobs, Login history)
-
-    %% Tạm khóa tài khoản
-    rect rgb(255, 240, 240)
-        Note over Admin,Log: Alternative Flow: Tạm khóa (Suspend)
-        Admin->>UI: S1. Nhấn "Suspend" trên user Active
-        UI-->>Admin: S2. Hộp thoại chọn lý do khóa<br/>(Vi phạm, Spam, Gian lận...)
-        Admin->>UI: S3. Chọn lý do và nhấn "Xác nhận"
-        
-        UI->>Server: S4. PUT /api/admin/users/:id/suspend<br/>(reason, notes)
-        
-        Server->>DB: S5. UPDATE Users<br/>SET status = 'Suspended',<br/>suspended_at = NOW(),<br/>suspend_reason = ?<br/>WHERE id = ?
-        DB-->>Server: S6. Xác nhận cập nhật
-        
-        Server->>Log: S7. INSERT INTO AdminLogs<br/>(admin_id, action='SUSPEND_USER',<br/>target_user_id, reason, ip_address)
-        Log-->>Server: S8. Log đã lưu
-        
-        Server->>Email: S9. Gửi email thông báo<br/>"Tài khoản bị khóa vì [reason]"
-        Email-->>Server: S10. Email sent
-        
-        Server-->>UI: S11. Success
-        UI-->>Admin: S12. ✅ "Đã khóa tài khoản [email]"
+    %% Khóa tài khoản
+    rect rgb(255, 230, 230)
+        Note over Admin,Email: Khóa tài khoản
+        Admin->>UI: 19. Click "Khóa", nhập lý do
+        UI->>Server: 20. POST /api/admin/users/{id}/suspend
+        Server->>DB: 21. UPDATE Users SET status='suspended'
+        DB-->>Server: 22. Cập nhật thành công
+        Server->>Email: 23. Gửi email thông báo
+        Email-->>Server: 24. Email sent
+        Server-->>UI: 25. Trả về success
+        UI-->>Admin: 26. "Đã khóa tài khoản"
     end
 
-    %% Mở khóa tài khoản
-    rect rgb(240, 255, 240)
-        Note over Admin,Log: Alternative Flow: Mở khóa (Activate)
-        Admin->>UI: U1. Nhấn "Activate" trên user Suspended
-        UI-->>Admin: U2. Hiển thị lý do khóa trước đó<br/>"Xác nhận mở khóa?"
-        Admin->>UI: U3. Nhấn "Xác nhận"
+    %% Mở khóa
+    rect rgb(230, 255, 230)
+        Note over Admin,Email: Mở khóa tài khoản
+        Admin->>UI: 27. Click "Mở khóa"
+        UI->>Server: 28. POST /api/admin/users/{id}/activate
+        Server->>DB: 29. UPDATE Users SET status='active'
+        DB-->>Server: 30. Cập nhật thành công
+        Server->>Email: 31. Gửi email thông báo
+        Email-->>Server: 32. Email sent
+        Server-->>UI: 33. Trả về success
+        UI-->>Admin: 34. "Đã mở khóa"
+    end
+
+    %% Chỉnh sửa
+    rect rgb(255, 250, 230)
+        Note over Admin,Email: Chỉnh sửa thông tin
+        Admin->>UI: 35. Click "Sửa", nhập thông tin
+        UI->>Server: 36. PUT /api/admin/users/{id}
+        Server->>DB: 37. Validate email unique
         
-        UI->>Server: U4. PUT /api/admin/users/:id/activate
-        
-        Server->>DB: U5. UPDATE Users<br/>SET status = 'Active',<br/>suspended_at = NULL,<br/>suspend_reason = NULL
-        DB-->>Server: U6. Xác nhận
-        
-        Server->>Log: U7. Log action 'ACTIVATE_USER'
-        Server->>Email: U8. "Tài khoản đã mở khóa"
-        
-        Server-->>UI: U9. Success
-        UI-->>Admin: U10. ✅ "Đã mở khóa tài khoản"
+        alt Email đã tồn tại
+            DB-->>Server: 38a. Email duplicate
+            Server-->>UI: 39a. Error
+            UI-->>Admin: 40a. Hiển thị lỗi
+        else Email hợp lệ
+            DB-->>Server: 38b. OK
+            Server->>DB: 41b. UPDATE Users
+            DB-->>Server: 42b. Updated
+            Server->>Email: 43b. Gửi email
+            Email-->>Server: 44b. Sent
+            Server-->>UI: 45b. Success
+            UI-->>Admin: 46b. "Cập nhật thành công"
+        end
     end
 
     %% Xóa user
-    rect rgb(255, 245, 240)
-        Note over Admin,Log: Alternative Flow: Xóa user (Delete)
-        Admin->>UI: D1. Nhấn "Delete"
-        UI->>Server: D2. GET /api/admin/users/:id/check-activity
+    rect rgb(255, 240, 240)
+        Note over Admin,DB: Xóa user
+        Admin->>UI: 47. Click "Xóa", nhập email
+        UI->>Server: 48. DELETE /api/admin/users/{id}
+        Server->>DB: 49. CHECK activities
         
-        Server->>DB: D3. SELECT COUNT(*) as activity<br/>FROM Applications/Jobs<br/>WHERE user_id = ?
-        DB-->>Server: D4. activity_count
-        
-        alt Có hoạt động (activity > 0)
-            Server-->>UI: D5. ❌ Không cho phép xóa
-            UI-->>Admin: "Không thể xóa user có hoạt động.<br/>Đề xuất: Tạm khóa"
+        alt Có hoạt động
+            DB-->>Server: 50a. Có dữ liệu
+            Server-->>UI: 51a. Error
+            UI-->>Admin: 52a. "Đề xuất Khóa"
         else Không có hoạt động
-            UI-->>Admin: D6. ⚠️ "CẢNH BÁO: Không thể hoàn tác!<br/>Nhập email để xác nhận"
-            Admin->>UI: D7. Nhập email chính xác
-            UI->>Server: D8. DELETE /api/admin/users/:id
-            
-            Server->>DB: D9. UPDATE Users<br/>SET status = 'Deleted',<br/>deleted_at = NOW(),<br/>email = CONCAT('deleted_', id, '_', email)
-            DB-->>Server: D10. Xác nhận
-            
-            Server->>Log: D11. INSERT critical log<br/>'DELETE_USER' with full details
-            Log-->>Server: D12. Log saved
-            
-            Server-->>UI: D13. Success
-            UI-->>Admin: D14. ✅ "Đã xóa user"
+            DB-->>Server: 50b. Không có
+            Server->>DB: 53b. UPDATE Users SET status='deleted'
+            DB-->>Server: 54b. Deleted
+            Server-->>UI: 55b. Success
+            UI-->>Admin: 56b. "Đã xóa"
         end
     end
-
-    %% Chỉnh sửa thông tin
-    rect rgb(250, 250, 255)
-        Note over Admin,Log: Alternative Flow: Chỉnh sửa user
-        Admin->>UI: E1. Nhấn "Edit"
-        UI-->>Admin: E2. Form chỉnh sửa (pre-fill data)
-        Admin->>UI: E3. Sửa name/email/phone/role/status
-        Admin->>UI: E4. Nhấn "Lưu"
-        
-        UI->>Server: E5. PUT /api/admin/users/:id<br/>(updated data)
-        
-        Server->>Server: E6. Validate<br/>(Email unique, Phone valid, Name not empty)
-        
-        alt Validation OK
-            Server->>DB: E7. UPDATE Users<br/>SET full_name=?, email=?, phone=?,<br/>role=?, status=?
-            DB-->>Server: E8. Xác nhận
-            Server->>Log: E9. Log 'UPDATE_USER'
-            Server->>Email: E10. Thông báo user (nếu cần)
-            Server-->>UI: E11. Success
-            UI-->>Admin: E12. ✅ "Cập nhật thành công"
-        else Email đã tồn tại
-            Server-->>UI: ❌ "Email đã được dùng"
-            UI-->>Admin: Hiển thị lỗi validation
-        end
-    end
-
-    Note over Admin,Log: Kết thúc use case<br/>(Mọi hành động đều được log)

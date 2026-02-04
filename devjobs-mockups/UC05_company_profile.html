@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UC05: Quản lý thông tin công ty - DevJobs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+        }
+
+        .navbar-content {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .required {
+            color: #ef4444;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .helper-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 6px;
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f9fafb;
+        }
+
+        .upload-area input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .logo-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .logo-preview img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+            padding: 14px 24px;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">DevJobs</div>
+            <div style="color: #6b7280;">Recruiter Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Quản lý thông tin công ty</h1>
+            <p>Cập nhật thông tin công ty của bạn để thu hút ứng viên tốt nhất</p>
+        </div>
+
+        <div class="form-card">
+            <form>
+                <div class="form-group">
+                    <label for="company-name">Tên công ty <span class="required">*</span></label>
+                    <input type="text" id="company-name" value="ABC Technology Vietnam"
+                        placeholder="VD: ABC Technology Vietnam">
+                    <p class="helper-text">Tên công ty sẽ hiển thị trên tất cả tin tuyển dụng</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả về công ty <span class="required">*</span></label>
+                    <textarea id="description"
+                        placeholder="Giới thiệu về công ty, lĩnh vực hoạt động, văn hóa làm việc...">ABC Technology là công ty phát triển phần mềm hàng đầu tại Việt Nam, chuyên cung cấp các giải pháp công nghệ cho thị trường quốc tế. Chúng tôi có môi trường làm việc năng động, sáng tạo và nhiều cơ hội phát triển.</textarea>
+                    <p class="helper-text">Tối thiểu 100 ký tự</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="website">Website</label>
+                    <input type="url" id="website" value="https://abc-tech.vn"
+                        placeholder="https://company-website.com">
+                    <p class="helper-text">URL website chính thức của công ty</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="size">Quy mô công ty</label>
+                    <select id="size"
+                        style="width: 100%; padding: 12px 16px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 15px;">
+                        <option>1-10 nhân viên</option>
+                        <option>11-50 nhân viên</option>
+                        <option selected>51-200 nhân viên</option>
+                        <option>201-500 nhân viên</option>
+                        <option>500+ nhân viên</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Logo công ty</label>
+                    <div class="upload-area">
+                        <input type="file" id="logo" accept="image/*">
+                        <div class="upload-icon">📤</div>
+                        <p style="font-weight: 600; margin-bottom: 4px;">Click để tải logo lên</p>
+                        <p style="font-size: 13px; color: #6b7280;">PNG, JPG (Tối đa 2MB)</p>
+                    </div>
+                    <div class="logo-preview">
+                        <img src="https://via.placeholder.com/150x150/667eea/ffffff?text=ABC" alt="Logo preview">
+                        <p style="font-size: 13px; color: #6b7280; margin-top: 8px;">Logo hiện tại</p>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thông tin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

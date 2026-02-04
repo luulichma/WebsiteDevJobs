@@ -1,0 +1,64 @@
+Users
+-
+user_id int PK
+email varchar(255) unique
+password_hash varchar(255)
+full_name varchar(255)
+phone varchar(20)
+role varchar(20)
+status varchar(20)
+cv_url varchar(500)
+skills text
+created_at datetime
+
+Companies
+-
+company_id int PK
+company_name varchar(255)
+description text
+website varchar(255)
+logo_url varchar(500)
+address varchar(500)
+status varchar(20)
+created_by int FK >- Users.user_id
+created_at datetime
+
+Jobs
+-
+job_id int PK
+company_id int FK >- Companies.company_id
+recruiter_id int FK >- Users.user_id
+title varchar(255)
+description text
+requirements text
+salary_min decimal(10,2)
+salary_max decimal(10,2)
+location varchar(255)
+job_type varchar(50)
+status varchar(20)
+expiry_date date
+approved_by int FK >- Users.user_id
+created_at datetime
+
+Applications
+-
+application_id int PK
+job_id int FK >- Jobs.job_id
+candidate_id int FK >- Users.user_id
+cv_url varchar(500)
+cover_letter text
+status varchar(20)
+applied_at datetime
+reviewed_by int FK >- Users.user_id
+
+Skills
+-
+skill_id int PK
+skill_name varchar(100) unique
+category varchar(50)
+created_at datetime
+
+Job_Skills
+-
+job_id int FK >- Jobs.job_id
+skill_id int FK >- Skills.skill_id

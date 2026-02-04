@@ -1,0 +1,70 @@
+Table Users {
+  user_id int [pk, increment]
+  email varchar(255) [unique, not null]
+  password_hash varchar(255) [not null]
+  full_name varchar(255) [not null]
+  phone varchar(20)
+  role varchar(20) [not null, note: 'candidate, recruiter, admin']
+  status varchar(20) [default: 'active', note: 'active, suspended, deleted']
+  cv_url varchar(500)
+  skills text [note: 'JSON array']
+  created_at datetime
+  updated_at datetime
+  last_login datetime
+}
+
+Table Companies {
+  company_id int [pk, increment]
+  company_name varchar(255) [not null]
+  description text
+  website varchar(255)
+  logo_url varchar(500)
+  address varchar(500)
+  status varchar(20) [default: 'pending', note: 'pending, active, suspended']
+  created_by int [ref: > Users.user_id]
+  created_at datetime
+}
+
+Table Jobs {
+  job_id int [pk, increment]
+  company_id int [not null, ref: > Companies.company_id]
+  recruiter_id int [not null, ref: > Users.user_id]
+  title varchar(255) [not null]
+  description text [not null]
+  requirements text
+  salary_min decimal(10,2)
+  salary_max decimal(10,2)
+  location varchar(255)
+  job_type varchar(50) [note: 'full-time, part-time, remote, contract']
+  status varchar(20) [default: 'pending', note: 'pending, active, closed, rejected, expired']
+  expiry_date date
+  approved_by int [ref: > Users.user_id]
+  created_at datetime
+}
+
+Table Applications {
+  application_id int [pk, increment]
+  job_id int [not null, ref: > Jobs.job_id]
+  candidate_id int [not null, ref: > Users.user_id]
+  cv_url varchar(500) [not null]
+  cover_letter text
+  status varchar(20) [default: 'pending', note: 'pending, viewed, shortlisted, interview, accepted, rejected']
+  applied_at datetime
+  reviewed_by int [ref: > Users.user_id]
+  
+  indexes {
+    (job_id, candidate_id) [unique]
+  }
+}
+
+Table Skills {
+  skill_id int [pk, increment]
+  skill_name varchar(100) [unique, not null]
+  category varchar(50)
+  created_at datetime
+}
+
+Table Job_Skills {
+  job_id int [pk, ref: > Jobs.job_id]
+  skill_id int [pk, ref: > Skills.skill_id]
+}

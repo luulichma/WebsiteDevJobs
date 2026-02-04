@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UC08: Quản lý bài đăng tin tuyển dụng - DevJobs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 48px;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+        }
+
+        .btn-new {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-new:hover {
+            background: #5568d3;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .filter-group {
+            flex: 1;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #6b7280;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 20px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .job-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 6px;
+            font-size: 15px;
+        }
+
+        .job-meta {
+            color: #6b7280;
+            font-size: 13px;
+            display: flex;
+            gap: 16px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-closed {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .status-expired {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stats-cell {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 2px;
+        }
+
+        .actions-menu {
+            position: relative;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .action-btn:hover {
+            background: #e5e7eb;
+        }
+
+        .dropdown {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 8px 0;
+            min-width: 160px;
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #374151;
+        }
+
+        .dropdown-item:hover {
+            background: #f3f4f6;
+        }
+
+        .dropdown-item.danger {
+            color: #dc2626;
+        }
+
+        .pagination {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .pagination-info {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">DevJobs</div>
+            <div style="color: #6b7280;">Recruiter Dashboard</div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>Quản lý bài đăng tin tuyển dụng</h1>
+                <p style="color: #6b7280; margin-top: 8px;">Theo dõi và quản lý các tin tuyển dụng của bạn</p>
+            </div>
+            <button class="btn-new">+ Đăng tin mới</button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Trạng thái</label>
+                <select>
+                    <option>Tất cả</option>
+                    <option>Đang hoạt động</option>
+                    <option>Chờ duyệt</option>
+                    <option>Đã đóng</option>
+                    <option>Hết hạn</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Sắp xếp</label>
+                <select>
+                    <option>Mới nhất</option>
+                    <option>Cũ nhất</option>
+                    <option>Nhiều ứng viên nhất</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tìm kiếm</label>
+                <input type="text" placeholder="Tìm theo tên vị trí...">
+            </div>
+        </div>
+
+        <div class="content-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vị trí tuyển dụng</th>
+                        <th>Trạng thái</th>
+                        <th>Ứng viên</th>
+                        <th>Hạn nộp</th>
+                        <th>Ngày đăng</th>
+                        <th style="text-align: center;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="job-title">Senior React Developer</div>
+                            <div class="job-meta">
+                                <span>📍 Hà Nội</span>
+                                <span>💰 $1,500 - $2,500</span>
+                                <span>⏰ Full-time</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-active">Đang hoạt động</span></td>
+                        <td class="stats-cell">
+                            <div class="stat-number">15</div>
+                            <div class="stat-label">ứng viên</div>
+                        </td>
+                        <td>15/03/2024</td>
+                        <td>01/02/2024</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">⋮ Thao tác</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="job-title">Backend Engineer (Node.js)</div>
+                            <div class="job-meta">
+                                <span>📍 TP. HCM</span>
+                                <span>💰 $1,200 - $2,000</span>
+                                <span>⏰ Full-time</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-active">Đang hoạt động</span></td>
+                        <td class="stats-cell">
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">ứng viên</div>
+                        </td>
+                        <td>20/03/2024</td>
+                        <td>05/02/2024</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">⋮ Thao tác</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="job-title">Full Stack Developer (MERN)</div>
+                            <div class="job-meta">
+                                <span>📍 Đà Nẵng</span>
+                                <span>💰 $1,000 - $1,800</span>
+                                <span>⏰ Remote</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-pending">Chờ duyệt</span></td>
+                        <td class="stats-cell">
+                            <div class="stat-number">0</div>
+                            <div class="stat-label">ứng viên</div>
+                        </td>
+                        <td>25/03/2024</td>
+                        <td>04/02/2024</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">⋮ Thao tác</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="job-title">DevOps Engineer</div>
+                            <div class="job-meta">
+                                <span>📍 Hà Nội</span>
+                                <span>💰 $2,000 - $3,000</span>
+                                <span>⏰ Full-time</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-closed">Đã đóng</span></td>
+                        <td class="stats-cell">
+                            <div class="stat-number">23</div>
+                            <div class="stat-label">ứng viên</div>
+                        </td>
+                        <td>01/02/2024</td>
+                        <td>15/01/2024</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">⋮ Thao tác</button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="job-title">UI/UX Designer</div>
+                            <div class="job-meta">
+                                <span>📍 TP. HCM</span>
+                                <span>💰 $800 - $1,500</span>
+                                <span>⏰ Part-time</span>
+                            </div>
+                        </td>
+                        <td><span class="status-badge status-expired">Hết hạn</span></td>
+                        <td class="stats-cell">
+                            <div class="stat-number">5</div>
+                            <div class="stat-label">ứng viên</div>
+                        </td>
+                        <td>30/01/2024</td>
+                        <td>10/01/2024</td>
+                        <td style="text-align: center;">
+                            <button class="action-btn">⋮ Thao tác</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <div class="pagination-info">Hiển thị 1-5 trong tổng số 12 tin</div>
+                <div class="pagination-btns">
+                    <button class="page-btn">‹ Trước</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">Sau ›</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dropdown menu example (hidden by default) -->
+        <div class="dropdown" style="display: none; position: absolute;">
+            <div class="dropdown-item">✏️ Chỉnh sửa</div>
+            <div class="dropdown-item">👁️ Xem chi tiết</div>
+            <div class="dropdown-item">📋 Xem ứng viên</div>
+            <div class="dropdown-item">🔄 Gia hạn tin</div>
+            <div class="dropdown-item">🔒 Đóng tin</div>
+            <div class="dropdown-item danger">🗑️ Xóa tin</div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<diagram>
+  <!-- DevJobs Database - ERD (Chen Notation) - 6 Core Tables -->
+  
+  <!-- ENTITIES -->
+  <entities>
+    <entity id="1" name="USERS">
+      <attributes>
+        <attribute name="user_id" key="true"/>
+        <attribute name="email"/>
+        <attribute name="password_hash"/>
+        <attribute name="full_name"/>
+        <attribute name="phone"/>
+        <attribute name="role"/>
+        <attribute name="status"/>
+        <attribute name="cv_url"/>
+        <attribute name="skills"/>
+        <attribute name="created_at"/>
+      </attributes>
+    </entity>
+    
+    <entity id="2" name="COMPANIES">
+      <attributes>
+        <attribute name="company_id" key="true"/>
+        <attribute name="company_name"/>
+        <attribute name="description"/>
+        <attribute name="website"/>
+        <attribute name="logo_url"/>
+        <attribute name="address"/>
+        <attribute name="status"/>
+        <attribute name="created_at"/>
+      </attributes>
+    </entity>
+    
+    <entity id="3" name="JOBS">
+      <attributes>
+        <attribute name="job_id" key="true"/>
+        <attribute name="title"/>
+        <attribute name="description"/>
+        <attribute name="requirements"/>
+        <attribute name="salary_min"/>
+        <attribute name="salary_max"/>
+        <attribute name="location"/>
+        <attribute name="job_type"/>
+        <attribute name="status"/>
+        <attribute name="expiry_date"/>
+        <attribute name="created_at"/>
+      </attributes>
+    </entity>
+    
+    <entity id="4" name="APPLICATIONS">
+      <attributes>
+        <attribute name="application_id" key="true"/>
+        <attribute name="cv_url"/>
+        <attribute name="cover_letter"/>
+        <attribute name="status"/>
+        <attribute name="applied_at"/>
+      </attributes>
+    </entity>
+    
+    <entity id="5" name="SKILLS">
+      <attributes>
+        <attribute name="skill_id" key="true"/>
+        <attribute name="skill_name"/>
+        <attribute name="category"/>
+        <attribute name="created_at"/>
+      </attributes>
+    </entity>
+  </entities>
+  
+  <!-- RELATIONSHIPS -->
+  <relationships>
+    <relationship id="R1" name="creates">
+      <entity ref="1" role="Recruiter" cardinality="1"/>
+      <entity ref="2" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R2" name="posts">
+      <entity ref="2" role="" cardinality="1"/>
+      <entity ref="3" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R3" name="manages">
+      <entity ref="1" role="Recruiter" cardinality="1"/>
+      <entity ref="3" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R4" name="receives">
+      <entity ref="3" role="" cardinality="1"/>
+      <entity ref="4" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R5" name="submits">
+      <entity ref="1" role="Candidate" cardinality="1"/>
+      <entity ref="4" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R6" name="requires">
+      <entity ref="3" role="" cardinality="M"/>
+      <entity ref="5" role="" cardinality="N"/>
+      <type>many-to-many</type>
+    </relationship>
+    
+    <relationship id="R7" name="approves">
+      <entity ref="1" role="Admin" cardinality="1"/>
+      <entity ref="3" role="" cardinality="N"/>
+    </relationship>
+    
+    <relationship id="R8" name="reviews">
+      <entity ref="1" role="Recruiter" cardinality="1"/>
+      <entity ref="4" role="" cardinality="N"/>
+    </relationship>
+  </relationships>
+</diagram>
