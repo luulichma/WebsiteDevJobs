@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Admin,DB: UC10.2: Xem chi tiết user
+
+    Admin->>UI: 1. Click "Xem chi tiết" trên 1 user
+    UI->>Server: 2. GET /api/admin/users/{id}
+    Server->>DB: 3. SELECT * FROM Users WHERE user_id = ?
+    DB-->>Server: 4. User data
+    
+    alt User = Candidate
+        Server->>DB: 5a. SELECT * FROM Applications<br/>WHERE candidate_id = ?
+        DB-->>Server: 6a. Application history
+    else User = Recruiter
+        Server->>DB: 5b. SELECT * FROM Jobs<br/>WHERE recruiter_id = ?
+        DB-->>Server: 6b. Job posts history
+    end
+    
+    Server->>DB: 7. SELECT * FROM LoginHistory<br/>WHERE user_id = ?<br/>ORDER BY login_at DESC LIMIT 10
+    DB-->>Server: 8. Login history
+    
+    Server-->>UI: 9. Trả về full data<br/>(info + history + activities)
+    UI-->>Admin: 10. Hiển thị chi tiết đầy đủ:<br/>- Thông tin cơ bản<br/>- Lịch sử đăng nhập<br/>- Activities (Applications/Jobs)
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Admin,DB: UC10.6: Xóa user
+
+    Admin->>UI: 1. Click "Xóa" trên user
+    UI->>Server: 2. GET /api/admin/users/{id}/can-delete
+    Server->>DB: 3. Kiểm tra activities<br/>SELECT COUNT(*) FROM Applications WHERE candidate_id = ?<br/>+ SELECT COUNT(*) FROM Jobs WHERE recruiter_id = ?
+    
+    alt Có hoạt động (Applications/Jobs)
+        DB-->>Server: 4a. Count > 0
+        Server-->>UI: 5a. Error "Có hoạt động"
+        UI-->>Admin: 6a. ❌ "Không thể xóa user này<br/>vì đã có [N] hoạt động trong hệ thống"<br/>+ Đề xuất: "Khóa tài khoản" thay vì xóa
+    else Không có hoạt động
+        DB-->>Server: 4b. Count = 0
+        Server-->>UI: 5b. Can delete
+        UI-->>Admin: 6b. ⚠️ Yêu cầu nhập email để xác nhận<br/>"Nhập email của user để xác nhận xóa"
+        Admin->>UI: 7b. Nhập email xác nhận
+        
+        alt Email không khớp
+            UI-->>Admin: 8ba. ❌ "Email không khớp"
+        else Email khớp
+            Admin->>UI: 8bb. Nhấn "Xác nhận xóa"
+            UI->>Server: 9bb. DELETE /api/admin/users/{id}
+            Server->>DB: 10bb. UPDATE Users<br/>SET status = 'deleted',<br/>deleted_at = NOW()<br/>(Soft delete)
+            DB-->>Server: 11bb. Deleted
+            
+            Server->>DB: 12bb. INSERT INTO AdminLogs<br/>(admin_id, action, target_user)
+            DB-->>Server: 13bb. Log saved
+            
+            Server-->>UI: 14bb. Success
+            UI-->>Admin: 15bb. ✅ "Đã xóa user"
+        end
+    end
+
+    </div>
+</body>
+</html>
