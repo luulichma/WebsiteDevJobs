@@ -1,0 +1,38 @@
+sequenceDiagram
+    actor R as Recruiter
+    participant UI as User Interface
+    participant S as System
+    participant DB as Database
+    
+    R->>UI: Chọn "Đăng tin mới" trên Dashboard
+    UI->>S: Kiểm tra Company Profile đã có?
+    S->>DB: SELECT Companies WHERE recruiter_id
+    
+    alt Chưa có company
+        DB-->>S: NULL
+        S-->>UI: Lỗi
+        UI->>R: "Vui lòng cập nhật thông tin công ty trước"
+    else Đã có company
+        DB-->>S: Company exists
+        S-->>UI: OK
+        UI->>R: Hiển thị form đăng tin
+        
+        R->>UI: Nhập tiêu đề (Job Title)
+        R->>UI: Chọn kỹ năng (Tags: React, Node...)
+        R->>UI: Nhập mức lương, mô tả, địa điểm
+        R->>UI: Nhấn "Đăng tin"
+        
+        UI->>S: Validate dữ liệu
+        
+        alt Dữ liệu không hợp lệ
+            S-->>UI: Lỗi validation
+            UI->>R: Hiển thị lỗi
+        else Dữ liệu hợp lệ
+            S->>DB: INSERT Jobs (status=Pending)
+            DB-->>S: job_id
+            S->>DB: INSERT Job_Skills
+            DB-->>S: Success
+            S-->>UI: Thành công
+            UI->>R: "Tin đã gửi, chờ Admin duyệt"
+        end
+    end
