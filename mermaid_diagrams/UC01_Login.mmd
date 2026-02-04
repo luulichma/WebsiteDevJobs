@@ -1,0 +1,50 @@
+sequenceDiagram
+    actor U as User
+    participant UI as Login Page
+    participant S as System
+    participant DB as Database
+    participant Auth as Auth Service
+    
+    U->>UI: Chọn "Đăng nhập" trên menu
+    UI->>U: Hiển thị Form đăng nhập
+    U->>UI: Nhập Email và Password
+    U->>UI: Nhấn "Đăng nhập"
+    
+    UI->>S: Gửi credentials
+    S->>DB: SELECT * FROM Users WHERE email
+    
+    alt Email không tồn tại
+        DB-->>S: NULL
+        S-->>UI: Lỗi "Email hoặc mật khẩu không chính xác"
+        UI->>U: Hiển thị lỗi
+    else Email tồn tại
+        DB-->>S: User data
+        S->>Auth: Verify password hash
+        
+        alt Mật khẩu sai
+            Auth-->>S: Invalid
+            S-->>UI: Lỗi "Email hoặc mật khẩu không chính xác"
+            UI->>U: Hiển thị lỗi
+        else Mật khẩu đúng
+            Auth-->>S: Valid
+            S->>S: Kiểm tra tài khoản có bị khóa?
+            
+            alt Tài khoản bị khóa
+                S-->>UI: "Tài khoản đã bị vô hiệu hóa"
+                UI->>U: Hiển thị thông báo, liên hệ Admin
+            else Tài khoản active
+                S->>S: Tạo JWT Token
+                S->>DB: Lưu session
+                
+                alt role = candidate
+                    S-->>UI: Redirect /jobs (Tìm việc)
+                else role = recruiter
+                    S-->>UI: Redirect /recruiter/dashboard
+                else role = admin
+                    S-->>UI: Redirect /admin/jobs/pending
+                end
+                
+                UI->>U: Hiển thị Dashboard
+            end
+        end
+    end
