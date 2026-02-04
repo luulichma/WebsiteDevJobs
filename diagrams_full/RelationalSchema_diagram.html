@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+graph TB
+    subgraph "USERS Table"
+        U1["<b>USERS</b><br/>____________<br/>🔑 user_id INT PK<br/>📧 email VARCHAR UNIQUE<br/>🔒 password_hash VARCHAR<br/>👤 full_name VARCHAR<br/>📞 phone VARCHAR<br/>👔 role ENUM<br/>✅ status ENUM<br/>📄 cv_url VARCHAR<br/>⚙️ skills TEXT JSON<br/>📅 created_at DATETIME<br/>📅 updated_at DATETIME<br/>📅 last_login DATETIME"]
+    end
+    
+    subgraph "COMPANIES Table"
+        C1["<b>COMPANIES</b><br/>____________<br/>🔑 company_id INT PK<br/>🏢 company_name VARCHAR<br/>📝 description TEXT<br/>🌐 website VARCHAR<br/>🖼️ logo_url VARCHAR<br/>📍 address VARCHAR<br/>📞 phone VARCHAR<br/>📧 email VARCHAR<br/>✅ status ENUM<br/>🔗 created_by INT FK<br/>📅 created_at DATETIME"]
+    end
+    
+    subgraph "JOBS Table"
+        J1["<b>JOBS</b><br/>____________<br/>🔑 job_id INT PK<br/>🔗 company_id INT FK<br/>🔗 recruiter_id INT FK<br/>💼 title VARCHAR<br/>📝 description TEXT<br/>📋 requirements TEXT<br/>💰 salary_min DECIMAL<br/>💰 salary_max DECIMAL<br/>📍 location VARCHAR<br/>⏰ job_type ENUM<br/>✅ status ENUM<br/>📅 expiry_date DATE<br/>🔗 approved_by INT FK"]
+    end
+    
+    subgraph "APPLICATIONS Table"
+        A1["<b>APPLICATIONS</b><br/>____________<br/>🔑 application_id INT PK<br/>🔗 job_id INT FK<br/>🔗 candidate_id INT FK<br/>📄 cv_url VARCHAR<br/>✉️ cover_letter TEXT<br/>✅ status ENUM<br/>📅 applied_at DATETIME<br/>🔗 reviewed_by INT FK"]
+    end
+    
+    subgraph "SKILLS & JOB_SKILLS Tables"
+        S1["<b>SKILLS</b><br/>____________<br/>🔑 skill_id INT PK<br/>🏷️ skill_name VARCHAR UK<br/>📁 category VARCHAR"]
+        JS1["<b>JOB_SKILLS</b><br/>____________<br/>🔑🔗 job_id INT PK FK<br/>🔑🔗 skill_id INT PK FK"]
+    end
+    
+    subgraph "ADMIN_LOGS Table"
+        AL1["<b>ADMIN_LOGS</b><br/>____________<br/>🔑 log_id INT PK<br/>🔗 admin_id INT FK<br/>⚡ action VARCHAR<br/>🎯 target_type ENUM<br/>🆔 target_id INT<br/>📝 details TEXT JSON<br/>🌐 ip_address VARCHAR"]
+    end
+    
+    subgraph "JOB_LOGS Table"
+        JL1["<b>JOB_LOGS</b><br/>____________<br/>🔑 log_id INT PK<br/>🔗 job_id INT FK<br/>🔗 recruiter_id INT FK<br/>⚡ action VARCHAR<br/>📝 details TEXT JSON"]
+    end
+    
+    %% Relationships
+    U1 -->|"1:N created_by"| C1
+    C1 -->|"1:N company_id"| J1
+    U1 -->|"1:N recruiter_id"| J1
+    U1 -->|"1:N approved_by"| J1
+    J1 -->|"1:N job_id"| A1
+    U1 -->|"1:N candidate_id"| A1
+    U1 -->|"1:N reviewed_by"| A1
+    J1 -->|"1:N job_id"| JS1
+    S1 -->|"1:N skill_id"| JS1
+    U1 -->|"1:N admin_id"| AL1
+    J1 -->|"1:N job_id"| JL1
+    
+    classDef primaryKey fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef foreignKey fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    classDef junction fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    
+    class U1,C1,J1,A1,S1,AL1,JL1 primaryKey
+    class JS1 junction
+
+    </div>
+</body>
+</html>

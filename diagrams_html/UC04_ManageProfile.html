@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Candidate as 👤 Ứng viên<br/>(Candidate)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Storage as ☁️ Cloud Storage<br/>(S3/Cloudinary)
+
+    Note over Candidate,Storage: UC04: Quản lý hồ sơ cá nhân
+
+    %% Luồng chính
+    Candidate->>UI: 1. Truy cập trang "Hồ sơ của tôi"
+    UI->>Server: 2. GET /api/candidate/profile
+    Server->>DB: 3. SELECT * FROM Candidates WHERE id = ?
+    DB-->>Server: 4. Trả về thông tin hiện tại
+    Server-->>UI: 5. Trả về dữ liệu profile
+    UI-->>Candidate: 6. Hiển thị form chỉnh sửa<br/>(Họ tên, Email, SĐT, Skills, CV)
+
+    Candidate->>UI: 7. Chỉnh sửa thông tin và upload CV mới
+    Candidate->>UI: 8. Nhấn "Lưu thay đổi"
+    
+    UI->>Server: 9. PUT /api/candidate/profile<br/>(FormData + File CV)
+    
+    alt File CV được upload
+        Server->>Server: 10. Kiểm tra file<br/>(PDF/DOCX, <5MB)
+        
+        alt File hợp lệ
+            Server->>Storage: 11. Upload CV lên Cloud
+            Storage-->>Server: 12. Trả về URL của CV
+            Server->>DB: 13. UPDATE Candidates<br/>SET name=?, phone=?, cv_url=?, skills=?<br/>WHERE id=?
+            DB-->>Server: 14. Xác nhận cập nhật
+            Server-->>UI: 15. Trả về success
+            UI-->>Candidate: 16. ✅ "Cập nhật thành công"
+        else File không hợp lệ (E1)
+            Server-->>UI: ❌ Lỗi: File không đúng định dạng<br/>hoặc dung lượng > 5MB
+            UI-->>Candidate: Hiển thị thông báo lỗi
+        end
+    else Chỉ cập nhật thông tin (không upload CV)
+        Server->>DB: 11. UPDATE Candidates<br/>SET name=?, phone=?, skills=?<br/>WHERE id=?
+        DB-->>Server: 12. Xác nhận cập nhật
+        Server-->>UI: 13. Trả về success
+        UI-->>Candidate: 14. ✅ "Cập nhật thành công"
+    end
+
+    Note over Candidate,Storage: Kết thúc use case
+
+    </div>
+</body>
+</html>

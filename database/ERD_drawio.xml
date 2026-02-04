@@ -1,0 +1,165 @@
+<mxfile host="app.diagrams.net" modified="2026-02-04T10:55:00.000Z" agent="5.0" version="21.1.2" etag="DevJobs-ERD" type="device">
+  <diagram id="ERD-Chen-DevJobs" name="DevJobs ERD">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        
+        <!-- ENTITY: USERS -->
+        <mxCell id="entity-users" value="USERS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="100" y="300" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-user_id" value="user_id" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="20" y="250" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-email" value="email" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="20" y="300" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-role" value="role" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="20" y="350" width="80" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- ENTITY: COMPANIES -->
+        <mxCell id="entity-companies" value="COMPANIES" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="300" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-company_id" value="company_id" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="270" width="90" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-company_name" value="company_name" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="540" y="320" width="100" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- ENTITY: JOBS -->
+        <mxCell id="entity-jobs" value="JOBS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="700" y="300" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-job_id" value="job_id" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="840" y="250" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-title" value="title" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="840" y="300" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-status" value="status" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="840" y="350" width="80" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- ENTITY: APPLICATIONS -->
+        <mxCell id="entity-applications" value="APPLICATIONS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="500" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-app_id" value="application_id" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="310" y="480" width="100" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-cv_url" value="cv_url" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="310" y="530" width="80" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- ENTITY: SKILLS -->
+        <mxCell id="entity-skills" value="SKILLS" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="900" y="500" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-skill_id" value="skill_id" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffcccc;strokeColor=#b85450;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1030" y="490" width="80" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="attr-skill_name" value="skill_name" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11" vertex="1" parent="1">
+          <mxGeometry x="1030" y="540" width="90" height="40" as="geometry"/>
+        </mxCell>
+        
+        <!-- RELATIONSHIP: creates -->
+        <mxCell id="rel-creates" value="creates" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="250" y="290" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-users-creates" value="1" edge="1" parent="1" source="entity-users" target="rel-creates">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-creates-companies" value="N" edge="1" parent="1" source="rel-creates" target="entity-companies">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- RELATIONSHIP: posts -->
+        <mxCell id="rel-posts" value="posts" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="550" y="290" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-companies-posts" value="1" edge="1" parent="1" source="entity-companies" target="rel-posts">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-posts-jobs" value="N" edge="1" parent="1" source="rel-posts" target="entity-jobs">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- RELATIONSHIP: receives -->
+        <mxCell id="rel-receives" value="receives" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="550" y="400" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-jobs-receives" value="1" edge="1" parent="1" source="entity-jobs" target="rel-receives">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-receives-apps" value="N" edge="1" parent="1" source="rel-receives" target="entity-applications">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- RELATIONSHIP: submits -->
+        <mxCell id="rel-submits" value="submits" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="210" y="400" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-users-submits" value="1" edge="1" parent="1" source="entity-users" target="rel-submits">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-submits-apps" value="N" edge="1" parent="1" source="rel-submits" target="entity-applications">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- RELATIONSHIP: requires (M:N) -->
+        <mxCell id="rel-requires" value="requires" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="760" y="490" width="100" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-jobs-requires" value="M" edge="1" parent="1" source="entity-jobs" target="rel-requires">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge-requires-skills" value="N" edge="1" parent="1" source="rel-requires" target="entity-skills">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+        <!-- Attribute connections -->
+        <mxCell id="conn-user-id" edge="1" parent="1" source="attr-user_id" target="entity-users" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-email" edge="1" parent="1" source="attr-email" target="entity-users" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-role" edge="1" parent="1" source="attr-role" target="entity-users" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-company-id" edge="1" parent="1" source="attr-company_id" target="entity-companies" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-company-name" edge="1" parent="1" source="attr-company_name" target="entity-companies" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-job-id" edge="1" parent="1" source="attr-job_id" target="entity-jobs" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-title" edge="1" parent="1" source="attr-title" target="entity-jobs" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-status" edge="1" parent="1" source="attr-status" target="entity-jobs" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-app-id" edge="1" parent="1" source="attr-app_id" target="entity-applications" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-cv" edge="1" parent="1" source="attr-cv_url" target="entity-applications" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-skill-id" edge="1" parent="1" source="attr-skill_id" target="entity-skills" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="conn-skill-name" edge="1" parent="1" source="attr-skill_name" target="entity-skills" style="dashed=1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
