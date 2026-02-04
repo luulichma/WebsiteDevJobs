@@ -1,0 +1,55 @@
+graph LR
+    %% Actors - xếp dọc bên trái
+    Candidate["👤<br/>Candidate<br/>(Ứng viên)"]
+    Recruiter["👔<br/>Recruiter<br/>(Nhà tuyển dụng)"]
+    Admin["⚙️<br/>Admin<br/>(Quản trị viên)"]
+    
+    %% Use Cases
+    UC01[Đăng ký/Đăng nhập]
+    UC02[Quản lý profile]
+    UC03[Tìm kiếm jobs]
+    UC04[Xem chi tiết job]
+    UC05[Nộp hồ sơ]
+    UC06[Xem lịch sử ứng tuyển]
+    UC07[Quản lý công ty]
+    UC08[Đăng tin tuyển dụng]
+    UC09[Quản lý tin đã đăng]
+    UC10[Xem ứng viên]
+    UC11[Tải CV]
+    UC12[Cập nhật trạng thái]
+    UC13[Duyệt tin]
+    UC14[Quản lý users]
+    UC15[Quản lý companies]
+    UC16[Thống kê]
+    
+    %% Candidate connections
+    Candidate --> UC01
+    Candidate --> UC02
+    Candidate --> UC03
+    Candidate --> UC04
+    Candidate --> UC05
+    Candidate --> UC06
+    
+    %% Recruiter connections
+    Recruiter --> UC01
+    Recruiter --> UC02
+    Recruiter --> UC07
+    Recruiter --> UC08
+    Recruiter --> UC09
+    Recruiter --> UC10
+    Recruiter --> UC11
+    Recruiter --> UC12
+    
+    %% Admin connections
+    Admin --> UC01
+    Admin --> UC13
+    Admin --> UC14
+    Admin --> UC15
+    Admin --> UC16
+    
+    %% Styling
+    classDef actor fill:#e3f2fd,stroke:#1976d2,stroke-width:3px
+    classDef usecase fill:#fff9c4,stroke:#f57f17,stroke-width:2px
+    
+    class Candidate,Recruiter,Admin actor
+    class UC01,UC02,UC03,UC04,UC05,UC06,UC07,UC08,UC09,UC10,UC11,UC12,UC13,UC14,UC15,UC16 usecase
