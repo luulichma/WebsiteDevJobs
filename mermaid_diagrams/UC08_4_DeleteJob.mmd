@@ -1,0 +1,28 @@
+sequenceDiagram
+    actor Recruiter as 👔 Nhà tuyển dụng<br/>(Recruiter)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Recruiter,DB: UC08.4: Xóa tin tuyển dụng
+
+    Recruiter->>UI: 1. Nhấn "Delete" trên tin cần xóa
+    UI->>Server: 2. DELETE /api/jobs/:id
+    
+    Server->>DB: 3. SELECT COUNT(*) FROM Applications<br/>WHERE job_id = ?
+    
+    alt Có ứng viên đã nộp đơn
+        DB-->>Server: 4a. Count > 0
+        Server-->>UI: 5a. Error "Không thể xóa"
+        UI-->>Recruiter: 6a. ❌ "Không thể xóa tin này<br/>vì đã có [N] ứng viên nộp đơn"<br/>+ Đề xuất "Đóng tin" thay vì xóa
+    else Chưa có ứng viên
+        DB-->>Server: 4b. Count = 0
+        Server-->>UI: 5b. Hiển thị cảnh báo
+        UI-->>Recruiter: 6b. ⚠️ "Hành động không thể hoàn tác.<br/>Bạn chắc chắn muốn xóa?"
+        Recruiter->>UI: 7b. Nhấn "Xác nhận xóa"
+        UI->>Server: 8b. Confirm delete
+        Server->>DB: 9b. UPDATE Jobs<br/>SET status = 'deleted'<br/>(Soft delete)
+        DB-->>Server: 10b. Deleted
+        Server-->>UI: 11b. Success
+        UI-->>Recruiter: 12b. ✅ "Đã xóa tin tuyển dụng"
+    end

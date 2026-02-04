@@ -1,0 +1,19 @@
+sequenceDiagram
+    actor Recruiter as 👔 Nhà tuyển dụng<br/>(Recruiter)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Email as 📧 Email Service
+
+    Note over Recruiter,Email: UC08.3: Đóng tin tuyển dụng
+
+    Recruiter->>UI: 1. Nhấn "Close" trên tin Active
+    UI-->>Recruiter: 2. Hộp thoại xác nhận<br/>"Tin sẽ không còn hiển thị với ứng viên"
+    Recruiter->>UI: 3. Nhấn "Xác nhận"
+    UI->>Server: 4. PUT /api/jobs/:id/close
+    Server->>DB: 5. UPDATE Jobs<br/>SET status = 'Closed',<br/>closed_at = NOW()<br/>WHERE id = ? AND company_id = ?
+    DB-->>Server: 6. Xác nhận
+    Server->>Email: 7. Gửi email thông báo<br/>đến ứng viên (optional)
+    Email-->>Server: 8. Email sent
+    Server-->>UI: 9. Success
+    UI-->>Recruiter: 10. ✅ "Đã đóng tin tuyển dụng"
