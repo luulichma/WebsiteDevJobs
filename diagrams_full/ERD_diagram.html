@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+graph TD
+    %% ==================== USERS ENTITY ====================
+    USERS[USERS]:::entity
+    U_ID([user_id]):::key
+    U_EMAIL([email]):::attribute
+    U_PASS([password_hash]):::attribute
+    U_NAME([full_name]):::attribute
+    U_PHONE([phone]):::attribute
+    U_ROLE([role]):::attribute
+    U_STATUS([status]):::attribute
+    U_CV([cv_url]):::attribute
+    U_SKILLS([skills]):::attribute
+    U_CREATED([created_at]):::attribute
+    
+    U_ID -.-> USERS
+    U_EMAIL -.-> USERS
+    U_PASS -.-> USERS
+    U_NAME -.-> USERS
+    U_PHONE -.-> USERS
+    U_ROLE -.-> USERS
+    U_STATUS -.-> USERS
+    U_CV -.-> USERS
+    U_SKILLS -.-> USERS
+    U_CREATED -.-> USERS
+
+    %% ==================== COMPANIES ENTITY ====================
+    COMPANIES[COMPANIES]:::entity
+    C_ID([company_id]):::key
+    C_NAME([company_name]):::attribute
+    C_DESC([description]):::attribute
+    C_WEB([website]):::attribute
+    C_LOGO([logo_url]):::attribute
+    C_ADDR([address]):::attribute
+    C_STATUS([status]):::attribute
+    C_CREATED([created_at]):::attribute
+    
+    C_ID -.-> COMPANIES
+    C_NAME -.-> COMPANIES
+    C_DESC -.-> COMPANIES
+    C_WEB -.-> COMPANIES
+    C_LOGO -.-> COMPANIES
+    C_ADDR -.-> COMPANIES
+    C_STATUS -.-> COMPANIES
+    C_CREATED -.-> COMPANIES
+
+    %% ==================== JOBS ENTITY ====================
+    JOBS[JOBS]:::entity
+    J_ID([job_id]):::key
+    J_TITLE([title]):::attribute
+    J_DESC([description]):::attribute
+    J_REQ([requirements]):::attribute
+    J_SAL_MIN([salary_min]):::attribute
+    J_SAL_MAX([salary_max]):::attribute
+    J_LOC([location]):::attribute
+    J_TYPE([job_type]):::attribute
+    J_STATUS([status]):::attribute
+    J_EXP([expiry_date]):::attribute
+    J_CREATED([created_at]):::attribute
+    
+    J_ID -.-> JOBS
+    J_TITLE -.-> JOBS
+    J_DESC -.-> JOBS
+    J_REQ -.-> JOBS
+    J_SAL_MIN -.-> JOBS
+    J_SAL_MAX -.-> JOBS
+    J_LOC -.-> JOBS
+    J_TYPE -.-> JOBS
+    J_STATUS -.-> JOBS
+    J_EXP -.-> JOBS
+    J_CREATED -.-> JOBS
+
+    %% ==================== APPLICATIONS ENTITY ====================
+    APPLICATIONS[APPLICATIONS]:::entity
+    A_ID([application_id]):::key
+    A_CV([cv_url]):::attribute
+    A_COVER([cover_letter]):::attribute
+    A_STATUS([status]):::attribute
+    A_APPLIED([applied_at]):::attribute
+    
+    A_ID -.-> APPLICATIONS
+    A_CV -.-> APPLICATIONS
+    A_COVER -.-> APPLICATIONS
+    A_STATUS -.-> APPLICATIONS
+    A_APPLIED -.-> APPLICATIONS
+
+    %% ==================== SKILLS ENTITY ====================
+    SKILLS[SKILLS]:::entity
+    S_ID([skill_id]):::key
+    S_NAME([skill_name]):::attribute
+    S_CAT([category]):::attribute
+    S_CREATED([created_at]):::attribute
+    
+    S_ID -.-> SKILLS
+    S_NAME -.-> SKILLS
+    S_CAT -.-> SKILLS
+    S_CREATED -.-> SKILLS
+
+    %% ==================== RELATIONSHIPS ====================
+    R_CREATES{{creates}}:::relationship
+    R_POSTS{{posts}}:::relationship
+    R_MANAGES{{manages}}:::relationship
+    R_RECEIVES{{receives}}:::relationship
+    R_SUBMITS{{submits}}:::relationship
+    R_REQUIRES{{requires}}:::relationship
+    R_APPROVES{{approves}}:::relationship
+    R_REVIEWS{{reviews}}:::relationship
+
+    %% Recruiter creates Companies (1:N)
+    USERS -->|1| R_CREATES
+    R_CREATES -->|N| COMPANIES
+
+    %% Companies posts Jobs (1:N)
+    COMPANIES -->|1| R_POSTS
+    R_POSTS -->|N| JOBS
+
+    %% Recruiter manages Jobs (1:N)
+    USERS -->|1| R_MANAGES
+    R_MANAGES -->|N| JOBS
+
+    %% Jobs receives Applications (1:N)
+    JOBS -->|1| R_RECEIVES
+    R_RECEIVES -->|N| APPLICATIONS
+
+    %% Candidate submits Applications (1:N)
+    USERS -->|1| R_SUBMITS
+    R_SUBMITS -->|N| APPLICATIONS
+
+    %% Jobs requires Skills (M:N via Job_Skills)
+    JOBS -->|M| R_REQUIRES
+    R_REQUIRES -->|N| SKILLS
+
+    %% Admin approves Jobs (1:N)
+    USERS -->|1| R_APPROVES
+    R_APPROVES -->|N| JOBS
+
+    %% Recruiter reviews Applications (1:N)
+    USERS -->|1| R_REVIEWS
+    R_REVIEWS -->|N| APPLICATIONS
+
+    %% ==================== STYLING ====================
+    classDef entity fill:#4A90E2,stroke:#2E5C8A,stroke-width:3px,color:#fff
+    classDef attribute fill:#F5F5DC,stroke:#8B8970,stroke-width:2px
+    classDef key fill:#FFB6C1,stroke:#C71585,stroke-width:3px,font-weight:bold
+    classDef relationship fill:#FFE4B5,stroke:#DAA520,stroke-width:2px
+
+    </div>
+</body>
+</html>
