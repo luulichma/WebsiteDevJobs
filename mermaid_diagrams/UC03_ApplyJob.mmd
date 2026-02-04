@@ -1,38 +1,104 @@
 sequenceDiagram
-    actor C as Candidate
-    participant UI as User Interface
-    participant S as System
-    participant FS as File Storage
-    participant DB as Database
-    
-    C->>UI: Xem chi tiết Job
-    UI->>C: Hiển thị Job Detail
-    C->>UI: Nhấn "Apply Now"
-    UI->>S: Kiểm tra đã đăng nhập?
-    S-->>UI: OK
-    UI->>C: Hiển thị form nộp hồ sơ
-    
-    C->>UI: Tải file CV (PDF/DOCX)
-    UI->>S: Validate file (format <5MB)
-    
-    alt File không hợp lệ
-        S-->>UI: Lỗi file
-        UI->>C: "File không hợp lệ hoặc quá lớn"
-    else File hợp lệ
-        S->>DB: Kiểm tra đã nộp đơn chưa?
+    actor Candidate as 👤 Ứng viên<br/>(Candidate)
+    participant UI as 🖥️ Giao diện<br/>(Job Detail Page)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant Storage as ☁️ Cloud Storage<br/>(Cloudinary/S3)
+    participant DB as 💾 Database
+
+    Note over Candidate,DB: UC03: Ứng tuyển công việc
+
+    %% Main Flow: Apply Job
+    rect rgb(230, 245, 255)
+        Note over Candidate,DB: Luồng chính: Nộp hồ sơ
+        Candidate->>UI: 1. Xem trang chi tiết Job
+        UI-->>Candidate: 2. Hiển thị thông tin Job
+        Candidate->>UI: 3. Nhấn "Apply Now"
+        UI-->>Candidate: 4. Hiển thị Form nộp hồ sơ
         
-        alt Đã nộp rồi
-            DB-->>S: Đã tồn tại
-            S-->>UI: "Bạn đã ứng tuyển vị trí này"
-        else Chưa nộp
-            C->>UI: Viết Cover Letter
-            C->>UI: Nhấn "Nộp hồ sơ"
-            UI->>S: Gửi dữ liệu
-            S->>FS: Upload CV (Cloudinary/S3)
-            FS-->>S: URL file
-            S->>DB: INSERT Applications (cv_url, status=Pending)
-            DB-->>S: Success
-            S-->>UI: Thành công
-            UI->>C: "Nộp đơn thành công"
+        Candidate->>UI: 5. Tải file CV (PDF)
+        Candidate->>UI: 6. Viết Cover Letter
+        Candidate->>UI: 7. Nhấn "Nộp hồ sơ"
+        
+        UI->>Server: 8. POST /api/applications<br/>{job_id, cv_file, cover_letter}
+        
+        %% File validation
+        Server->>Server: 9. Validate file<br/>(format=PDF?, size<5MB?)
+        
+        alt File không hợp lệ (E1)
+            Server-->>UI: 10a. Error: File invalid
+            UI-->>Candidate: 11a. "Chỉ chấp nhận PDF <5MB"
+        else File hợp lệ
+            %% Check duplicate
+            Server->>DB: 10b. SELECT FROM Applications<br/>WHERE job_id=? AND candidate_id=?
+            
+            alt Đã nộp đơn (E3)
+                DB-->>Server: 11c. Đã tồn tại record
+                Server-->>UI: 12c. Error: Already applied
+                UI-->>Candidate: 13c. "Bạn đã nộp hồ sơ"
+            else Chưa nộp
+                DB-->>Server: 11d. Không tồn tại
+                
+                %% Upload to cloud
+                Server->>Storage: 12d. Upload CV file
+                Storage-->>Server: 13d. Trả về cv_url
+                
+                %% Save to DB
+                Server->>DB: 14d. INSERT Applications<br/>(job_id, candidate_id, cv_url,<br/>cover_letter, status='pending')
+                DB-->>Server: 15d. Success
+                
+                Server-->>UI: 16d. Success response
+                UI-->>Candidate: 17d. ✅ "Nộp hồ sơ thành công!"
+            end
+        end
+    end
+
+    %% Alternative Flow: Update Application
+    rect rgb(255, 250, 230)
+        Note over Candidate,DB: Luồng thay thế A1: Cập nhật hồ sơ
+        
+        Candidate->>UI: 18. Vào lại trang Job đã ứng tuyển
+        UI->>Server: 19. GET /api/applications/status?job_id=...
+        Server->>DB: 20. SELECT status FROM Applications
+        DB-->>Server: 21. Trả về status hiện tại
+        
+        alt Status đang xử lý (E2)
+            Note over Server: status IN ('viewed','shortlisted',<br/>'interview','accepted','rejected')
+            Server-->>UI: 22a. Status = processing
+            UI-->>Candidate: 23a. Hiển thị "Đã ứng tuyển"<br/>⚠️ Ẩn nút "Cập nhật"<br/>"Hồ sơ đang được xem xét"
+        else Status = pending
+            Server-->>UI: 22b. Status = pending
+            UI-->>Candidate: 23b. Hiển thị "Đã ứng tuyển"<br/>✏️ Nút "Cập nhật hồ sơ"
+            
+            Candidate->>UI: 24. Nhấn "Cập nhật hồ sơ"
+            UI-->>Candidate: 25. Hiển thị Form cập nhật
+            
+            Candidate->>UI: 26. Tải CV mới (PDF)
+            Candidate->>UI: 27. Sửa Cover Letter
+            Candidate->>UI: 28. Nhấn "Lưu thay đổi"
+            
+            UI->>Server: 29. PUT /api/applications/{id}<br/>{cv_file_new, cover_letter_new}
+            
+            %% Validate new file
+            Server->>Server: 30. Validate file mới
+            
+            alt File không hợp lệ
+                Server-->>UI: 31a. Error
+                UI-->>Candidate: 32a. "File không hợp lệ"
+            else File hợp lệ
+                %% Upload new CV
+                Server->>Storage: 31b. Upload CV mới
+                Storage-->>Server: 32b. cv_url_new
+                
+                %% Delete old CV
+                Server->>Storage: 33b. Delete CV cũ
+                Storage-->>Server: 34b. Deleted
+                
+                %% Update DB
+                Server->>DB: 35b. UPDATE Applications<br/>SET cv_url=cv_url_new,<br/>cover_letter=...,<br/>applied_at=NOW()
+                DB-->>Server: 36b. Updated
+                
+                Server-->>UI: 37b. Success
+                UI-->>Candidate: 38b. ✅ "Cập nhật thành công!"
+            end
         end
     end

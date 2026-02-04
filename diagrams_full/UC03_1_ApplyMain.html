@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Candidate as 👤 Ứng viên<br/>(Candidate)
+    participant UI as 🖥️ Giao diện<br/>(Job Detail Page)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant Storage as ☁️ Cloud Storage<br/>(Cloudinary/S3)
+    participant DB as 💾 Database
+
+    Note over Candidate,DB: UC03: Ứng tuyển công việc - Luồng chính
+
+    Candidate->>UI: 1. Xem trang chi tiết Job
+    UI-->>Candidate: 2. Hiển thị thông tin Job + "Apply Now"
+    
+    Candidate->>UI: 3. Nhấn "Apply Now"
+    UI-->>Candidate: 4. Hiển thị Form nộp hồ sơ
+    
+    Candidate->>UI: 5. Tải file CV (PDF)
+    Candidate->>UI: 6. Viết Cover Letter
+    Candidate->>UI: 7. Nhấn "Nộp hồ sơ"
+    
+    UI->>Server: 8. POST /api/applications<br/>{job_id, cv_file, cover_letter}
+    
+    %% File validation
+    Server->>Server: 9. Validate file<br/>(format=PDF?, size<5MB?)
+    
+    alt E1: File không hợp lệ
+        Server-->>UI: 10a. Error: Invalid file
+        UI-->>Candidate: 11a. ❌ "Chỉ chấp nhận PDF <5MB"
+    else File hợp lệ
+        %% Check duplicate
+        Server->>DB: 10b. SELECT FROM Applications<br/>WHERE job_id=? AND candidate_id=?
+        
+        alt E3: Đã nộp đơn
+            DB-->>Server: 11c. Đã tồn tại record
+            Server-->>UI: 12c. Error: Already applied
+            UI-->>Candidate: 13c. ⚠️ "Bạn đã nộp hồ sơ rồi"
+        else Chưa nộp - OK
+            DB-->>Server: 11d. Không tồn tại
+            
+            %% Upload to cloud
+            Server->>Storage: 12d. Upload CV file
+            Storage-->>Server: 13d. Trả về cv_url
+            
+            %% Save to DB
+            Server->>DB: 14d. INSERT Applications<br/>(job_id, candidate_id, cv_url,<br/>cover_letter, status='pending',<br/>applied_at=NOW())
+            DB-->>Server: 15d. Success
+            
+            Server-->>UI: 16d. Success response
+            UI-->>Candidate: 17d. ✅ "Nộp hồ sơ thành công!"
+        end
+    end
+
+    </div>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Candidate as 👤 Ứng viên<br/>(Candidate)
+    participant UI as 🖥️ Giao diện<br/>(Job Detail Page)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant Storage as ☁️ Cloud Storage<br/>(Cloudinary/S3)
+    participant DB as 💾 Database
+
+    Note over Candidate,DB: UC03: Cập nhật hồ sơ ứng tuyển
+
+    Candidate->>UI: 1. Vào lại trang Job đã ứng tuyển
+    UI->>Server: 2. GET /api/applications/status?job_id=...
+    Server->>DB: 3. SELECT status FROM Applications<br/>WHERE job_id=? AND candidate_id=?
+    DB-->>Server: 4. Trả về status hiện tại
+    
+    alt E2: Status đang xử lý
+        Note over Server: status IN ('viewed','shortlisted',<br/>'interview','accepted','rejected')
+        Server-->>UI: 5a. Status = processing
+        UI-->>Candidate: 6a. Hiển thị "Đã ứng tuyển"<br/>🔒 Ẩn nút "Cập nhật"<br/>⚠️ "Hồ sơ đang được Nhà tuyển dụng xem xét"
+    else Status = pending - OK
+        Server-->>UI: 5b. Status = pending
+        UI-->>Candidate: 6b. Hiển thị "Đã ứng tuyển"<br/>✏️ Nút "Cập nhật hồ sơ"
+        
+        Candidate->>UI: 7. Nhấn "Cập nhật hồ sơ"
+        UI-->>Candidate: 8. Hiển thị Form cập nhật<br/>(CV cũ + Cover Letter cũ)
+        
+        Candidate->>UI: 9. Tải CV mới (PDF)
+        Candidate->>UI: 10. Sửa Cover Letter
+        Candidate->>UI: 11. Nhấn "Lưu thay đổi"
+        
+        UI->>Server: 12. PUT /api/applications/{id}<br/>{cv_file_new, cover_letter_new}
+        
+        %% Validate new file
+        Server->>Server: 13. Validate file mới<br/>(PDF?, <5MB?)
+        
+        alt File không hợp lệ
+            Server-->>UI: 14a. Error: Invalid file
+            UI-->>Candidate: 15a. ❌ "File không hợp lệ"
+        else File hợp lệ
+            %% Upload new CV
+            Server->>Storage: 14b. Upload CV mới
+            Storage-->>Server: 15b. Trả về cv_url_new
+            
+            %% Delete old CV from cloud
+            Server->>Storage: 16b. Delete CV cũ
+            Storage-->>Server: 17b. Deleted
+            
+            %% Update DB
+            Server->>DB: 18b. UPDATE Applications<br/>SET cv_url=cv_url_new,<br/>cover_letter=new_letter,<br/>applied_at=NOW()<br/>WHERE application_id=?
+            DB-->>Server: 19b. Updated
+            
+            Server-->>UI: 20b. Success response
+            UI-->>Candidate: 21b. ✅ "Cập nhật hồ sơ thành công!"
+        end
+    end
+
+    </div>
+</body>
+</html>
