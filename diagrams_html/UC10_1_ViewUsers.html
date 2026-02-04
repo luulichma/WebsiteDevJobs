@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Admin,DB: UC10.1: Xem danh sách & Tìm kiếm users
+
+    %% Xem danh sách users
+    Admin->>UI: 1. Truy cập "Quản lý người dùng"
+    UI->>Server: 2. GET /api/admin/users
+    Server->>DB: 3. SELECT * FROM Users<br/>ORDER BY created_at DESC<br/>LIMIT 50 OFFSET 0
+    DB-->>Server: 4. Trả về danh sách users
+    Server-->>UI: 5. Trả về dữ liệu (50 users)
+    UI-->>Admin: 6. Hiển thị bảng danh sách<br/>(ID, Name, Email, Role, Status, Actions)
+
+    %% Tìm kiếm/Lọc
+    Admin->>UI: 7. Nhập từ khóa tìm kiếm<br/>hoặc chọn filter (role/status)
+    UI->>Server: 8. GET /api/admin/users?search=...&role=...&status=...
+    Server->>DB: 9. SELECT * FROM Users<br/>WHERE (email LIKE '%...%' OR full_name LIKE '%...%')<br/>AND role = ? AND status = ?
+    DB-->>Server: 10. Trả về kết quả
+    Server-->>UI: 11. Trả về dữ liệu filtered
+    UI-->>Admin: 12. Hiển thị kết quả<br/>+ "Tìm thấy [N] kết quả"
+
+    </div>
+</body>
+</html>

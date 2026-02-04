@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Admin as ⚙️ Quản trị viên<br/>(Admin)
+    participant UI as 🖥️ Giao diện<br/>(Admin Dashboard)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Email as 📧 Email Service
+
+    Note over Admin,Email: UC10.5: Chỉnh sửa thông tin user
+
+    Admin->>UI: 1. Click "Sửa" trên user
+    UI-->>Admin: 2. Hiển thị form chỉnh sửa<br/>(Name, Phone, Role, Status)
+    Admin->>UI: 3. Chỉnh sửa thông tin
+    Admin->>UI: 4. Nhấn "Lưu"
+    
+    UI->>Server: 5. PUT /api/admin/users/{id}<br/>(updated data)
+    Server->>DB: 6. Kiểm tra email unique<br/>SELECT COUNT(*) FROM Users<br/>WHERE email = ? AND user_id != ?
+    
+    alt Email đã tồn tại
+        DB-->>Server: 7a. Count > 0
+        Server-->>UI: 8a. Error "Email duplicate"
+        UI-->>Admin: 9a. ❌ Hiển thị lỗi<br/>"Email này đã được sử dụng"
+    else Email hợp lệ (hoặc không đổi)
+        DB-->>Server: 7b. Count = 0 (OK)
+        Server->>DB: 8b. UPDATE Users<br/>SET full_name=?, phone=?,<br/>role=?, status=?, updated_at=NOW()<br/>WHERE user_id = ?
+        DB-->>Server: 9b. Updated
+        
+        Server->>DB: 10b. INSERT INTO AdminLogs<br/>(admin_id, action, target_user, changes)
+        DB-->>Server: 11b. Log saved
+        
+        Server->>Email: 12b. Gửi email thông báo<br/>"Thông tin tài khoản đã được cập nhật"
+        Email-->>Server: 13b. Email sent
+        
+        Server-->>UI: 14b. Success
+        UI-->>Admin: 15b. ✅ "Cập nhật thành công"
+    end
+
+    </div>
+</body>
+</html>

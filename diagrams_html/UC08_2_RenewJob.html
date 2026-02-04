@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+sequenceDiagram
+    actor Recruiter as 👔 Nhà tuyển dụng<br/>(Recruiter)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+
+    Note over Recruiter,DB: UC08.2: Gia hạn tin tuyển dụng
+
+    Recruiter->>UI: 1. Nhấn "Renew" trên tin hết hạn
+    UI->>Server: 2. POST /api/jobs/:id/renew
+    
+    Server->>Server: 3. Kiểm tra credits/subscription
+    
+    alt Đủ credits
+        Server->>DB: 4. UPDATE Jobs<br/>SET expiry_date = DATE_ADD(NOW(), 30),<br/>status = 'Active'
+        DB-->>Server: 5. Xác nhận
+        Server->>DB: 6. Trừ credits (UPDATE Credits)
+        DB-->>Server: 7. Credits updated
+        Server-->>UI: 8. Success
+        UI-->>Recruiter: 9. ✅ "Gia hạn thành công đến [date]"
+    else Hết credits
+        Server-->>UI: ❌ Không đủ credits
+        UI-->>Recruiter: "Vui lòng nâng cấp gói"<br/>+ Button "Nâng cấp ngay"
+    end
+
+    </div>
+</body>
+</html>
