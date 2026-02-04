@@ -1,0 +1,84 @@
+sequenceDiagram
+    actor Recruiter as 👔 Nhà tuyển dụng<br/>(Recruiter)
+    participant UI as 🖥️ Giao diện<br/>(UI)
+    participant Server as ⚙️ Server<br/>(Backend)
+    participant DB as 💾 Database
+    participant Email as 📧 Email Service
+
+    Note over Recruiter,Email: UC08: Quản lý các bài đăng tin tuyển dụng
+
+    %% Xem danh sách
+    Recruiter->>UI: 1. Truy cập "Quản lý tin tuyển dụng"
+    UI->>Server: 2. GET /api/recruiter/jobs
+    Server->>DB: 3. SELECT * FROM Jobs<br/>WHERE company_id = ?<br/>ORDER BY created_at DESC
+    DB-->>Server: 4. Trả về danh sách jobs
+    Server-->>UI: 5. Trả về dữ liệu jobs
+    UI-->>Recruiter: 6. Hiển thị bảng danh sách jobs<br/>(Title, Posted, Expiry, Applications, Status, Actions)
+
+    %% Chọn hành động - Ví dụ: Edit Job
+    Recruiter->>UI: 7. Nhấn nút "Edit" trên 1 job
+    UI->>Server: 8. GET /api/jobs/:id
+    Server->>DB: 9. SELECT * FROM Jobs<br/>WHERE id = ? AND company_id = ?
+    DB-->>Server: 10. Trả về thông tin job
+    Server-->>UI: 11. Trả về data
+    UI-->>Recruiter: 12. Hiển thị form chỉnh sửa<br/>(pre-fill dữ liệu)
+
+    %% Chỉnh sửa và lưu
+    Recruiter->>UI: 13. Chỉnh sửa thông tin<br/>(Title, Description, Salary, Location...)
+    Recruiter->>UI: 14. Nhấn "Lưu thay đổi"
+    
+    UI->>Server: 15. PUT /api/jobs/:id<br/>(Updated data)
+    
+    Server->>Server: 16. Validate dữ liệu<br/>(Title not empty, Expiry > Today,<br/>Salary min <= max)
+    
+    alt Validation thành công
+        Server->>DB: 17. UPDATE Jobs<br/>SET title=?, description=?, salary_min=?,<br/>salary_max=?, location=?, updated_at=NOW()<br/>WHERE id=? AND company_id=?
+        DB-->>Server: 18. Xác nhận cập nhật
+        
+        Server->>DB: 19. INSERT INTO JobLogs<br/>(job_id, action, admin_id, details)
+        DB-->>Server: 20. Log đã lưu
+        
+        Server-->>UI: 21. Trả về success
+        UI-->>Recruiter: 22. ✅ "Cập nhật tin thành công"
+        UI->>UI: 23. Quay lại danh sách
+        
+    else Validation thất bại
+        Server-->>UI: ❌ Lỗi validation<br/>(Title trống, Expiry < Today...)
+        UI-->>Recruiter: Hiển thị thông báo lỗi<br/>tại các trường không hợp lệ
+    end
+
+    %% Gia hạn tin (Alternative flow)
+    rect rgb(240, 248, 255)
+        Note over Recruiter,Email: Alternative Flow: Gia hạn tin
+        Recruiter->>UI: A1. Nhấn "Renew" trên tin hết hạn
+        UI->>Server: A2. POST /api/jobs/:id/renew
+        
+        Server->>Server: A3. Kiểm tra credits/subscription
+        
+        alt Đủ credits
+            Server->>DB: A4. UPDATE Jobs<br/>SET expiry_date = DATE_ADD(NOW(), 30),<br/>status = 'Active'
+            DB-->>Server: A5. Xác nhận
+            Server->>DB: A6. Trừ credits
+            Server-->>UI: A7. Success
+            UI-->>Recruiter: A8. ✅ "Gia hạn thành công đến [date]"
+        else Hết credits
+            Server-->>UI: ❌ Không đủ credits
+            UI-->>Recruiter: "Vui lòng nâng cấp gói"
+        end
+    end
+
+    %% Đóng tin (Alternative flow)
+    rect rgb(255, 250, 240)
+        Note over Recruiter,Email: Alternative Flow: Đóng tin
+        Recruiter->>UI: B1. Nhấn "Close" trên tin Active
+        UI-->>Recruiter: B2. Hộp thoại xác nhận
+        Recruiter->>UI: B3. Nhấn "Xác nhận"
+        UI->>Server: B4. PUT /api/jobs/:id/close
+        Server->>DB: B5. UPDATE Jobs<br/>SET status = 'Closed',<br/>closed_at = NOW()
+        DB-->>Server: B6. Xác nhận
+        Server->>Email: B7. Gửi email thông báo<br/>đến ứng viên (optional)
+        Server-->>UI: B8. Success
+        UI-->>Recruiter: B9. ✅ "Đã đóng tin"
+    end
+
+    Note over Recruiter,Email: Kết thúc use case
