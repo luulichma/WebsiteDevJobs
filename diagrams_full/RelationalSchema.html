@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .mermaid {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="mermaid">
+classDiagram
+    class USERS {
+        +INT user_id PK
+        VARCHAR(255) email UK
+        VARCHAR(255) password_hash
+        VARCHAR(255) full_name
+        VARCHAR(20) phone
+        ENUM role
+        ENUM status
+        VARCHAR(500) cv_url
+        TEXT skills
+        DATETIME created_at
+    }
+
+    class COMPANIES {
+        +INT company_id PK
+        VARCHAR(255) company_name
+        TEXT description
+        VARCHAR(255) website
+        VARCHAR(500) logo_url
+        VARCHAR(500) address
+        ENUM status
+        INT created_by FK
+        DATETIME created_at
+    }
+
+    class JOBS {
+        +INT job_id PK
+        INT company_id FK
+        INT recruiter_id FK
+        VARCHAR(255) title
+        TEXT description
+        TEXT requirements
+        DECIMAL salary_min
+        DECIMAL salary_max
+        VARCHAR(255) location
+        ENUM job_type
+        ENUM status
+        DATE expiry_date
+        INT approved_by FK
+        DATETIME created_at
+    }
+
+    class APPLICATIONS {
+        +INT application_id PK
+        INT job_id FK
+        INT candidate_id FK
+        VARCHAR(500) cv_url
+        TEXT cover_letter
+        ENUM status
+        DATETIME applied_at
+        INT reviewed_by FK
+    }
+
+    class SKILLS {
+        +INT skill_id PK
+        VARCHAR(100) skill_name UK
+        VARCHAR(50) category
+        DATETIME created_at
+    }
+
+    class JOB_SKILLS {
+        +INT job_id PK,FK
+        +INT skill_id PK,FK
+    }
+
+    %% Relationships
+    USERS "1" --> "N" COMPANIES : creates
+    COMPANIES "1" --> "N" JOBS : posts
+    USERS "1" --> "N" JOBS : manages(recruiter)
+    USERS "1" --> "N" JOBS : approves(admin)
+    JOBS "1" --> "N" APPLICATIONS : receives
+    USERS "1" --> "N" APPLICATIONS : submits(candidate)
+    USERS "1" --> "N" APPLICATIONS : reviews(recruiter)
+    JOBS "M" <--> "N" SKILLS : requires
+    JOBS "1" --> "N" JOB_SKILLS : has
+    SKILLS "1" --> "N" JOB_SKILLS : in
+
+    </div>
+</body>
+</html>
