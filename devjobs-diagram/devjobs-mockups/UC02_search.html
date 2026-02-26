@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UC02: Tìm kiếm việc làm - DevJobs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: white;
+            padding: 16px 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+        }
+
+        .navbar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .search-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 48px 24px;
+            margin-bottom: 32px;
+        }
+
+        .search-hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-hero h1 {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .search-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .search-btn {
+            padding: 12px 32px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 32px;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            height: fit-content;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+
+        .filter-group {
+            margin-bottom: 24px;
+        }
+
+        .filter-group h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .filter-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .filter-option:hover {
+            background: #f9fafb;
+        }
+
+        .filter-option input {
+            cursor: pointer;
+        }
+
+        .filter-option label {
+            cursor: pointer;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .jobs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .results-count {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .sort-select {
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .job-header {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .job-info {
+            flex: 1;
+        }
+
+        .job-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .company-name {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .job-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            background: #ede9fe;
+            color: #6d28d9;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .salary {
+            color: #10b981;
+            font-weight: 600;
+            margin-left: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="logo">DevJobs</div>
+            <div class="nav-links">
+                <a href="#">Tìm việc</a>
+                <a href="#">Công ty</a>
+                <a href="#">Blog</a>
+                <a href="#" style="color: #667eea; font-weight: 600;">Đăng nhập</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="search-hero">
+        <div class="search-hero-content">
+            <h1>Tìm công việc IT mơ ước của bạn</h1>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Vị trí, kỹ năng, công ty...">
+                <input type="text" class="search-input" placeholder="Địa điểm" style="flex: 0.6;">
+                <button class="search-btn">Tìm kiếm</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <aside class="filters">
+            <h3>Bộ lọc</h3>
+
+            <div class="filter-group">
+                <h4>Địa điểm</h4>
+                <div class="filter-option">
+                    <input type="checkbox" id="hn">
+                    <label for="hn">Hà Nội (247)</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="hcm">
+                    <label for="hcm">TP. Hồ Chí Minh (189)</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="dn">
+                    <label for="dn">Đà Nẵng (45)</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4>Mức lương</h4>
+                <div class="filter-option">
+                    <input type="checkbox" id="s1">
+                    <label for="s1">10-20 triệu</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="s2">
+                    <label for="s2">20-30 triệu</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="s3">
+                    <label for="s3">30-50 triệu</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="s4">
+                    <label for="s4">Trên 50 triệu</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h4>Kỹ năng</h4>
+                <div class="filter-option">
+                    <input type="checkbox" id="react">
+                    <label for="react">React</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="nodejs">
+                    <label for="nodejs">Node.js</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="python">
+                    <label for="python">Python</label>
+                </div>
+                <div class="filter-option">
+                    <input type="checkbox" id="java">
+                    <label for="java">Java</label>
+                </div>
+            </div>
+        </aside>
+
+        <main class="jobs-container">
+            <div class="results-header">
+                <span class="results-count">Tìm thấy <strong>127 việc làm</strong></span>
+                <select class="sort-select">
+                    <option>Mới nhất</option>
+                    <option>Lương cao nhất</option>
+                    <option>Phù hợp nhất</option>
+                </select>
+            </div>
+
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="company-logo">ABC</div>
+                    <div class="job-info">
+                        <h3 class="job-title">Senior React Developer</h3>
+                        <p class="company-name">ABC Technology Vietnam</p>
+                        <div class="job-meta">
+                            <span class="meta-item">📍 Hà Nội</span>
+                            <span class="meta-item">💼 Full-time</span>
+                            <span class="meta-item">⏰ Đăng 2 ngày trước</span>
+                            <span class="salary">$1,500 - $2,500</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tags">
+                    <span class="tag">React</span>
+                    <span class="tag">TypeScript</span>
+                    <span class="tag">Redux</span>
+                    <span class="tag">Next.js</span>
+                </div>
+            </div>
+
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="company-logo">XYZ</div>
+                    <div class="job-info">
+                        <h3 class="job-title">Backend Engineer (Node.js)</h3>
+                        <p class="company-name">XYZ Solutions</p>
+                        <div class="job-meta">
+                            <span class="meta-item">📍 TP.HCM</span>
+                            <span class="meta-item">💼 Full-time</span>
+                            <span class="meta-item">⏰ Đăng 5 ngày trước</span>
+                            <span class="salary">$1,200 - $2,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tags">
+                    <span class="tag">Node.js</span>
+                    <span class="tag">Express</span>
+                    <span class="tag">MongoDB</span>
+                    <span class="tag">AWS</span>
+                </div>
+            </div>
+
+            <div class="job-card">
+                <div class="job-header">
+                    <div class="company-logo">DEF</div>
+                    <div class="job-info">
+                        <h3 class="job-title">Full Stack Developer (MERN)</h3>
+                        <p class="company-name">DEF Digital Agency</p>
+                        <div class="job-meta">
+                            <span class="meta-item">📍 Đà Nẵng</span>
+                            <span class="meta-item">💼 Full-time</span>
+                            <span class="meta-item">⏰ Đăng 1 tuần trước</span>
+                            <span class="salary">$1,000 - $1,800</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tags">
+                    <span class="tag">React</span>
+                    <span class="tag">Node.js</span>
+                    <span class="tag">MongoDB</span>
+                    <span class="tag">Express</span>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+sequenceDiagram
+    actor C as Candidate
+    participant UI as User Interface
+    participant S as System
+    participant DB as Database
+    
+    C->>UI: Truy cập trang chủ
+    UI->>C: Hiển thị form tìm kiếm
+    C->>UI: Nhập từ khóa (VD: Java Backend)
+    C->>UI: Chọn địa điểm/mức lương (tùy chọn)
+    C->>UI: Nhấn "Tìm kiếm"
+    
+    UI->>S: Gửi yêu cầu tìm kiếm
+    S->>DB: Query Jobs JOIN Skills WHERE status=Active
+    DB-->>S: Trả về danh sách jobs
+    S->>S: Lọc và sắp xếp kết quả
+    S-->>UI: Trả về danh sách jobs
+    
+    alt Có kết quả
+        UI->>C: Hiển thị kết quả (Logo, Tên, Lương, Địa điểm, Tags)
+        C->>UI: Click vào job để xem chi tiết
+    else Không tìm thấy kết quả
+        UI->>C: "Không tìm thấy việc làm phù hợp"
+        UI->>C: Gợi ý từ khóa khác
+    end
