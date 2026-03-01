@@ -1,0 +1,183 @@
+.search-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 48px 24px;
+}
+
+.search-hero-content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.search-hero h1 {
+    color: white;
+    font-size: 28px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.search-bar {
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    gap: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.search-select {
+    flex: 0.6;
+}
+
+.search-container {
+    max-width: 1200px;
+    margin: 32px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 24px;
+}
+
+.filters h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    margin-bottom: 24px;
+}
+
+.filter-group h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+}
+
+.filter-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.filter-option:hover {
+    background: #f9fafb;
+}
+
+.filter-option input {
+    cursor: pointer;
+}
+
+.btn-clear {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 4px;
+    padding: 0;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.job-card-top {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.company-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: #ede9fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #667eea;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.job-info {
+    flex: 1;
+}
+
+.job-info h3 {
+    font-size: 17px;
+    margin-bottom: 4px;
+    color: #1f2937;
+}
+
+.company-name {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.job-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.salary-text {
+    color: #10b981;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.no-results {
+    text-align: center;
+    padding: 48px 24px;
+    color: #6b7280;
+}
+
+@media (max-width: 768px) {
+    .search-bar {
+        flex-direction: column;
+    }
+
+    .search-container {
+        grid-template-columns: 1fr;
+    }
+
+    .search-select {
+        flex: 1;
+    }
+}
