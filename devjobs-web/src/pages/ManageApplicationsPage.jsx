@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getJobsByRecruiter, APPLICATIONS, getUserById, getStatusLabel, getStatusBadge } from '../data/mockData';
+import { FiFile, FiCalendar, FiUserCheck, FiUserX } from 'react-icons/fi';
 import './DashboardPages.css';
 
 export default function ManageApplicationsPage() {
@@ -47,13 +48,13 @@ export default function ManageApplicationsPage() {
                                             <tr key={app.application_id}>
                                                 <td><strong>{candidate?.full_name}</strong></td>
                                                 <td>{candidate?.email}</td>
-                                                <td>{app.applied_at}</td>
+                                                <td><FiCalendar size={13} style={{ marginRight: 4 }} />{app.applied_at}</td>
                                                 <td><span className={`badge ${getStatusBadge(app.status)}`}>{getStatusLabel(app.status)}</span></td>
                                                 <td>
                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                        <button className="btn btn-sm btn-primary" onClick={() => alert(`Xem CV: ${app.cv_url}`)}>📄 Xem CV</button>
-                                                        <button className="btn btn-sm btn-success" onClick={() => updateStatus(app.application_id, 'interview')}>Mời PV</button>
-                                                        <button className="btn btn-sm btn-danger" onClick={() => updateStatus(app.application_id, 'rejected')}>Từ chối</button>
+                                                        <button className="btn btn-sm btn-primary" onClick={() => alert(`Xem CV: ${app.cv_url}`)}><FiFile size={13} /> CV</button>
+                                                        <button className="btn btn-sm btn-success" onClick={() => updateStatus(app.application_id, 'interview')}><FiUserCheck size={13} /> Mời PV</button>
+                                                        <button className="btn btn-sm btn-danger" onClick={() => updateStatus(app.application_id, 'rejected')}><FiUserX size={13} /> Từ chối</button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -65,7 +66,7 @@ export default function ManageApplicationsPage() {
                     )}
                     {apps.length > 0 && apps[0]?.cover_letter && (
                         <div style={{ marginTop: 24, padding: 16, background: '#f9fafb', borderRadius: 8 }}>
-                            <h4>📝 Thư giới thiệu (Cover Letter):</h4>
+                            <h4>Thư giới thiệu (Cover Letter):</h4>
                             <p className="text-muted mt-1" style={{ fontStyle: 'italic' }}>"{apps[0].cover_letter}"</p>
                         </div>
                     )}

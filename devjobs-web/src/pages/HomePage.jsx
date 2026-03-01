@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { JOBS, COMPANIES, getCompanyById } from '../data/mockData';
+import { JOBS, getCompanyById } from '../data/mockData';
+import { FiMapPin, FiBriefcase, FiSearch, FiFileText, FiSend, FiArrowRight, FiUsers, FiTrendingUp } from 'react-icons/fi';
 import './HomePage.css';
 
 export default function HomePage() {
@@ -14,7 +15,7 @@ export default function HomePage() {
                     <p>Kết nối hàng ngàn Lập trình viên với các Doanh nghiệp IT hàng đầu Việt Nam</p>
                     <div className="hero-search">
                         <input type="text" placeholder="Vị trí, kỹ năng, công ty..." className="hero-input" />
-                        <Link to="/jobs" className="btn btn-primary btn-lg">Tìm kiếm</Link>
+                        <Link to="/jobs" className="btn btn-primary btn-lg"><FiSearch style={{ marginRight: 4 }} /> Tìm kiếm</Link>
                     </div>
                     <div className="hero-stats">
                         <div><strong>500+</strong><span>Việc làm</span></div>
@@ -29,7 +30,7 @@ export default function HomePage() {
                 <div className="container">
                     <div className="section-header">
                         <h2>Việc làm nổi bật</h2>
-                        <Link to="/jobs" className="view-all">Xem tất cả →</Link>
+                        <Link to="/jobs" className="view-all">Xem tất cả <FiArrowRight /></Link>
                     </div>
                     <div className="jobs-grid">
                         {activeJobs.map(job => {
@@ -44,8 +45,8 @@ export default function HomePage() {
                                         </div>
                                     </div>
                                     <div className="job-card-meta">
-                                        <span>📍 {job.location}</span>
-                                        <span>💼 {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
+                                        <span><FiMapPin size={14} /> {job.location}</span>
+                                        <span><FiBriefcase size={14} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
                                         <span className="salary">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>
                                     </div>
                                     <div className="tags">
@@ -64,17 +65,17 @@ export default function HomePage() {
                     <h2 className="text-center mb-3">Cách hoạt động</h2>
                     <div className="steps-grid">
                         <div className="step-card">
-                            <div className="step-icon">📝</div>
+                            <div className="step-icon"><FiFileText /></div>
                             <h3>Tạo hồ sơ</h3>
                             <p>Đăng ký tài khoản và cập nhật CV, kỹ năng của bạn</p>
                         </div>
                         <div className="step-card">
-                            <div className="step-icon">🔍</div>
+                            <div className="step-icon"><FiSearch /></div>
                             <h3>Tìm kiếm</h3>
                             <p>Tìm việc phù hợp theo kỹ năng, địa điểm, mức lương</p>
                         </div>
                         <div className="step-card">
-                            <div className="step-icon">📮</div>
+                            <div className="step-icon"><FiSend /></div>
                             <h3>Ứng tuyển</h3>
                             <p>Nộp CV trực tiếp và theo dõi trạng thái hồ sơ</p>
                         </div>

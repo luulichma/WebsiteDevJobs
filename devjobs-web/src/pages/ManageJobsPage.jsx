@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getJobsByRecruiter, APPLICATIONS, getStatusLabel, getStatusBadge } from '../data/mockData';
+import { FiPlus, FiEdit, FiXCircle, FiRefreshCw } from 'react-icons/fi';
 import './DashboardPages.css';
 
 export default function ManageJobsPage() {
@@ -25,7 +26,7 @@ export default function ManageJobsPage() {
                         <h1>Quản lý tin tuyển dụng</h1>
                         <p>Xem và quản lý tất cả tin đăng của công ty</p>
                     </div>
-                    <Link to="/recruiter/post-job" className="btn btn-primary">+ Đăng tin mới</Link>
+                    <Link to="/recruiter/post-job" className="btn btn-primary"><FiPlus size={16} /> Đăng tin mới</Link>
                 </div>
 
                 <div className="filter-tabs mb-3">
@@ -56,15 +57,15 @@ export default function ManageJobsPage() {
                                                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                                     {job.status === 'active' && (
                                                         <>
-                                                            <button className="btn btn-sm btn-secondary">✏️ Sửa</button>
-                                                            <button className="btn btn-sm btn-warning" onClick={() => setShowConfirm({ type: 'close', jobId: job.job_id })}>Đóng tin</button>
+                                                            <button className="btn btn-sm btn-secondary"><FiEdit size={13} /> Sửa</button>
+                                                            <button className="btn btn-sm btn-warning" onClick={() => setShowConfirm({ type: 'close', jobId: job.job_id })}><FiXCircle size={13} /> Đóng</button>
                                                         </>
                                                     )}
                                                     {(job.status === 'expired' || job.status === 'closed') && (
                                                         <button className="btn btn-sm btn-success" onClick={() => {
                                                             setJobs(prev => prev.map(j => j.job_id === job.job_id ? { ...j, status: 'active' } : j));
                                                             alert('Đã gia hạn thêm 30 ngày!');
-                                                        }}>🔄 Gia hạn</button>
+                                                        }}><FiRefreshCw size={13} /> Gia hạn</button>
                                                     )}
                                                 </div>
                                             </td>

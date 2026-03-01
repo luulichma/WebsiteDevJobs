@@ -1,0 +1,32 @@
+============================================
+  DevJobs Frontend - Hướng dẫn chạy
+============================================
+
+YÊU CẦU:
+  - Cài sẵn Node.js (tải tại https://nodejs.org)
+
+BƯỚC 1: Mở Terminal (CMD hoặc PowerShell)
+
+BƯỚC 2: Chạy các lệnh sau:
+
+  cd f:\BTL_NAM_3_KY_2\WebsiteDevJobs\devjobs-web
+  npm install
+  npm run dev
+
+BƯỚC 3: Mở trình duyệt, vào địa chỉ:
+
+  http://localhost:5173/
+
+BƯỚC 4: Đăng nhập bằng tài khoản demo:
+
+  Ứng viên:         candidate@devjobs.vn / 123456
+  Nhà tuyển dụng:   recruiter@devjobs.vn / 123456
+  Admin:            admin@devjobs.vn     / 123456
+
+TẮT APP:
+  Bấm Ctrl + C trong Terminal
+
+============================================
+  Nguyễn Thế Chiến - B23DCCN095
+  BTL Lập trình Web - 2026
+============================================

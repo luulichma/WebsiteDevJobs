@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { JOBS, getCompanyById, APPLICATIONS } from '../data/mockData';
+import { FiMapPin, FiBriefcase, FiClock, FiHome, FiGlobe, FiUpload, FiCheckCircle } from 'react-icons/fi';
 import './JobDetailPage.css';
 
 export default function JobDetailPage() {
@@ -31,10 +32,10 @@ export default function JobDetailPage() {
                         <div className="detail-header">
                             <h1>{job.title}</h1>
                             <div className="detail-meta">
-                                <span>🏢 {company?.company_name}</span>
-                                <span>📍 {job.location}</span>
-                                <span>💼 {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
-                                <span>⏰ Đăng ngày {job.created_at}</span>
+                                <span><FiHome size={16} /> {company?.company_name}</span>
+                                <span><FiMapPin size={16} /> {job.location}</span>
+                                <span><FiBriefcase size={16} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
+                                <span><FiClock size={16} /> Đăng ngày {job.created_at}</span>
                             </div>
                             <div className="detail-salary">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()} / tháng</div>
                             <div className="tags mb-2">
@@ -42,10 +43,10 @@ export default function JobDetailPage() {
                             </div>
 
                             {applied || alreadyApplied ? (
-                                <div className="alert alert-success">✅ Bạn đã nộp hồ sơ cho vị trí này</div>
+                                <div className="alert alert-success"><FiCheckCircle style={{ marginRight: 6 }} /> Bạn đã nộp hồ sơ cho vị trí này</div>
                             ) : isCandidate ? (
                                 <button className="btn btn-primary btn-block btn-lg" onClick={() => setShowApply(true)}>
-                                    Ứng tuyển ngay
+                                    <FiUpload style={{ marginRight: 6 }} /> Ứng tuyển ngay
                                 </button>
                             ) : !isAuthenticated ? (
                                 <Link to="/login" className="btn btn-primary btn-block btn-lg" style={{ display: 'block', textAlign: 'center' }}>
@@ -85,8 +86,8 @@ export default function JobDetailPage() {
                                 {company?.description}
                             </p>
                             <div className="company-details">
-                                {company?.website && <p><strong>Website:</strong> {company.website}</p>}
-                                {company?.address && <p><strong>Địa chỉ:</strong> {company.address}</p>}
+                                {company?.website && <p><FiGlobe size={14} style={{ marginRight: 4 }} /> {company.website}</p>}
+                                {company?.address && <p><FiMapPin size={14} style={{ marginRight: 4 }} /> {company.address}</p>}
                             </div>
                         </div>
                     </aside>
@@ -100,7 +101,7 @@ export default function JobDetailPage() {
                             <p className="text-muted mb-2">Vị trí: {job.title}</p>
                             <form onSubmit={handleApply}>
                                 <div className="form-group">
-                                    <label>Upload CV (PDF, DOCX) *</label>
+                                    <label><FiUpload size={14} style={{ marginRight: 4 }} /> Upload CV (PDF, DOCX) *</label>
                                     <input type="file" className="form-input" accept=".pdf,.doc,.docx" required
                                         style={{ border: '2px dashed #d1d5db' }} />
                                     <p style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>Dung lượng tối đa: 5MB</p>

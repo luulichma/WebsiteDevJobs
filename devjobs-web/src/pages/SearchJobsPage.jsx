@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { JOBS, getCompanyById } from '../data/mockData';
+import { FiMapPin, FiBriefcase, FiClock, FiSearch } from 'react-icons/fi';
 import './SearchJobsPage.css';
 
 export default function SearchJobsPage() {
@@ -38,7 +39,7 @@ export default function SearchJobsPage() {
                             <option value="">Tất cả địa điểm</option>
                             {locations.map(l => <option key={l} value={l}>{l}</option>)}
                         </select>
-                        <button className="btn btn-primary btn-lg">Tìm kiếm</button>
+                        <button className="btn btn-primary btn-lg"><FiSearch style={{ marginRight: 4 }} /> Tìm kiếm</button>
                     </div>
                 </div>
             </div>
@@ -81,7 +82,7 @@ export default function SearchJobsPage() {
                     <div className="results-list">
                         {sorted.length === 0 && (
                             <div className="no-results card">
-                                <p>😔 Không tìm thấy việc làm phù hợp với tiêu chí của bạn</p>
+                                <p>Không tìm thấy việc làm phù hợp với tiêu chí của bạn</p>
                                 <button className="btn btn-secondary btn-sm mt-2" onClick={() => { setKeyword(''); setLocation(''); setJobType(''); }}>
                                     Xóa tất cả bộ lọc
                                 </button>
@@ -97,9 +98,9 @@ export default function SearchJobsPage() {
                                             <h3>{job.title}</h3>
                                             <p className="company-name">{company?.company_name}</p>
                                             <div className="job-meta">
-                                                <span>📍 {job.location}</span>
-                                                <span>💼 {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
-                                                <span>⏰ {job.created_at}</span>
+                                                <span><FiMapPin size={14} /> {job.location}</span>
+                                                <span><FiBriefcase size={14} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
+                                                <span><FiClock size={14} /> {job.created_at}</span>
                                                 <span className="salary-text">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>
                                             </div>
                                         </div>

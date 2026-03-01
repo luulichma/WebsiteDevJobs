@@ -1,0 +1,20 @@
+============================================
+  DevJobs - Tài khoản Demo
+============================================
+
+1. Ứng viên (Candidate)
+   Email:    candidate@devjobs.vn
+   Mật khẩu: 123456
+
+2. Nhà tuyển dụng (Recruiter)
+   Email:    recruiter@devjobs.vn
+   Mật khẩu: 123456
+
+3. Quản trị viên (Admin)
+   Email:    admin@devjobs.vn
+   Mật khẩu: 123456
+
+============================================
+  Hướng dẫn: Vào http://localhost:5173/login
+  rồi nhập email + mật khẩu ở trên
+============================================

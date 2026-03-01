@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { USERS, getStatusLabel, getStatusBadge } from '../data/mockData';
+import { FiSearch, FiLock, FiUnlock, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
 import './DashboardPages.css';
 
 export default function AdminManageUsersPage() {
@@ -47,8 +48,11 @@ export default function AdminManageUsersPage() {
 
                 <div className="card mb-3">
                     <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                        <input type="text" className="form-input" placeholder="🔍 Tìm theo tên hoặc email..."
-                            value={search} onChange={e => setSearch(e.target.value)} style={{ flex: 1, minWidth: 200 }} />
+                        <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+                            <FiSearch size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#9ca3af' }} />
+                            <input type="text" className="form-input" placeholder="Tìm theo tên hoặc email..."
+                                value={search} onChange={e => setSearch(e.target.value)} style={{ paddingLeft: 36 }} />
+                        </div>
                         <select className="form-select" value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={{ width: 'auto' }}>
                             <option value="all">Tất cả vai trò</option>
                             <option value="candidate">Ứng viên</option>
@@ -69,17 +73,17 @@ export default function AdminManageUsersPage() {
                                         <td>#{u.user_id}</td>
                                         <td><strong>{u.full_name}</strong></td>
                                         <td>{u.email}</td>
-                                        <td>{u.role === 'candidate' ? '👤 Ứng viên' : '👔 NTD'}</td>
+                                        <td>{u.role === 'candidate' ? 'Ứng viên' : 'NTD'}</td>
                                         <td><span className={`badge ${getStatusBadge(u.status)}`}>{getStatusLabel(u.status)}</span></td>
                                         <td>{u.created_at}</td>
                                         <td>
                                             <div style={{ display: 'flex', gap: 6 }}>
                                                 <button className={`btn btn-sm ${u.status === 'active' ? 'btn-warning' : 'btn-success'}`}
                                                     onClick={() => toggleSuspend(u.user_id)}>
-                                                    {u.status === 'active' ? '🔒 Khóa' : '🔓 Mở'}
+                                                    {u.status === 'active' ? <><FiLock size={13} /> Khóa</> : <><FiUnlock size={13} /> Mở</>}
                                                 </button>
                                                 <button className="btn btn-sm btn-danger" onClick={() => { setDeleteTarget(u); setConfirmEmail(''); setDeleteError(''); }}>
-                                                    🗑️ Xóa
+                                                    <FiTrash2 size={13} /> Xóa
                                                 </button>
                                             </div>
                                         </td>
@@ -95,7 +99,7 @@ export default function AdminManageUsersPage() {
                 {deleteTarget && (
                     <div className="modal-overlay" onClick={() => setDeleteTarget(null)}>
                         <div className="modal" onClick={e => e.stopPropagation()}>
-                            <h3>⚠️ Xác nhận xóa tài khoản</h3>
+                            <h3><FiAlertTriangle size={20} color="#f59e0b" /> Xác nhận xóa tài khoản</h3>
                             <p className="text-muted mt-1">
                                 Bạn đang xóa tài khoản của <strong>{deleteTarget.full_name}</strong>. Hành động này không thể hoàn tác.
                             </p>
@@ -106,7 +110,7 @@ export default function AdminManageUsersPage() {
                             </div>
                             {deleteError && <div className="alert alert-danger">{deleteError}</div>}
                             <div style={{ display: 'flex', gap: 12 }}>
-                                <button className="btn btn-danger" onClick={handleDelete}>Xác nhận xóa</button>
+                                <button className="btn btn-danger" onClick={handleDelete}><FiTrash2 size={14} /> Xác nhận xóa</button>
                                 <button className="btn btn-secondary" onClick={() => setDeleteTarget(null)}>Hủy</button>
                             </div>
                         </div>

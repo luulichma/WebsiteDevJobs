@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { JOBS, getCompanyById, getUserById, getStatusLabel, getStatusBadge } from '../data/mockData';
+import { FiCheck, FiX, FiEye } from 'react-icons/fi';
 import './DashboardPages.css';
 
 export default function AdminApproveJobsPage() {
@@ -52,7 +53,7 @@ export default function AdminApproveJobsPage() {
                                         return (
                                             <tr key={job.job_id}>
                                                 <td>
-                                                    <button className="link-btn" onClick={() => setSelectedJob(job)}>{job.title}</button>
+                                                    <button className="link-btn" onClick={() => setSelectedJob(job)}><FiEye size={13} style={{ marginRight: 4 }} />{job.title}</button>
                                                 </td>
                                                 <td>{company?.company_name}</td>
                                                 <td>{recruiter?.full_name}</td>
@@ -61,8 +62,8 @@ export default function AdminApproveJobsPage() {
                                                 <td>
                                                     {job.status === 'pending' && (
                                                         <div style={{ display: 'flex', gap: 8 }}>
-                                                            <button className="btn btn-sm btn-success" onClick={() => handleApprove(job.job_id)}>✅ Duyệt</button>
-                                                            <button className="btn btn-sm btn-danger" onClick={() => handleReject(job.job_id)}>❌ Từ chối</button>
+                                                            <button className="btn btn-sm btn-success" onClick={() => handleApprove(job.job_id)}><FiCheck size={14} /> Duyệt</button>
+                                                            <button className="btn btn-sm btn-danger" onClick={() => handleReject(job.job_id)}><FiX size={14} /> Từ chối</button>
                                                         </div>
                                                     )}
                                                 </td>
@@ -100,8 +101,8 @@ export default function AdminApproveJobsPage() {
                             </div>
                             {selectedJob.status === 'pending' && (
                                 <div style={{ display: 'flex', gap: 12 }}>
-                                    <button className="btn btn-success btn-lg" style={{ flex: 1 }} onClick={() => handleApprove(selectedJob.job_id)}>✅ Duyệt tin</button>
-                                    <button className="btn btn-danger btn-lg" style={{ flex: 1 }} onClick={() => handleReject(selectedJob.job_id)}>❌ Từ chối</button>
+                                    <button className="btn btn-success btn-lg" style={{ flex: 1 }} onClick={() => handleApprove(selectedJob.job_id)}><FiCheck /> Duyệt tin</button>
+                                    <button className="btn btn-danger btn-lg" style={{ flex: 1 }} onClick={() => handleReject(selectedJob.job_id)}><FiX /> Từ chối</button>
                                 </div>
                             )}
                             {selectedJob.status !== 'pending' && (
