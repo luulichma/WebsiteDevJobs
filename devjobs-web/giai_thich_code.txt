@@ -1,0 +1,169 @@
+============================================
+  DevJobs Frontend — Giải thích toàn bộ code
+  Nguyễn Thế Chiến - B23DCCN095
+============================================
+
+1. TỔNG QUAN CÔNG NGHỆ
+-----------------------
+- ReactJS: Thư viện JavaScript để xây dựng giao diện (UI)
+- Vite: Công cụ chạy project React (dev server)
+- React Router: Thư viện điều hướng trang (routing)
+- React Icons: Thư viện icon SVG chuyên nghiệp
+
+React hoạt động theo mô hình COMPONENT — mỗi phần giao diện
+(navbar, footer, trang login, trang tìm việc...) được viết thành
+1 component riêng biệt, có thể tái sử dụng.
+
+
+2. CẤU TRÚC THƯ MỤC
+---------------------
+devjobs-web/src/
+├── main.jsx              → Điểm khởi chạy app
+├── App.jsx               → Cấu hình tất cả đường dẫn (routes)
+├── index.css             → CSS chung cho toàn bộ app
+│
+├── context/
+│   └── AuthContext.jsx   → Quản lý đăng nhập/đăng xuất
+│
+├── data/
+│   └── mockData.js       → Dữ liệu mẫu (giả lập database)
+│
+├── components/           → Các thành phần dùng chung
+│   ├── Navbar.jsx        → Thanh điều hướng trên cùng
+│   ├── Footer.jsx        → Chân trang
+│   └── ProtectedRoute.jsx→ Bảo vệ route theo quyền
+│
+└── pages/                → Các trang chính
+    ├── HomePage.jsx          → Trang chủ
+    ├── LoginPage.jsx         → Đăng nhập (UC01)
+    ├── RegisterPage.jsx      → Đăng ký (UC01)
+    ├── SearchJobsPage.jsx    → Tìm kiếm việc (UC02)
+    ├── JobDetailPage.jsx     → Chi tiết + Ứng tuyển (UC03)
+    ├── CandidateProfilePage  → Hồ sơ ứng viên (UC04)
+    ├── ApplicationHistoryPage→ Lịch sử ứng tuyển
+    ├── CompanyProfilePage    → Quản lý công ty (UC05)
+    ├── PostJobPage.jsx       → Đăng tin tuyển dụng (UC06)
+    ├── ManageApplicationsPage→ Quản lý ứng viên (UC07)
+    ├── ManageJobsPage.jsx    → Quản lý bài đăng (UC08)
+    ├── AdminApproveJobsPage  → Duyệt tin - Admin (UC09)
+    └── AdminManageUsersPage  → Quản lý users - Admin (UC10)
+
+
+3. GIẢI THÍCH TỪNG FILE QUAN TRỌNG
+-----------------------------------
+
+★ main.jsx — ĐIỂM KHỞI CHẠY
+  Đây là file đầu tiên được thực thi. Nó render component
+  <App /> vào thẻ <div id="root"> trong index.html.
+
+★ App.jsx — CẤU HÌNH ROUTING
+  Định nghĩa TẤT CẢ đường dẫn (URL) trong app:
+  - "/" → Trang chủ
+  - "/login" → Đăng nhập
+  - "/jobs" → Tìm kiếm
+  - "/jobs/:id" → Chi tiết job (id là tham số động)
+  - "/recruiter/*" → Các trang dành cho Nhà tuyển dụng
+  - "/admin/*" → Các trang dành cho Admin
+
+  Sử dụng <ProtectedRoute> để chặn truy cập trái phép.
+  VD: "/admin/users" chỉ cho role "admin" vào.
+
+★ AuthContext.jsx — QUẢN LÝ ĐĂNG NHẬP
+  Sử dụng React Context API để chia sẻ trạng thái đăng nhập
+  cho toàn bộ app mà không cần truyền props.
+
+  - login(email, password): Kiểm tra email/password với mock data.
+    Nếu đúng → lưu user vào localStorage, trả về thành công.
+  - logout(): Xóa user khỏi localStorage.
+  - isCandidate, isRecruiter, isAdmin: Kiểm tra role hiện tại.
+
+  → Khi có backend thật, chỉ cần thay hàm login() bằng gọi API.
+
+★ mockData.js — DỮ LIỆU MẪU (GIẢ LẬP DATABASE)
+  Chứa 6 bảng dữ liệu tương ứng thiết kế CSDL:
+  - USERS (5 users): 2 ứng viên, 2 NTD, 1 admin
+  - COMPANIES (3 công ty)
+  - JOBS (6 tin tuyển dụng): trạng thái active/pending/closed
+  - APPLICATIONS (5 đơn ứng tuyển): trạng thái pending/viewed/...
+  - SKILLS (20 kỹ năng)
+
+  Có các hàm helper: getCompanyById(), getJobsByRecruiter(),
+  getApplicationsByCandidate(), getStatusLabel()...
+
+★ ProtectedRoute.jsx — PHÂN QUYỀN
+  Nhận prop allowedRoles (VD: ['admin']).
+  - Nếu chưa đăng nhập → redirect về /login
+  - Nếu role không đúng → redirect về /
+  - Nếu hợp lệ → cho hiển thị trang
+
+★ Navbar.jsx — THANH ĐIỀU HƯỚNG
+  Navbar THAY ĐỔI theo role người dùng:
+  - Chưa đăng nhập: Tìm việc | Đăng nhập | Đăng ký
+  - Candidate: Tìm việc | Hồ sơ | Lịch sử
+  - Recruiter: Quản lý tin | Đăng tin | Ứng viên | Công ty
+  - Admin: Duyệt tin | Users
+
+★ index.css — HỆ THỐNG THIẾT KẾ (DESIGN SYSTEM)
+  Định nghĩa tất cả CSS chung:
+  - CSS Variables: --primary (#667eea), --gradient, --bg...
+  - Styles cho: button, input, card, table, badge, tag, modal
+  - Utility classes: .text-center, .mt-2, .mb-3...
+
+  → Tất cả page dùng chung hệ thống này để đảm bảo nhất quán.
+
+
+4. CÁC TRANG CHÍNH — LOGIC XỬ LÝ
+----------------------------------
+
+UC01 - LoginPage.jsx:
+  - Dùng useState để lưu email, password, error
+  - Gọi login() từ AuthContext
+  - Nếu thành công → redirect theo role
+  - Nếu thất bại → hiển thị lỗi
+
+UC02 - SearchJobsPage.jsx:
+  - Lọc JOBS theo keyword, location, jobType
+  - Sắp xếp theo mới nhất hoặc lương cao nhất
+  - Hiển thị sidebar bộ lọc + danh sách job cards
+
+UC03 - JobDetailPage.jsx:
+  - Lấy job_id từ URL bằng useParams()
+  - Hiển thị chi tiết: mô tả, yêu cầu, quyền lợi
+  - Modal ứng tuyển: upload CV + cover letter
+  - Kiểm tra đã đăng nhập chưa, đã ứng tuyển chưa
+
+UC06 - PostJobPage.jsx:
+  - Form đăng tin: title, mô tả, yêu cầu, lương, skills
+  - Chọn skills bằng tag buttons (toggle on/off)
+  - Submit → hiển thị thông báo "Chờ Admin duyệt"
+
+UC08 - ManageJobsPage.jsx:
+  - Filter tabs: Tất cả / Đang hoạt động / Chờ duyệt / Đã đóng
+  - Thao tác: Sửa, Đóng tin (có confirm modal), Gia hạn
+
+UC09 - AdminApproveJobsPage.jsx:
+  - Danh sách jobs theo trạng thái (mặc định "Chờ duyệt")
+  - Click tên → modal xem chi tiết
+  - Nút Duyệt → chuyển status "active"
+  - Nút Từ chối → chuyển status "rejected"
+
+UC10 - AdminManageUsersPage.jsx:
+  - Tìm kiếm user theo tên/email
+  - Lọc theo role (ứng viên / NTD)
+  - Khóa/Mở khóa tài khoản
+  - Xóa user (phải nhập email xác nhận — theo UC10)
+
+
+5. ĐIỂM NỔI BẬT KHI BÁO CÁO
+------------------------------
+✓ Sử dụng ReactJS — framework phổ biến nhất
+✓ Kiến trúc component-based: tái sử dụng, dễ bảo trì
+✓ React Router: SPA (Single Page Application), không reload
+✓ Context API: quản lý state toàn cục (auth)
+✓ Protected Routes: phân quyền 3 role
+✓ Responsive Design: hoạt động trên mobile
+✓ Design System: CSS Variables, nhất quán toàn app
+✓ Mock Data: mô phỏng đầy đủ 6 bảng CSDL
+✓ Phủ 10/10 Use Cases từ báo cáo phân tích
+
+============================================

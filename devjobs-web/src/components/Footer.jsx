@@ -21,8 +21,8 @@ export default function Footer() {
                     </div>
                     <div>
                         <h4>Liên hệ</h4>
-                        <a href="#">support@devjobs.vn</a>
-                        <a href="#">024 1234 5678</a>
+                        <a href="#">chiennguyenthe659@gmail.com</a>
+                        <a href="#">0981 294 721</a>
                     </div>
                 </div>
             </div>
