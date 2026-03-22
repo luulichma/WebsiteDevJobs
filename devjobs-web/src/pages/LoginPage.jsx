@@ -10,10 +10,10 @@ export default function LoginPage() {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const result = login(email, password);
+        const result = await login(email, password);
         if (result.success) {
             const role = result.user.role;
             if (role === 'candidate') navigate('/jobs');
@@ -65,7 +65,9 @@ export default function LoginPage() {
                 <div className="demo-accounts">
                     <p><strong>Tài khoản demo:</strong></p>
                     <p>👤 candidate@devjobs.vn / 123456</p>
+                    <p>👤 candidate2026@devjobs.vn / 123456</p>
                     <p>👔 recruiter@devjobs.vn / 123456</p>
+                    <p>👔 recruiter2026@devjobs.vn / 123456</p>
                     <p>⚙️ admin@devjobs.vn / 123456</p>
                 </div>
             </div>

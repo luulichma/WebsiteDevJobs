@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Kỹ Thuật: Phân Hệ Back-End</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f9f9f9;
+        }
+        .container {
+            background-color: #fff;
+            padding: 40px 50px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 25px;
+        }
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        ul {
+            margin-bottom: 20px;
+            padding-left: 25px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        strong {
+            color: #2c3e50;
+        }
+        .highlight {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-left: 5px solid #3498db;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BÁO CÁO KỸ THUẬT: PHÂN HỆ BACK-END<br><small style="font-size: 0.6em; font-weight: normal; color: #7f8c8d;">Dự án: Nền tảng Tuyển dụng DevJobs (RESTful Web API)</small></h1>
+
+        <div class="highlight">
+            <p><strong>Lưu ý:</strong> Phân hệ Back-end này được xây dựng theo mô hình <strong>RESTful Web API (API-only)</strong>, KHÔNG PHẢI là mô hình Web MVC truyền thống (trả về giao diện HTML/Razor Views). Backend chỉ nhận Request và trả về dữ liệu định dạng JSON, còn việc vẽ giao diện hoàn toàn do Frontend (ReactJS) đảm nhận.</p>
+        </div>
+
+        <h2>1. TỔNG QUAN PHÂN HỆ BACK-END</h2>
+        <p>Phân hệ Back-end của hệ thống DevJobs đóng vai trò là lõi xử lý nghiệp vụ trung tâm, chịu trách nhiệm giao tiếp với cơ sở dữ liệu (Database), thực thi bảo mật, kiểm soát quyền truy cập và cung cấp dữ liệu cho các ứng dụng phía Client (Frontend Web/Mobile) thông qua các giao thức HTTP dưới dạng cấu trúc dữ liệu JSON.</p>
+        <p>Hệ thống được thiết kế theo kiến trúc <strong>Client-Server độc lập</strong>, trong đó Back-end hoạt động hoàn toàn dưới dạng RESTful Web API, nhằm tách biệt hoàn toàn khỏi logic hiển thị giao diện, giúp tối ưu hóa khả năng mở rộng.</p>
+
+        <h2>2. CÔNG NGHỆ VÀ NGĂN XẾP (TECH STACK)</h2>
+        <p>Hệ thống sử dụng các công nghệ hiện đại chuyên biệt để tối ưu hóa hiệu suất ứng dụng phân tán:</p>
+        <ul>
+            <li><strong>Ngôn ngữ lập trình:</strong> C# (C-Sharp).</li>
+            <li><strong>Web Framework:</strong> ASP.NET Core Web API (.NET 10.0). Đây là framework hiệu suất cực cao của Microsoft chuyên dùng để xây dựng các dịch vụ HTTP.</li>
+            <li><strong>Cơ sở dữ liệu (DBMS):</strong> Microsoft SQL Server 2022 (Sẵn sàng nền tảng để triển khai môn học Phân tán cơ sở dữ liệu trong tương lai).</li>
+            <li><strong>O/RM (Object-Relational Mapping):</strong> Entity Framework Core 10.0 thiết lập theo phương pháp <em>Database-First</em> (Tự động sinh Model từ kịch bản quy chuẩn thiết kế CSDL thực tế).</li>
+            <li><strong>Bảo mật & Xác thực:</strong>
+                <ul>
+                    <li><strong>JSON Web Token (JWT):</strong> Thiết lập cơ chế Auth dạng Bearer Token (Stateless).</li>
+                    <li><strong>BCrypt.Net:</strong> Mã hóa một chiều (Hashing) mật khẩu người dùng trước khi lưu xuống CSDL.</li>
+                </ul>
+            </li>
+            <li><strong>Tài liệu lập trình hóa (API Docs):</strong> Swashbuckle / Swagger UI.</li>
+        </ul>
+
+        <h2>3. KIẾN TRÚC VÀ CÁC THÀNH PHẦN (MODULES) CỐT LÕI</h2>
+        
+        <h3>3.1. Design Patterns (Mẫu Thiết kế) áp dụng</h3>
+        <ul>
+            <li><strong>Controller Pattern:</strong> Lớp trung gian tiếp nhận HTTP Request (GET, POST, PUT, DELETE), xác thực tham số và điều hướng xuống lớp xử lý dữ liệu.</li>
+            <li><strong>DTO (Data Transfer Object) Pattern:</strong> Tách biệt hoàn toàn bản ghi dữ liệu Model (của Entity Framework) và luồng dữ liệu trả về cho Front-end. Ngăn chặn triệt để rò rỉ dữ liệu nhạy cảm (như mục PasswordHash) và giải quyết triệt để lỗi vòng lặp tham chiếu JSON (Circular Reference).</li>
+            <li><strong>Dependency Injection (DI):</strong> Được tích hợp sẵn trong .NET, giúp đăng ký tự động và quản lý vòng đời của <code>AppDbContext</code>, <code>JwtService</code> qua <code>Program.cs</code>.</li>
+        </ul>
+
+        <h3>3.2. Chức năng phân rã Modules (API Controllers)</h3>
+        <p>Hệ thống Back-end được chia làm 6 bộ điều khiển (Controllers) chính, phản ánh trực tiếp các thực thể và chức năng trong đồ án:</p>
+        <ol>
+            <li><strong>Auth Module (Đăng nhập/Đăng ký):</strong> Cung cấp endpoint đăng ký mới và đăng nhập. Khi xác thực thành công, trả về JWT Token chứa thông tin mã hóa (UserId, Role, CompanyId) giúp Frontend định danh phiên hoạt động suốt quá trình sử dụng.</li>
+            <li><strong>Users Module (Người dùng):</strong> Xử lý nghiệp vụ cá nhân hóa (Profile) cho từng tài khoản. Bên cạnh đó, hỗ trợ hệ thống Admin các chức năng quản lý từ xa như Get All, Khóa (Suspend), hoặc Xóa (Delete) tài khoản của ứng viên/công ty cố tình vi phạm.</li>
+            <li><strong>Jobs Module (Tin tuyển dụng):</strong> 
+                <ul>
+                    <li><strong>Góc nhìn Khách/Ứng viên:</strong> Lấy danh sách việc làm công khai với tham số lọc truy vấn (Tìm kiếm theo tên, lương, vị trí, kỹ năng...). API tích hợp sẵn thuật toán phân trang (Pagination).</li>
+                    <li><strong>Góc nhìn Recruiters:</strong> Đăng tin tuyển dụng (mặc định cần chờ Admin duyệt), sửa nội dung, tắt tin và gia hạn tin (renew).</li>
+                </ul>
+            </li>
+            <li><strong>Applications Module (Hồ sơ ứng tuyển):</strong> Là cầu nối giữa Candidate và Job. Xử lý nghiệp vụ nhận CV ứng tuyển, và cung cấp bảng điều khiển để nhà tuyển dụng cập nhật luồng trạng thái ứng viên (Từ "Chờ xem xét" -> "Đang phỏng vấn" -> "Chấp nhận"/"Từ chối").</li>
+            <li><strong>Companies Module (Hồ sơ Doanh nghiệp):</strong> Cung cấp thông tin tập đoàn, trụ sở và logo hiển thị.</li>
+            <li><strong>Skills Module (Danh mục Chuyên môn):</strong> Cung cấp từ điển các kỹ năng ngành nghề (IT, Marketing,...) để phân rã chuyên môn dễ dàng.</li>
+        </ol>
+
+        <h2>4. BẢO MẬT VÀ QUẢN LÝ DATABASE</h2>
+        
+        <h3>Phương thức giao tiếp Cơ sở dữ liệu</h3>
+        <p>Quá trình map cơ sở dữ liệu tuân thủ nghiêm ngặt chuẩn hệ cơ sở dữ liệu quan hệ <strong>Database-First</strong>. Cơ sở dữ liệu <code>DevJobs</code> được thiết kế chặt chẽ trên cấu trúc SQL Server Management Studio (SSMS). Backend sử dụng lệnh <code>Scaffold-DbContext</code> để phân tích cấu trúc khóa cứng và sinh tự động các Entity C#.</p>
+        <p><em>Công nghệ EF Core đã xử lý tự động và hoàn hảo quan hệ Nhiều-Nhiều (Many-to-Many), bóc tách quan hệ Job-Skills thành mảng Collection cấp ứng dụng (trong Memory) mà không đòi hỏi thao tác can thiệp trực tiếp từ lập trình viên xuống bảng nối trung gian.</em></p>
+
+        <h3>Chính sách Phân quyền và Quy tắc kết nối (CORS)</h3>
+        <ul>
+            <li><strong>CORS Policy (Cross-Origin Resource Sharing):</strong> Hệ thống được thiết lập chế độ bảo vệ nguồn gốc chặt chẽ. Chỉ cho phép đích danh các tên miền Front-end như <code>localhost:5173</code> hoặc <code>localhost:3000</code> truy cập API. Tránh tấn công đánh cắp dữ liệu chéo từ các máy chủ lạ.</li>
+            <li><strong>Authorization Barrier (Rào chắn Ủy quyền):</strong> Mỗi phân đoạn Endpoint API đều gán rào chắn <code>[Authorize(Roles="admin")]</code>, <code>[Authorize(Roles="recruiter")]</code>,... Bất kỳ token JWT giả mạo nào gửi tới Controller cũng sẽ bị đá ra ngoài qua mã lỗi <em>401 Unauthorized</em> hoặc <em>403 Forbidden</em> trước cả khi câu query kịp chạm xuống hệ cơ sở dữ liệu SQL Server.</li>
+        </ul>
+
+        <h2>5. TỔNG KẾT</h2>
+        <p>Phân hệ Back-end RESTful Web API của dự án DevJobs mang tới một giải pháp trung tâm tinh gọn, kiến trúc bền bỉ và bảo mật cao. Việc thiết kế hệ thống C# hoàn toàn độc lập với Frontend, kết hợp hệ quản trị cơ sở dữ liệu tiêu chuẩn Microsoft SQL Server 2022 giúp đảm bảo năng lực hệ thống dễ dàng cấu hình nhân bản và triển khai môn học hệ thống CSDL Phân Tán mà không cần làm tổn tác đến lõi mã nguồn API hiện tại.</p>
+        
+        <div class="footer">
+            Báo cáo Kỹ thuật - Nhóm Tuần 3 - Nền tảng Tuyển dụng DevJobs
+        </div>
+    </div>
+</body>
+</html>

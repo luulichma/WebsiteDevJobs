@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from 'react';
-import { USERS } from '../data/mockData';
+import apiService from '../services/apiService';
 
 const AuthContext = createContext(null);
 
@@ -9,22 +9,22 @@ export function AuthProvider({ children }) {
         return saved ? JSON.parse(saved) : null;
     });
 
-    const login = (email, password) => {
-        const found = USERS.find(
-            u => u.email === email && u.password === password && u.status === 'active'
-        );
-        if (found) {
-            const userData = { ...found };
-            delete userData.password;
-            setUser(userData);
+    const login = async (email, password) => {
+        try {
+            const res = await apiService.post('/auth/login', { email, password });
+            const { token, user: userData } = res.data;
+            localStorage.setItem('devjobs_token', token);
             localStorage.setItem('devjobs_user', JSON.stringify(userData));
+            setUser(userData);
             return { success: true, user: userData };
+        } catch (error) {
+            return { success: false, message: error.response?.data?.message || 'Lỗi đăng nhập' };
         }
-        return { success: false, message: 'Email hoặc mật khẩu không chính xác' };
     };
 
     const logout = () => {
         setUser(null);
+        localStorage.removeItem('devjobs_token');
         localStorage.removeItem('devjobs_user');
     };
 

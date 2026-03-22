@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Kỹ Thuật Đồ Án - Phần Backend DevJobs</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1e40af;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #1d4ed8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f8fafc;
+            color: #1e40af;
+        }
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        .endpoint {
+            font-family: monospace;
+            background-color: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c026d3;
+        }
+        .method {
+            font-weight: bold;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        .get { background-color: #dbeafe; color: #1e40af; }
+        .post { background-color: #d1fae5; color: #065f46; }
+        .put { background-color: #fef3c7; color: #92400e; }
+        .delete { background-color: #fee2e2; color: #991b1b; }
+        ul {
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .note {
+            background-color: #fef08a;
+            padding: 10px;
+            border-left: 4px solid #ca8a04;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Báo Cáo Kỹ Thuật - Phần Backend Hệ Thống DevJobs</h1>
+
+    <h2>1. Tổng quan Kiến trúc</h2>
+    <p>Phần Backend của hệ thống DevJobs được xây dựng theo mô hình <strong>RESTful Web API</strong>, đóng vai trò cung cấp các dịch vụ dữ liệu cho ứng dụng Frontend (ReactJS) thông qua các giao thức HTTP.</p>
+    <p>Hệ thống <strong>không</strong> sử dụng mô hình MVC (Model-View-Controller) truyền thống (nơi server render ra mã HTML). Thay vào đó, Backend chỉ xử lý logic nghiệp vụ, giao tiếp với cơ sở dữ liệu và trả về kết quả dưới định dạng <strong>JSON</strong>. Việc hiển thị giao diện người dùng hoàn toàn do Frontend đảm nhận (Single Page Application - SPA).</p>
+
+    <h2>2. Công nghệ sử dụng</h2>
+    <ul>
+        <li><strong>Ngôn ngữ lập trình:</strong> C# (C-Sharp)</li>
+        <li><strong>Framework:</strong> ASP.NET Core 8.0 Web API</li>
+        <li><strong>Cơ sở dữ liệu:</strong> Microsoft SQL Server</li>
+        <li><strong>ORM (Object-Relational Mapping):</strong> Entity Framework Core (chế độ Database-First Scaffold)</li>
+        <li><strong>Bảo mật & Xác thực:</strong> 
+            <ul>
+                <li><strong>JWT (JSON Web Token):</strong> Dùng để xác thực (Authentication) và phân quyền (Authorization) người dùng không lưu trạng thái (stateless).</li>
+                <li><strong>BCrypt.Net-Next:</strong> Thư viện băm (hashing) mật khẩu một chiều an toàn, chống lại các cuộc tấn công Brute-force & Rainbow table.</li>
+            </ul>
+        </li>
+    </ul>
+
+    <h2>3. Cấu trúc dự án Backend</h2>
+    <p>Dự án <code>DevJobsAPI</code> được tổ chức theo các thành phần chính sau:</p>
+    <ul>
+        <li><strong>Controllers/</strong>: Nơi tiếp nhận các HTTP Request từ client, điều hướng xử lý và trả về HTTP Response. Phân tách logic theo từng đối tượng nghiệp vụ (Users, Jobs, Applications, Auth...).</li>
+        <li><strong>Models/</strong>: Các lớp thực thể (Entities) ánh xạ trực tiếp với cấu trúc bảng trong CSDL SQL Server (được tự động sinh ra bởi EF Core Scaffold).</li>
+        <li><strong>DTOs/ (Data Transfer Objects)</strong>: Các lớp dữ liệu truyền tải. Dùng để tùy biến dữ liệu nhận vào (Request) và dữ liệu trả về (Response) để tránh lộ các trường nhạy cảm từ CSDL (như mật khẩu) và tối ưu hóa Payload.</li>
+        <li><strong>Services/</strong>: Chứa các lớp xử lý nghiệp vụ chung, ví dụ <code>JwtService</code> để đảm nhiệm việc tạo và xác minh token bảo mật.</li>
+        <li><strong>Program.cs & appsettings.json</strong>: File cấu hình hệ thống, chuỗi kết nối (Connection String), cấu hình CORS (cho phép frontend gọi API), và cấu hình Middleware bảo mật.</li>
+    </ul>
+
+    <h2>4. Chi tiết Danh sách Web API Endpoints</h2>
+
+    <h3>4.1. Xác thực (Authentication)</h3>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Mô tả</th>
+            <th>Phân quyền</th>
+        </tr>
+        <tr>
+            <td><span class="method post">POST</span></td>
+            <td><span class="endpoint">/api/auth/register</span></td>
+            <td>Đăng ký tài khoản mới (mã hóa mật khẩu)</td>
+            <td>Public</td>
+        </tr>
+        <tr>
+            <td><span class="method post">POST</span></td>
+            <td><span class="endpoint">/api/auth/login</span></td>
+            <td>Đăng nhập, xác thực và sinh ra JWT Token</td>
+            <td>Public</td>
+        </tr>
+    </table>
+
+    <h3>4.2. Quản lý Người dùng (Users)</h3>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Mô tả</th>
+            <th>Phân quyền</th>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/users/me</span></td>
+            <td>Lấy thông tin hồ sơ của người dùng đang đăng nhập</td>
+            <td>Đăng nhập</td>
+        </tr>
+        <tr>
+            <td><span class="method put">PUT</span></td>
+            <td><span class="endpoint">/api/users/me</span></td>
+            <td>Cập nhật thông tin cá nhân hiện tại (tên, sđt, CV...)</td>
+            <td>Candidate</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/users</span></td>
+            <td>Lấy và tìm kiếm danh sách người dùng</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td><span class="method put">PUT</span></td>
+            <td><span class="endpoint">/api/users/{id}/suspend</span></td>
+            <td>Khóa / Mở khóa tài khoản một người dùng</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td><span class="method delete">DELETE</span></td>
+            <td><span class="endpoint">/api/users/{id}</span></td>
+            <td>Xóa hoàn toàn tài khoản khỏi CSDL</td>
+            <td>Admin</td>
+        </tr>
+    </table>
+
+    <h3>4.3. Quản lý Đơn tuyển dụng (Jobs)</h3>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Mô tả</th>
+            <th>Phân quyền</th>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/jobs</span></td>
+            <td>Tìm kiếm và lọc các tin tuyển dụng đang "active"</td>
+            <td>Public</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/jobs/{id}</span></td>
+            <td>Lấy chi tiết một tin tuyển dụng (kèm thông tin công ty)</td>
+            <td>Public</td>
+        </tr>
+        <tr>
+            <td><span class="method post">POST</span></td>
+            <td><span class="endpoint">/api/jobs</span></td>
+            <td>Đăng tin tuyển dụng mới (trạng thái chờ duyệt "pending")</td>
+            <td>Recruiter</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/jobs/my</span></td>
+            <td>Lấy danh sách các tin tuyển dụng nhà tuyển dụng đã đăng</td>
+            <td>Recruiter</td>
+        </tr>
+        <tr>
+            <td><span class="method put">PUT</span></td>
+            <td><span class="endpoint">/api/jobs/{id}</span></td>
+            <td>Chỉnh sửa nội dung tin tuyển dụng (nếu chưa hết hạn)</td>
+            <td>Recruiter</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/jobs/pending</span></td>
+            <td>Lấy danh sách các tin đang chờ kiểm duyệt</td>
+            <td>Admin</td>
+        </tr>
+        <tr>
+            <td><span class="method put">PUT</span></td>
+            <td><span class="endpoint">/api/jobs/{id}/approve</span></td>
+            <td>Phê duyệt tin tuyển dụng chuyển sang "active"</td>
+            <td>Admin</td>
+        </tr>
+    </table>
+
+    <h3>4.4. Quản lý Ứng tuyển (Applications)</h3>
+    <table>
+        <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>Mô tả</th>
+            <th>Phân quyền</th>
+        </tr>
+        <tr>
+            <td><span class="method post">POST</span></td>
+            <td><span class="endpoint">/api/applications</span></td>
+            <td>Nộp hồ sơ ứng tuyển vào một tin tuyển dụng</td>
+            <td>Candidate</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/applications/my-applications</span></td>
+            <td>Lịch sử các đơn đã ứng tuyển của mình</td>
+            <td>Candidate</td>
+        </tr>
+        <tr>
+            <td><span class="method get">GET</span></td>
+            <td><span class="endpoint">/api/applications/job/{jobId}</span></td>
+            <td>Xem danh sách ứng viên nộp vào tin tuyển dụng cụ thể</td>
+            <td>Recruiter</td>
+        </tr>
+        <tr>
+            <td><span class="method put">PUT</span></td>
+            <td><span class="endpoint">/api/applications/{id}/status</span></td>
+            <td>Cập nhật trạng thái ứng viên (shortlisted, interview, accepted, rejected)</td>
+            <td>Recruiter</td>
+        </tr>
+    </table>
+
+    <h2>5. Chuẩn bị cho Giai đoạn Phân Tán (Distributed Database)</h2>
+    <div class="note">
+        <strong>Lưu ý:</strong> Database của hệ thống đã được di chuyển từ <code>(localdb)</code> sang một SQL Server Service thực thụ (ví dụ: Developer/Express Edition) có mở cổng TCP/IP.
+        Nhờ đó, Connection String trong <code>appsettings.json</code> hiện được cấu hình để có thể tiếp nhận kết nối qua môi trường mạng LAN/Internet. Điểm này rất quan trọng để phục vụ môn Cơ sở dữ liệu phân tán (Distributed Database), cho phép phân mảnh các bảng dữ liệu ra nhiều server vật lý khác nhau mà Backend vẫn có thể truy vấn tới.
+    </div>
+
+</body>
+</html>

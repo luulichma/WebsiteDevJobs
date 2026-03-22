@@ -1,28 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SKILLS } from '../data/mockData';
+import apiService from '../services/apiService';
 import './DashboardPages.css';
 
 export default function PostJobPage() {
     const navigate = useNavigate();
+    const [skills, setSkills] = useState([]);
     const [form, setForm] = useState({
         title: '', description: '', requirements: '', benefits: '',
-        salary_min: '', salary_max: '', location: 'Hà Nội', job_type: 'full-time', skills: [],
+        salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time',
     });
+    const [selectedSkills, setSelectedSkills] = useState([]);
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    useEffect(() => {
+        apiService.get('/skills').then(res => setSkills(res.data)).catch(console.error);
+    }, []);
 
     const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-    const toggleSkill = (name) => {
-        setForm(prev => ({
-            ...prev,
-            skills: prev.skills.includes(name) ? prev.skills.filter(s => s !== name) : [...prev.skills, name]
-        }));
+    const toggleSkill = (skillId) => {
+        setSelectedSkills(prev => prev.includes(skillId) ? prev.filter(id => id !== skillId) : [...prev, skillId]);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSubmitted(true);
+        setSubmitting(true);
+        try {
+            const payload = {
+                ...form,
+                salaryMin: form.salaryMin ? Number(form.salaryMin) : null,
+                salaryMax: form.salaryMax ? Number(form.salaryMax) : null,
+                expiryDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString().split('T')[0], // Mặc định 1 tháng
+                skillIds: selectedSkills
+            };
+            await apiService.post('/jobs', payload);
+            setSubmitted(true);
+        } catch (error) {
+            alert(error.response?.data?.message || 'Lỗi khi đăng tin');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (submitted) {
@@ -35,7 +54,7 @@ export default function PostJobPage() {
                         <p className="text-muted mt-1">Tin của bạn đang chờ Admin duyệt. Bạn sẽ nhận thông báo khi tin được phê duyệt.</p>
                         <div className="mt-3" style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                             <button className="btn btn-primary" onClick={() => navigate('/recruiter/jobs')}>Xem danh sách tin</button>
-                            <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm({ title: '', description: '', requirements: '', benefits: '', salary_min: '', salary_max: '', location: 'Hà Nội', job_type: 'full-time', skills: [] }); }}>Đăng tin mới</button>
+                            <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm({ title: '', description: '', requirements: '', benefits: '', salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time' }); setSelectedSkills([]); }}>Đăng tin mới</button>
                         </div>
                     </div>
                 </div>
@@ -60,11 +79,11 @@ export default function PostJobPage() {
                         <div className="form-group">
                             <label>Kỹ năng yêu cầu (chọn tags)</label>
                             <div className="skill-selector">
-                                {SKILLS.slice(0, 15).map(s => (
-                                    <button type="button" key={s.skill_id}
-                                        className={`skill-tag ${form.skills.includes(s.skill_name) ? 'active' : ''}`}
-                                        onClick={() => toggleSkill(s.skill_name)}>
-                                        {s.skill_name}
+                                {skills.map(s => (
+                                    <button type="button" key={s.skillId}
+                                        className={`skill-tag ${selectedSkills.includes(s.skillId) ? 'active' : ''}`}
+                                        onClick={() => toggleSkill(s.skillId)}>
+                                        {s.skillName}
                                     </button>
                                 ))}
                             </div>
@@ -72,12 +91,12 @@ export default function PostJobPage() {
                         <div className="form-row">
                             <div className="form-group">
                                 <label>Lương tối thiểu ($)</label>
-                                <input type="number" name="salary_min" className="form-input" value={form.salary_min}
+                                <input type="number" name="salaryMin" className="form-input" value={form.salaryMin}
                                     onChange={handleChange} placeholder="VD: 1000" />
                             </div>
                             <div className="form-group">
                                 <label>Lương tối đa ($)</label>
-                                <input type="number" name="salary_max" className="form-input" value={form.salary_max}
+                                <input type="number" name="salaryMax" className="form-input" value={form.salaryMax}
                                     onChange={handleChange} placeholder="VD: 2000" />
                             </div>
                         </div>
@@ -93,7 +112,7 @@ export default function PostJobPage() {
                             </div>
                             <div className="form-group">
                                 <label>Loại hình công việc</label>
-                                <select name="job_type" className="form-select" value={form.job_type} onChange={handleChange}>
+                                <select name="jobType" className="form-select" value={form.jobType} onChange={handleChange}>
                                     <option value="full-time">Toàn thời gian</option>
                                     <option value="part-time">Bán thời gian</option>
                                     <option value="remote">Remote</option>
@@ -116,7 +135,9 @@ export default function PostJobPage() {
                             <textarea name="benefits" className="form-textarea" rows="4" value={form.benefits}
                                 onChange={handleChange} placeholder="Mỗi quyền lợi trên 1 dòng..." />
                         </div>
-                        <button type="submit" className="btn btn-primary btn-lg">Đăng tin tuyển dụng</button>
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
+                            {submitting ? 'Đang gửi...' : 'Đăng tin tuyển dụng'}
+                        </button>
                     </form>
                 </div>
             </div>

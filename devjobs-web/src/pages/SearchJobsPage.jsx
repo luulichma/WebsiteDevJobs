@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { JOBS, getCompanyById } from '../data/mockData';
+import apiService from '../services/apiService';
 import { FiMapPin, FiBriefcase, FiClock, FiSearch } from 'react-icons/fi';
 import './SearchJobsPage.css';
 
@@ -9,23 +9,39 @@ export default function SearchJobsPage() {
     const [location, setLocation] = useState('');
     const [jobType, setJobType] = useState('');
     const [sortBy, setSortBy] = useState('newest');
+    
+    const [jobs, setJobs] = useState([]);
+    const [total, setTotal] = useState(0);
 
-    const activeJobs = JOBS.filter(j => j.status === 'active');
+    const fetchJobs = async () => {
+        try {
+            const params = { pageSize: 50 };
+            if (keyword) params.keyword = keyword;
+            if (location) params.location = location;
+            if (jobType) params.jobType = jobType;
+            // API hiện tại chưa hỗ trợ sort theo salary, ta có thể tự sort hoặc bổ sung param sau. Hiện tại dùng mặc định.
 
-    const filtered = activeJobs.filter(job => {
-        const matchKeyword = !keyword || job.title.toLowerCase().includes(keyword.toLowerCase()) ||
-            job.skills?.some(s => s.toLowerCase().includes(keyword.toLowerCase()));
-        const matchLocation = !location || job.location === location;
-        const matchType = !jobType || job.job_type === jobType;
-        return matchKeyword && matchLocation && matchType;
-    });
+            const res = await apiService.get('/jobs', { params });
+            let items = res.data.items || [];
 
-    const sorted = [...filtered].sort((a, b) => {
-        if (sortBy === 'salary') return (b.salary_max || 0) - (a.salary_max || 0);
-        return new Date(b.created_at) - new Date(a.created_at);
-    });
+            // Tự sort trên client cho tiện nếu API chưa hỗ trợ
+            if (sortBy === 'salary') {
+                items.sort((a, b) => (b.salaryMax || 0) - (a.salaryMax || 0));
+            }
 
-    const locations = [...new Set(JOBS.map(j => j.location))];
+            setJobs(items);
+            setTotal(res.data.total || 0);
+        } catch (error) {
+            console.error('Lỗi lấy tài nguyên:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchJobs();
+    }, [location, jobType, sortBy]); // fetch khi filter/sort thay đổi
+
+    // Hardcode location vì không lưu bảng riêng
+    const locations = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Remote'];
 
     return (
         <div className="search-page">
@@ -33,13 +49,14 @@ export default function SearchJobsPage() {
                 <div className="search-hero-content">
                     <h1>Tìm công việc IT mơ ước của bạn</h1>
                     <div className="search-bar">
-                        <input type="text" className="search-input" placeholder="Vị trí, kỹ năng, công ty..."
-                            value={keyword} onChange={e => setKeyword(e.target.value)} />
+                        <input type="text" className="search-input" placeholder="Vị trí, kỹ năng..."
+                            value={keyword} onChange={e => setKeyword(e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && fetchJobs()} />
                         <select className="search-input search-select" value={location} onChange={e => setLocation(e.target.value)}>
                             <option value="">Tất cả địa điểm</option>
                             {locations.map(l => <option key={l} value={l}>{l}</option>)}
                         </select>
-                        <button className="btn btn-primary btn-lg"><FiSearch style={{ marginRight: 4 }} /> Tìm kiếm</button>
+                        <button className="btn btn-primary btn-lg" onClick={fetchJobs}><FiSearch style={{ marginRight: 4 }} /> Tìm kiếm</button>
                     </div>
                 </div>
             </div>
@@ -73,42 +90,39 @@ export default function SearchJobsPage() {
 
                 <main className="results">
                     <div className="results-header">
-                        <span>Tìm thấy <strong>{sorted.length} việc làm</strong></span>
+                        <span>Tìm thấy <strong>{total} việc làm</strong></span>
                         <select className="form-select" style={{ width: 'auto' }} value={sortBy} onChange={e => setSortBy(e.target.value)}>
                             <option value="newest">Mới nhất</option>
                             <option value="salary">Lương cao nhất</option>
                         </select>
                     </div>
                     <div className="results-list">
-                        {sorted.length === 0 && (
+                        {jobs.length === 0 && (
                             <div className="no-results card">
                                 <p>Không tìm thấy việc làm phù hợp với tiêu chí của bạn</p>
-                                <button className="btn btn-secondary btn-sm mt-2" onClick={() => { setKeyword(''); setLocation(''); setJobType(''); }}>
+                                <button className="btn btn-secondary btn-sm mt-2" onClick={() => { setKeyword(''); setLocation(''); setJobType(''); fetchJobs(); }}>
                                     Xóa tất cả bộ lọc
                                 </button>
                             </div>
                         )}
-                        {sorted.map(job => {
-                            const company = getCompanyById(job.company_id);
-                            return (
-                                <Link to={`/jobs/${job.job_id}`} className="job-card card" key={job.job_id}>
-                                    <div className="job-card-top">
-                                        <div className="company-logo">{company?.company_name?.substring(0, 3).toUpperCase()}</div>
-                                        <div className="job-info">
-                                            <h3>{job.title}</h3>
-                                            <p className="company-name">{company?.company_name}</p>
-                                            <div className="job-meta">
-                                                <span><FiMapPin size={14} /> {job.location}</span>
-                                                <span><FiBriefcase size={14} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
-                                                <span><FiClock size={14} /> {job.created_at}</span>
-                                                <span className="salary-text">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>
-                                            </div>
+                        {jobs.map(job => (
+                            <Link to={`/jobs/${job.jobId}`} className="job-card card" key={job.jobId}>
+                                <div className="job-card-top">
+                                    <div className="company-logo">{job.companyName?.substring(0, 3).toUpperCase()}</div>
+                                    <div className="job-info">
+                                        <h3>{job.title}</h3>
+                                        <p className="company-name">{job.companyName}</p>
+                                        <div className="job-meta">
+                                            <span><FiMapPin size={14} /> {job.location}</span>
+                                            <span><FiBriefcase size={14} /> {job.jobType === 'full-time' ? 'Toàn thời gian' : job.jobType === 'remote' ? 'Remote' : job.jobType}</span>
+                                            <span><FiClock size={14} /> {new Date(job.createdAt).toLocaleDateString()}</span>
+                                            <span className="salary-text">${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}</span>
                                         </div>
                                     </div>
-                                    <div className="tags">{job.skills?.map(s => <span className="tag" key={s}>{s}</span>)}</div>
-                                </Link>
-                            );
-                        })}
+                                </div>
+                                <div className="tags">{job.skills?.map(s => <span className="tag" key={s}>{s}</span>)}</div>
+                            </Link>
+                        ))}
                     </div>
                 </main>
             </div>

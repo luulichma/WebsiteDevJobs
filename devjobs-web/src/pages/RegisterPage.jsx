@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import apiService from '../services/apiService';
 import './AuthPages.css';
 
 export default function RegisterPage() {
@@ -7,16 +8,29 @@ export default function RegisterPage() {
     const [success, setSuccess] = useState(false);
     const navigate = useNavigate();
 
+    const [error, setError] = useState('');
+
     const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         if (formData.password !== formData.confirmPassword) {
-            alert('Mật khẩu xác nhận không khớp!');
+            setError('Mật khẩu xác nhận không khớp!');
             return;
         }
-        setSuccess(true);
-        setTimeout(() => navigate('/login'), 2000);
+        try {
+            await apiService.post('/auth/register', {
+                email: formData.email,
+                password: formData.password,
+                fullName: formData.full_name,
+                role: formData.role
+            });
+            setSuccess(true);
+            setTimeout(() => navigate('/login'), 2000);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Lỗi đăng ký. Vui lòng thử lại.');
+        }
     };
 
     return (
@@ -30,7 +44,8 @@ export default function RegisterPage() {
                 <h2>Đăng ký tài khoản</h2>
                 <p className="auth-subtitle">Tạo tài khoản để bắt đầu!</p>
 
-                {success && <div className="alert alert-success">🎉 Đăng ký thành công! Đang chuyển đến trang đăng nhập...</div>}
+                {error && <div className="alert alert-danger">{error}</div>}
+                {success && <div className="alert alert-success">🎉 Đăng ký thành công! Đang chuyển hướng...</div>}
 
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">

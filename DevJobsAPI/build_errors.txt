@@ -1,0 +1,53 @@
+﻿  Determining projects to restore...
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Azure.Identity' 1.7.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-5mfx-4wcx-rv27
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wvxc-855f-jvrv
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Microsoft.Data.SqlClient' 5.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-98g6-xh36-x2p7
+  All projects are up-to-date for restore.
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Azure.Identity' 1.7.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-5mfx-4wcx-rv27
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wvxc-855f-jvrv
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Microsoft.Data.SqlClient' 5.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-98g6-xh36-x2p7
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Models\AppDbContext.cs(29,10): warning CS1030: #warning: 'To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\AuthController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\UsersController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(42,25): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\CompaniesController.cs(39,26): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(37,42): warning CS8602: Dereference of a possibly null reference. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(119,22): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(121,78): error CS1503: Argument 1: cannot convert from 'System.DateOnly' to 'System.DateTime' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(146,78): error CS1503: Argument 1: cannot convert from 'System.DateOnly' to 'System.DateTime' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(239,24): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(240,23): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(241,22): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+
+Build FAILED.
+
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Azure.Identity' 1.7.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-5mfx-4wcx-rv27
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wvxc-855f-jvrv
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Microsoft.Data.SqlClient' 5.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-98g6-xh36-x2p7
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Azure.Identity' 1.7.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-5mfx-4wcx-rv27
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-m5vv-6r4h-3vj9
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1902: Package 'Azure.Identity' 1.7.0 has a known moderate severity vulnerability, https://github.com/advisories/GHSA-wvxc-855f-jvrv
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj : warning NU1903: Package 'Microsoft.Data.SqlClient' 5.1.1 has a known high severity vulnerability, https://github.com/advisories/GHSA-98g6-xh36-x2p7
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Models\AppDbContext.cs(29,10): warning CS1030: #warning: 'To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\AuthController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\UsersController.cs(3,7): warning CS0105: The using directive for 'DevJobsAPI.Models' appeared previously in this namespace [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(42,25): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\CompaniesController.cs(39,26): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(37,42): warning CS8602: Dereference of a possibly null reference. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\ApplicationsController.cs(119,22): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(239,24): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(240,23): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(241,22): warning CS8601: Possible null reference assignment. [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(121,78): error CS1503: Argument 1: cannot convert from 'System.DateOnly' to 'System.DateTime' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\Controllers\JobsController.cs(146,78): error CS1503: Argument 1: cannot convert from 'System.DateOnly' to 'System.DateTime' [F:\BTL_NAM_3_KY_2\WebsiteDevJobs\DevJobsAPI\DevJobsAPI.csproj]
+    20 Warning(s)
+    2 Error(s)
+
+Time Elapsed 00:00:01.36

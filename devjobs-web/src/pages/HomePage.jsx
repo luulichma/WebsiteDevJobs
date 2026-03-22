@@ -1,10 +1,17 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { JOBS, getCompanyById } from '../data/mockData';
+import apiService from '../services/apiService';
 import { FiMapPin, FiBriefcase, FiSearch, FiFileText, FiSend, FiArrowRight, FiUsers, FiTrendingUp } from 'react-icons/fi';
 import './HomePage.css';
 
 export default function HomePage() {
-    const activeJobs = JOBS.filter(j => j.status === 'active').slice(0, 3);
+    const [activeJobs, setActiveJobs] = useState([]);
+
+    useEffect(() => {
+        apiService.get('/jobs?pageSize=3').then(res => {
+            setActiveJobs(res.data.items);
+        }).catch(err => console.error(err));
+    }, []);
 
     return (
         <div className="home-page">
@@ -33,28 +40,25 @@ export default function HomePage() {
                         <Link to="/jobs" className="view-all">Xem tất cả <FiArrowRight /></Link>
                     </div>
                     <div className="jobs-grid">
-                        {activeJobs.map(job => {
-                            const company = getCompanyById(job.company_id);
-                            return (
-                                <Link to={`/jobs/${job.job_id}`} className="job-card" key={job.job_id}>
-                                    <div className="job-card-header">
-                                        <div className="company-logo">{company?.company_name?.substring(0, 3).toUpperCase()}</div>
-                                        <div>
-                                            <h3>{job.title}</h3>
-                                            <p className="company-name">{company?.company_name}</p>
-                                        </div>
+                        {activeJobs.map(job => (
+                            <Link to={`/jobs/${job.jobId}`} className="job-card" key={job.jobId}>
+                                <div className="job-card-header">
+                                    <div className="company-logo">{job.companyName?.substring(0, 3).toUpperCase()}</div>
+                                    <div>
+                                        <h3>{job.title}</h3>
+                                        <p className="company-name">{job.companyName}</p>
                                     </div>
-                                    <div className="job-card-meta">
-                                        <span><FiMapPin size={14} /> {job.location}</span>
-                                        <span><FiBriefcase size={14} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
-                                        <span className="salary">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}</span>
-                                    </div>
-                                    <div className="tags">
-                                        {job.skills?.slice(0, 4).map(s => <span className="tag" key={s}>{s}</span>)}
-                                    </div>
-                                </Link>
-                            );
-                        })}
+                                </div>
+                                <div className="job-card-meta">
+                                    <span><FiMapPin size={14} /> {job.location}</span>
+                                    <span><FiBriefcase size={14} /> {job.jobType === 'full-time' ? 'Toàn thời gian' : job.jobType === 'remote' ? 'Remote' : job.jobType}</span>
+                                    <span className="salary">${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}</span>
+                                </div>
+                                <div className="tags">
+                                    {job.skills?.slice(0, 4).map(s => <span className="tag" key={s}>{s}</span>)}
+                                </div>
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </section>

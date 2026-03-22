@@ -1,42 +1,62 @@
-import { useState } from 'react';
-import { USERS, getStatusLabel, getStatusBadge } from '../data/mockData';
+import { useState, useEffect } from 'react';
+import apiService from '../services/apiService';
 import { FiSearch, FiLock, FiUnlock, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
 import './DashboardPages.css';
 
+const getStatusBadge = (status) => status === 'active' ? 'badge-success' : 'badge-danger';
+const getStatusLabel = (status) => status === 'active' ? 'Hoạt động' : 'Bị khóa';
+
 export default function AdminManageUsersPage() {
-    const [users, setUsers] = useState(USERS.filter(u => u.role !== 'admin'));
+    const [users, setUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [confirmEmail, setConfirmEmail] = useState('');
     const [deleteError, setDeleteError] = useState('');
 
+    useEffect(() => {
+        apiService.get('/users').then(res => setUsers(res.data)).catch(console.error).finally(() => setLoading(false));
+    }, []);
+
     const filtered = users.filter(u => {
-        const matchSearch = !search || u.full_name.toLowerCase().includes(search.toLowerCase()) ||
+        const matchSearch = !search || u.fullName.toLowerCase().includes(search.toLowerCase()) ||
             u.email.toLowerCase().includes(search.toLowerCase());
         const matchRole = roleFilter === 'all' || u.role === roleFilter;
         return matchSearch && matchRole;
     });
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (confirmEmail !== deleteTarget?.email) {
             setDeleteError('Email xác nhận không chính xác!');
             return;
         }
-        setUsers(prev => prev.filter(u => u.user_id !== deleteTarget.user_id));
-        setDeleteTarget(null);
-        setConfirmEmail('');
-        setDeleteError('');
+        try {
+            await apiService.delete(`/users/${deleteTarget.userId}`);
+            setUsers(prev => prev.filter(u => u.userId !== deleteTarget.userId));
+            setDeleteTarget(null);
+            setConfirmEmail('');
+            setDeleteError('');
+        } catch (error) {
+            setDeleteError(error.response?.data?.message || 'Xóa thất bại');
+        }
     };
 
-    const toggleSuspend = (userId) => {
-        setUsers(prev => prev.map(u => {
-            if (u.user_id === userId) {
-                return { ...u, status: u.status === 'active' ? 'suspended' : 'active' };
-            }
-            return u;
-        }));
+    const toggleSuspend = async (userId) => {
+        try {
+            await apiService.put(`/users/${userId}/suspend`);
+            setUsers(prev => prev.map(u => {
+                if (u.userId === userId) {
+                    return { ...u, status: u.status === 'active' ? 'suspended' : 'active' };
+                }
+                return u;
+            }));
+        } catch (error) {
+            alert('Lỗi thay đổi trạng thái');
+        }
     };
+
+    if (loading) return <div className="container mt-3">Đang tải danh sách...</div>;
 
     return (
         <div className="dashboard-page">
@@ -69,17 +89,17 @@ export default function AdminManageUsersPage() {
                             </thead>
                             <tbody>
                                 {filtered.map(u => (
-                                    <tr key={u.user_id}>
-                                        <td>#{u.user_id}</td>
-                                        <td><strong>{u.full_name}</strong></td>
+                                    <tr key={u.userId}>
+                                        <td>#{u.userId}</td>
+                                        <td><strong>{u.fullName}</strong></td>
                                         <td>{u.email}</td>
                                         <td>{u.role === 'candidate' ? 'Ứng viên' : 'NTD'}</td>
                                         <td><span className={`badge ${getStatusBadge(u.status)}`}>{getStatusLabel(u.status)}</span></td>
-                                        <td>{u.created_at}</td>
+                                        <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                                         <td>
                                             <div style={{ display: 'flex', gap: 6 }}>
                                                 <button className={`btn btn-sm ${u.status === 'active' ? 'btn-warning' : 'btn-success'}`}
-                                                    onClick={() => toggleSuspend(u.user_id)}>
+                                                    onClick={() => toggleSuspend(u.userId)}>
                                                     {u.status === 'active' ? <><FiLock size={13} /> Khóa</> : <><FiUnlock size={13} /> Mở</>}
                                                 </button>
                                                 <button className="btn btn-sm btn-danger" onClick={() => { setDeleteTarget(u); setConfirmEmail(''); setDeleteError(''); }}>
@@ -101,7 +121,7 @@ export default function AdminManageUsersPage() {
                         <div className="modal" onClick={e => e.stopPropagation()}>
                             <h3><FiAlertTriangle size={20} color="#f59e0b" /> Xác nhận xóa tài khoản</h3>
                             <p className="text-muted mt-1">
-                                Bạn đang xóa tài khoản của <strong>{deleteTarget.full_name}</strong>. Hành động này không thể hoàn tác.
+                                Bạn đang xóa tài khoản của <strong>{deleteTarget.fullName}</strong>. Hành động này không thể hoàn tác.
                             </p>
                             <div className="form-group mt-2">
                                 <label>Nhập email để xác nhận xóa:</label>

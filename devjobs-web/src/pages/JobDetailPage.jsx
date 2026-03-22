@@ -1,27 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { JOBS, getCompanyById, APPLICATIONS } from '../data/mockData';
+import apiService from '../services/apiService';
 import { FiMapPin, FiBriefcase, FiClock, FiHome, FiGlobe, FiUpload, FiCheckCircle } from 'react-icons/fi';
 import './JobDetailPage.css';
 
 export default function JobDetailPage() {
     const { id } = useParams();
     const { user, isAuthenticated, isCandidate } = useAuth();
+    const [job, setJob] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [showApply, setShowApply] = useState(false);
     const [applied, setApplied] = useState(false);
+    const [alreadyApplied, setAlreadyApplied] = useState(false);
     const [coverLetter, setCoverLetter] = useState('');
 
-    const job = JOBS.find(j => j.job_id === parseInt(id));
+    useEffect(() => {
+        const fetchDetail = async () => {
+            try {
+                const res = await apiService.get(`/jobs/${id}`);
+                setJob(res.data);
+                if (isAuthenticated && isCandidate) {
+                    const apps = await apiService.get('/applications/my-applications');
+                    const hasApplied = apps.data.some(a => a.jobId === parseInt(id));
+                    setAlreadyApplied(hasApplied);
+                }
+            } catch (error) {
+                console.error('Job loading error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDetail();
+    }, [id, isAuthenticated, isCandidate]);
+
+    if (loading) return <div className="container mt-3">Đang tải...</div>;
     if (!job) return <div className="container mt-3"><div className="card"><h2>Không tìm thấy công việc</h2><Link to="/jobs">← Quay lại tìm kiếm</Link></div></div>;
 
-    const company = getCompanyById(job.company_id);
-    const alreadyApplied = user && APPLICATIONS.some(a => a.job_id === job.job_id && a.candidate_id === user.user_id);
-
-    const handleApply = (e) => {
+    const handleApply = async (e) => {
         e.preventDefault();
-        setApplied(true);
-        setShowApply(false);
+        try {
+            await apiService.post('/applications', {
+                jobId: job.jobId,
+                cvUrl: '/uploads/cv.pdf', // Giả lập file upload
+                coverLetter: coverLetter
+            });
+            setApplied(true);
+            setShowApply(false);
+        } catch (error) {
+            alert(error.response?.data?.message || 'Lỗi khi ứng tuyển');
+        }
     };
 
     return (
@@ -32,12 +60,12 @@ export default function JobDetailPage() {
                         <div className="detail-header">
                             <h1>{job.title}</h1>
                             <div className="detail-meta">
-                                <span><FiHome size={16} /> {company?.company_name}</span>
+                                <span><FiHome size={16} /> {job.companyName}</span>
                                 <span><FiMapPin size={16} /> {job.location}</span>
-                                <span><FiBriefcase size={16} /> {job.job_type === 'full-time' ? 'Toàn thời gian' : job.job_type === 'remote' ? 'Remote' : job.job_type}</span>
-                                <span><FiClock size={16} /> Đăng ngày {job.created_at}</span>
+                                <span><FiBriefcase size={16} /> {job.jobType === 'full-time' ? 'Toàn thời gian' : job.jobType === 'remote' ? 'Remote' : job.jobType}</span>
+                                <span><FiClock size={16} /> Đăng ngày {new Date(job.createdAt).toLocaleDateString()}</span>
                             </div>
-                            <div className="detail-salary">${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()} / tháng</div>
+                            <div className="detail-salary">${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()} / tháng</div>
                             <div className="tags mb-2">
                                 {job.skills?.map(s => <span className="tag" key={s}>{s}</span>)}
                             </div>
@@ -66,29 +94,16 @@ export default function JobDetailPage() {
                                 {job.requirements?.split('\n').map((r, i) => <li key={i}>• {r}</li>)}
                             </ul>
                         </div>
-
-                        {job.benefits && (
-                            <div className="detail-section">
-                                <h2>Quyền lợi</h2>
-                                <ul>
-                                    {job.benefits.split('\n').map((b, i) => <li key={i}>• {b}</li>)}
-                                </ul>
-                            </div>
-                        )}
                     </main>
 
                     <aside className="detail-sidebar">
                         <div className="card">
                             <h3>Về công ty</h3>
-                            <div className="sidebar-logo">{company?.company_name?.substring(0, 3).toUpperCase()}</div>
-                            <h4>{company?.company_name}</h4>
+                            <div className="sidebar-logo">{job.companyName?.substring(0, 3).toUpperCase()}</div>
+                            <h4>{job.companyName}</h4>
                             <p className="text-muted" style={{ fontSize: '14px', lineHeight: '1.6', marginTop: '8px' }}>
-                                {company?.description}
+                                Đăng bởi: Cty {job.companyName}
                             </p>
-                            <div className="company-details">
-                                {company?.website && <p><FiGlobe size={14} style={{ marginRight: 4 }} /> {company.website}</p>}
-                                {company?.address && <p><FiMapPin size={14} style={{ marginRight: 4 }} /> {company.address}</p>}
-                            </div>
                         </div>
                     </aside>
                 </div>

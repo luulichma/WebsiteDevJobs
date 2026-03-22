@@ -1,24 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { getJobsByRecruiter, APPLICATIONS, getStatusLabel, getStatusBadge } from '../data/mockData';
+import apiService from '../services/apiService';
 import { FiPlus, FiEdit, FiXCircle, FiRefreshCw, FiSave, FiX } from 'react-icons/fi';
 import './DashboardPages.css';
 
+// Tái sử dụng các ui helper
+const getStatusBadge = (s) => s === 'active' ? 'badge-success' : s === 'pending' ? 'badge-warning' : 'badge-secondary';
+const getStatusLabel = (s) => s === 'active' ? 'Đang tuyển' : s === 'pending' ? 'Chờ duyệt' : s === 'closed' ? 'Đã đóng' : s === 'expired' ? 'Hết hạn' : s;
+
 export default function ManageJobsPage() {
-    const { user } = useAuth();
-    const [jobs, setJobs] = useState(getJobsByRecruiter(user?.user_id));
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState('all');
     const [showConfirm, setShowConfirm] = useState(null);
     const [editJob, setEditJob] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [editSaved, setEditSaved] = useState(false);
 
+    const fetchMyJobs = async () => {
+        try {
+            const res = await apiService.get('/jobs/my');
+            setJobs(res.data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyJobs();
+    }, []);
+
     const filtered = filter === 'all' ? jobs : jobs.filter(j => j.status === filter);
 
-    const handleClose = (jobId) => {
-        setJobs(prev => prev.map(j => j.job_id === jobId ? { ...j, status: 'closed' } : j));
-        setShowConfirm(null);
+    const handleClose = async (jobId) => {
+        try {
+            await apiService.put(`/jobs/${jobId}/close`);
+            setJobs(prev => prev.map(j => j.jobId === jobId ? { ...j, status: 'closed' } : j));
+            setShowConfirm(null);
+        } catch (e) {
+            alert('Lỗi đóng tin');
+        }
+    };
+
+    const handleRenew = async (jobId) => {
+        try {
+            await apiService.put(`/jobs/${jobId}/renew`);
+            setJobs(prev => prev.map(j => j.jobId === jobId ? { ...j, status: 'active' } : j));
+            alert('Đã gia hạn thêm 30 ngày!');
+        } catch (e) {
+            alert('Lỗi gia hạn');
+        }
     };
 
     const openEdit = (job) => {
@@ -28,24 +61,36 @@ export default function ManageJobsPage() {
             description: job.description,
             requirements: job.requirements,
             benefits: job.benefits || '',
-            salary_min: job.salary_min,
-            salary_max: job.salary_max,
+            salaryMin: job.salaryMin || '',
+            salaryMax: job.salaryMax || '',
             location: job.location,
-            job_type: job.job_type,
+            jobType: job.jobType,
         });
         setEditSaved(false);
     };
 
     const handleEditChange = (e) => setEditForm({ ...editForm, [e.target.name]: e.target.value });
 
-    const handleEditSave = (e) => {
+    const handleEditSave = async (e) => {
         e.preventDefault();
-        setJobs(prev => prev.map(j =>
-            j.job_id === editJob.job_id ? { ...j, ...editForm, salary_min: Number(editForm.salary_min), salary_max: Number(editForm.salary_max) } : j
-        ));
-        setEditSaved(true);
-        setTimeout(() => { setEditJob(null); setEditSaved(false); }, 1500);
+        try {
+            const payload = {
+                ...editForm,
+                salaryMin: editForm.salaryMin ? Number(editForm.salaryMin) : null,
+                salaryMax: editForm.salaryMax ? Number(editForm.salaryMax) : null,
+                skillIds: editJob.skills?.map(s => 1) || [] // FIXME: Chọn skill id thực ở form sau nếu cần, tạm bypass array rỗng hoặc mapping cơ bản
+            };
+            await apiService.put(`/jobs/${editJob.jobId}`, payload);
+            
+            setJobs(prev => prev.map(j => j.jobId === editJob.jobId ? { ...j, ...payload } : j));
+            setEditSaved(true);
+            setTimeout(() => { setEditJob(null); setEditSaved(false); }, 1500);
+        } catch (err) {
+            alert('Cập nhật thất bại');
+        }
     };
+
+    if (loading) return <div className="container mt-3">Đang tải...</div>;
 
     return (
         <div className="dashboard-page">
@@ -67,43 +112,41 @@ export default function ManageJobsPage() {
                 </div>
 
                 <div className="card">
-                    <div className="table-container">
-                        <table>
-                            <thead>
-                                <tr><th>Tiêu đề</th><th>Ứng viên</th><th>Ngày đăng</th><th>Hết hạn</th><th>Trạng thái</th><th>Thao tác</th></tr>
-                            </thead>
-                            <tbody>
-                                {filtered.map(job => {
-                                    const appCount = APPLICATIONS.filter(a => a.job_id === job.job_id).length;
-                                    return (
-                                        <tr key={job.job_id}>
-                                            <td><Link to={`/jobs/${job.job_id}`} style={{ color: '#667eea', fontWeight: 500 }}>{job.title}</Link></td>
-                                            <td>{appCount} hồ sơ</td>
-                                            <td>{job.created_at}</td>
-                                            <td>{job.expiry_date}</td>
+                    {jobs.length === 0 ? (
+                        <p className="text-center text-muted" style={{ padding: '20px' }}>Chưa có tin đăng nào</p>
+                    ) : (
+                        <div className="table-container">
+                            <table>
+                                <thead>
+                                    <tr><th>Tiêu đề</th><th>Ứng viên</th><th>Ngày đăng</th><th>Hết hạn</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                                </thead>
+                                <tbody>
+                                    {filtered.map(job => (
+                                        <tr key={job.jobId}>
+                                            <td><Link to={`/jobs/${job.jobId}`} style={{ color: '#667eea', fontWeight: 500 }}>{job.title}</Link></td>
+                                            <td>{job.applicationCount || 0} hồ sơ</td>
+                                            <td>{new Date(job.createdAt).toLocaleDateString()}</td>
+                                            <td>{job.expiryDate || 'N/A'}</td>
                                             <td><span className={`badge ${getStatusBadge(job.status)}`}>{getStatusLabel(job.status)}</span></td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                                     {job.status === 'active' && (
                                                         <>
                                                             <button className="btn btn-sm btn-secondary" onClick={() => openEdit(job)}><FiEdit size={13} /> Sửa</button>
-                                                            <button className="btn btn-sm btn-warning" onClick={() => setShowConfirm({ type: 'close', jobId: job.job_id })}><FiXCircle size={13} /> Đóng</button>
+                                                            <button className="btn btn-sm btn-warning" onClick={() => setShowConfirm({ type: 'close', jobId: job.jobId })}><FiXCircle size={13} /> Đóng</button>
                                                         </>
                                                     )}
                                                     {(job.status === 'expired' || job.status === 'closed') && (
-                                                        <button className="btn btn-sm btn-success" onClick={() => {
-                                                            setJobs(prev => prev.map(j => j.job_id === job.job_id ? { ...j, status: 'active' } : j));
-                                                            alert('Đã gia hạn thêm 30 ngày!');
-                                                        }}><FiRefreshCw size={13} /> Gia hạn</button>
+                                                        <button className="btn btn-sm btn-success" onClick={() => handleRenew(job.jobId)}><FiRefreshCw size={13} /> Gia hạn</button>
                                                     )}
                                                 </div>
                                             </td>
                                         </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
 
                 {/* Close Confirm Modal */}
@@ -144,11 +187,11 @@ export default function ManageJobsPage() {
                                         <div className="form-row">
                                             <div className="form-group">
                                                 <label>Lương tối thiểu ($)</label>
-                                                <input type="number" name="salary_min" className="form-input" value={editForm.salary_min} onChange={handleEditChange} />
+                                                <input type="number" name="salaryMin" className="form-input" value={editForm.salaryMin} onChange={handleEditChange} />
                                             </div>
                                             <div className="form-group">
                                                 <label>Lương tối đa ($)</label>
-                                                <input type="number" name="salary_max" className="form-input" value={editForm.salary_max} onChange={handleEditChange} />
+                                                <input type="number" name="salaryMax" className="form-input" value={editForm.salaryMax} onChange={handleEditChange} />
                                             </div>
                                         </div>
                                         <div className="form-row">
@@ -160,7 +203,7 @@ export default function ManageJobsPage() {
                                             </div>
                                             <div className="form-group">
                                                 <label>Loại hình</label>
-                                                <select name="job_type" className="form-select" value={editForm.job_type} onChange={handleEditChange}>
+                                                <select name="jobType" className="form-select" value={editForm.jobType} onChange={handleEditChange}>
                                                     <option value="full-time">Toàn thời gian</option><option value="part-time">Bán thời gian</option>
                                                     <option value="remote">Remote</option><option value="contract">Hợp đồng</option>
                                                 </select>

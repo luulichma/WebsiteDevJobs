@@ -1,29 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { getApplicationsByCandidate, JOBS, getCompanyById, getStatusLabel, getStatusBadge } from '../data/mockData';
+import apiService from '../services/apiService';
 import { FiUpload, FiX, FiCheckCircle } from 'react-icons/fi';
 import './DashboardPages.css';
 
+const getStatusBadge = (status) => {
+    switch (status) {
+        case 'pending': return 'badge-warning';
+        case 'reviewed': return 'badge-info';
+        case 'accepted': return 'badge-success';
+        case 'rejected': return 'badge-danger';
+        default: return 'badge-secondary';
+    }
+};
+
+const getStatusLabel = (status) => {
+    switch (status) {
+        case 'pending': return 'Chờ duyệt';
+        case 'reviewed': return 'Đang xem xét';
+        case 'accepted': return 'Đã trúng tuyển';
+        case 'rejected': return 'Đã từ chối';
+        default: return status;
+    }
+};
+
 export default function ApplicationHistoryPage() {
     const { user } = useAuth();
-    const [apps, setApps] = useState(getApplicationsByCandidate(user?.user_id));
+    const [apps, setApps] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [editApp, setEditApp] = useState(null);
     const [newCvFile, setNewCvFile] = useState(null);
     const [updateSuccess, setUpdateSuccess] = useState(false);
 
+    useEffect(() => {
+        apiService.get('/applications/my-applications')
+            .then(res => setApps(res.data))
+            .catch(err => console.error(err))
+            .finally(() => setLoading(false));
+    }, []);
+
     const handleUpdateCV = (e) => {
         e.preventDefault();
         if (!newCvFile) { alert('Vui lòng chọn file CV mới!'); return; }
-        // Cập nhật tên file CV trong state
+        // TODO: API cho phép upload CV bổ sung hiện chưa có, giả lập thay đổi UI
         setApps(prev => prev.map(a =>
-            a.application_id === editApp.application_id
-                ? { ...a, cv_url: `/uploads/${newCvFile.name}` }
+            a.applicationId === editApp.applicationId
+                ? { ...a, cvUrl: `/uploads/${newCvFile.name}` }
                 : a
         ));
         setUpdateSuccess(true);
         setTimeout(() => { setEditApp(null); setUpdateSuccess(false); setNewCvFile(null); }, 1800);
     };
+
+    if (loading) return <div className="container mt-3">Đang tải...</div>;
 
     return (
         <div className="dashboard-page">
@@ -46,18 +76,16 @@ export default function ApplicationHistoryPage() {
                                 </thead>
                                 <tbody>
                                     {apps.map(app => {
-                                        const job = JOBS.find(j => j.job_id === app.job_id);
-                                        const company = job ? getCompanyById(job.company_id) : null;
-                                        const cvName = app.cv_url?.split('/').pop() || 'cv.pdf';
+                                        const cvName = app.cvUrl?.split('/').pop() || 'cv.pdf';
                                         return (
-                                            <tr key={app.application_id}>
+                                            <tr key={app.applicationId}>
                                                 <td>
-                                                    <Link to={`/jobs/${app.job_id}`} style={{ color: '#667eea', fontWeight: 500 }}>
-                                                        {job?.title || 'N/A'}
+                                                    <Link to={`/jobs/${app.jobId}`} style={{ color: '#667eea', fontWeight: 500 }}>
+                                                        {app.jobTitle || 'N/A'}
                                                     </Link>
                                                 </td>
-                                                <td>{company?.company_name || 'N/A'}</td>
-                                                <td>{app.applied_at}</td>
+                                                <td>{app.companyName || 'N/A'}</td>
+                                                <td>{new Date(app.appliedAt).toLocaleDateString()}</td>
                                                 <td style={{ fontSize: 13, color: '#6b7280' }}>📄 {cvName}</td>
                                                 <td>
                                                     <span className={`badge ${getStatusBadge(app.status)}`}>
@@ -91,22 +119,22 @@ export default function ApplicationHistoryPage() {
                                 <div className="text-center" style={{ padding: '32px 0' }}>
                                     <FiCheckCircle size={56} color="#10b981" style={{ marginBottom: 16 }} />
                                     <h2>Cập nhật CV thành công!</h2>
-                                    <p className="text-muted mt-1">Hồ sơ của bạn đã được cập nhật.</p>
+                                    <p className="text-muted mt-1">Hồ sơ của bạn (giả lập) đã được cập nhật.</p>
                                 </div>
                             ) : (
                                 <>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                                        <h2>Cập nhật CV</h2>
+                                        <h2>Cập nhật CV (Demo)</h2>
                                         <button onClick={() => setEditApp(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                             <FiX size={24} color="#6b7280" />
                                         </button>
                                     </div>
 
                                     <p className="text-muted mb-2">
-                                        Vị trí: <strong>{JOBS.find(j => j.job_id === editApp.job_id)?.title}</strong>
+                                        Vị trí: <strong>{editApp.jobTitle}</strong>
                                     </p>
                                     <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>
-                                        CV hiện tại: <strong>{editApp.cv_url?.split('/').pop()}</strong>
+                                        CV hiện tại: <strong>{editApp.cvUrl?.split('/').pop() || 'Thư mục mặc định'}</strong>
                                     </p>
 
                                     <form onSubmit={handleUpdateCV}>
