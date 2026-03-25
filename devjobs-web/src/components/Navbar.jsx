@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiSearch, FiUser, FiLogOut, FiPlusCircle, FiFileText, FiUsers, FiCheckSquare, FiBriefcase, FiHome } from 'react-icons/fi';
+import { FiSearch, FiUser, FiLogOut, FiPlusCircle, FiFileText, FiUsers, FiCheckSquare, FiBriefcase, FiHome, FiBarChart2 } from 'react-icons/fi';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -45,6 +45,7 @@ export default function Navbar() {
 
                     {isAdmin && (
                         <>
+                            <Link to="/admin/dashboard"><FiBarChart2 size={15} /> Thống kê</Link>
                             <Link to="/admin/approve"><FiCheckSquare size={15} /> Duyệt tin</Link>
                             <Link to="/admin/users"><FiUsers size={15} /> Users</Link>
                         </>

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
+import apiService from '../services/apiService';
 import './AuthPages.css';
 
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const { login, loginWithToken } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -21,6 +23,19 @@ export default function LoginPage() {
             else if (role === 'admin') navigate('/admin/approve');
         } else {
             setError(result.message);
+        }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            const res = await apiService.post('/auth/google', { credential: credentialResponse.credential });
+            const { token, user } = res.data;
+            loginWithToken(token, user);
+            if (user.role === 'candidate') navigate('/jobs');
+            else if (user.role === 'recruiter') navigate('/recruiter/jobs');
+            else navigate('/admin/approve');
+        } catch (err) {
+            setError(err.response?.data?.message || 'Đăng nhập Google thất bại');
         }
     };
 
@@ -53,9 +68,14 @@ export default function LoginPage() {
 
                 <div className="auth-divider"><span>Hoặc đăng nhập bằng</span></div>
 
-                <div className="social-login">
-                    <button className="social-btn">🔵 Google</button>
-                    <button className="social-btn">🔷 Facebook</button>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                    <GoogleLogin
+                        onSuccess={handleGoogleSuccess}
+                        onError={() => setError('Đăng nhập Google thất bại')}
+                        text="signin_with"
+                        shape="rectangular"
+                        locale="vi"
+                    />
                 </div>
 
                 <p className="auth-footer">
@@ -63,12 +83,21 @@ export default function LoginPage() {
                 </p>
 
                 <div className="demo-accounts">
-                    <p><strong>Tài khoản demo:</strong></p>
-                    <p>👤 candidate@devjobs.vn / 123456</p>
-                    <p>👤 candidate2026@devjobs.vn / 123456</p>
-                    <p>👔 recruiter@devjobs.vn / 123456</p>
-                    <p>👔 recruiter2026@devjobs.vn / 123456</p>
-                    <p>⚙️ admin@devjobs.vn / 123456</p>
+                    <p><strong>Đăng nhập nhanh:</strong></p>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button type="button" className="demo-btn"
+                            onClick={() => { setEmail('candidate@devjobs.vn'); setPassword('123456'); }}>
+                            👤 Ứng viên
+                        </button>
+                        <button type="button" className="demo-btn"
+                            onClick={() => { setEmail('recruiter@devjobs.vn'); setPassword('123456'); }}>
+                            👔 Nhà tuyển dụng
+                        </button>
+                        <button type="button" className="demo-btn"
+                            onClick={() => { setEmail('admin@devjobs.vn'); setPassword('123456'); }}>
+                            ⚙️ Admin
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

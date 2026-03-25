@@ -16,6 +16,11 @@ namespace DevJobsAPI.DTOs
         public string Role { get; set; } = "candidate"; // candidate | recruiter
     }
 
+    public class GoogleLoginRequest
+    {
+        public string Credential { get; set; } = string.Empty; // Google ID token
+    }
+
     public class AuthResponse
     {
         public string Token { get; set; } = string.Empty;

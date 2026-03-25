@@ -38,7 +38,12 @@ export default function SearchJobsPage() {
 
     useEffect(() => {
         fetchJobs();
-    }, [location, jobType, sortBy]); // fetch khi filter/sort thay đổi
+    }, [location, jobType, sortBy]); // keyword is triggered manually via handleSearch
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        fetchJobs();
+    };
 
     // Hardcode location vì không lưu bảng riêng
     const locations = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Remote'];

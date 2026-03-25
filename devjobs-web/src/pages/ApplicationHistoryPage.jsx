@@ -9,6 +9,8 @@ const getStatusBadge = (status) => {
     switch (status) {
         case 'pending': return 'badge-warning';
         case 'reviewed': return 'badge-info';
+        case 'shortlisted': return 'badge-info';
+        case 'interview': return 'badge-info';
         case 'accepted': return 'badge-success';
         case 'rejected': return 'badge-danger';
         default: return 'badge-secondary';
@@ -19,6 +21,8 @@ const getStatusLabel = (status) => {
     switch (status) {
         case 'pending': return 'Chờ duyệt';
         case 'reviewed': return 'Đang xem xét';
+        case 'shortlisted': return 'Qua vòng hồ sơ';
+        case 'interview': return 'Mời phỏng vấn';
         case 'accepted': return 'Đã trúng tuyển';
         case 'rejected': return 'Đã từ chối';
         default: return status;

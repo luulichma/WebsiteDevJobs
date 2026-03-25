@@ -110,5 +110,22 @@
 }
 
 .demo-accounts p {
-    margin-bottom: 4px;
+    margin-bottom: 8px;
+}
+
+.demo-btn {
+    padding: 8px 14px;
+    border: 1.5px solid #667eea;
+    border-radius: 8px;
+    background: white;
+    color: #667eea;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.demo-btn:hover {
+    background: #667eea;
+    color: white;
 }

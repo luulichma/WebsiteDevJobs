@@ -42,7 +42,7 @@ export default function JobDetailPage() {
         try {
             await apiService.post('/applications', {
                 jobId: job.jobId,
-                cvUrl: '/uploads/cv.pdf', // Giả lập file upload
+                cvUrl: user?.cvUrl || '/uploads/cv.pdf',
                 coverLetter: coverLetter
             });
             setApplied(true);

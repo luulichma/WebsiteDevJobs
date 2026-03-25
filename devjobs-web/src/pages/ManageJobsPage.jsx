@@ -16,6 +16,7 @@ export default function ManageJobsPage() {
     const [editJob, setEditJob] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [editSaved, setEditSaved] = useState(false);
+    const [allSkills, setAllSkills] = useState([]); // tất cả skills để map tên → id
 
     const fetchMyJobs = async () => {
         try {
@@ -30,6 +31,7 @@ export default function ManageJobsPage() {
 
     useEffect(() => {
         fetchMyJobs();
+        apiService.get('/skills').then(res => setAllSkills(res.data)).catch(console.error);
     }, []);
 
     const filtered = filter === 'all' ? jobs : jobs.filter(j => j.status === filter);
@@ -78,7 +80,9 @@ export default function ManageJobsPage() {
                 ...editForm,
                 salaryMin: editForm.salaryMin ? Number(editForm.salaryMin) : null,
                 salaryMax: editForm.salaryMax ? Number(editForm.salaryMax) : null,
-                skillIds: editJob.skills?.map(s => 1) || [] // FIXME: Chọn skill id thực ở form sau nếu cần, tạm bypass array rỗng hoặc mapping cơ bản
+                skillIds: editJob.skills
+                    ?.map(name => allSkills.find(s => s.skillName === name)?.skillId)
+                    .filter(Boolean) || []
             };
             await apiService.put(`/jobs/${editJob.jobId}`, payload);
             

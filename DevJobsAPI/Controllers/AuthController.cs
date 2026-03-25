@@ -4,6 +4,7 @@ using DevJobsAPI.Models;
 using DevJobsAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace DevJobsAPI.Controllers
 {
@@ -93,5 +94,49 @@ namespace DevJobsAPI.Controllers
             CreatedAt = u.CreatedAt,
             Skills = string.IsNullOrWhiteSpace(u.Skills) ? new() : u.Skills.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList()
         };
+
+        /// <summary>Đăng nhập bằng Google OAuth</summary>
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest req)
+        {
+            // Xác minh token với Google
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"https://oauth2.googleapis.com/tokeninfo?id_token={req.Credential}");
+            if (!response.IsSuccessStatusCode)
+                return Unauthorized(new { message = "Token Google không hợp lệ" });
+
+            var json = await response.Content.ReadAsStringAsync();
+            var payload = JsonDocument.Parse(json).RootElement;
+
+            var email = payload.GetProperty("email").GetString();
+            var name = payload.TryGetProperty("name", out var nameProp) ? nameProp.GetString() : email;
+
+            if (string.IsNullOrEmpty(email))
+                return BadRequest(new { message = "Không lấy được email từ Google" });
+
+            // Tìm hoặc tạo user
+            var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Email = email,
+                    FullName = name ?? email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                    Role = "candidate",
+                    Status = "active",
+                    CreatedAt = DateTime.Now
+                };
+                _db.Users.Add(user);
+                await _db.SaveChangesAsync();
+            }
+            else if (user.Status != "active")
+            {
+                return Unauthorized(new { message = "Tài khoản của bạn đã bị khóa" });
+            }
+
+            var token = _jwt.GenerateToken(user, null);
+            return Ok(new AuthResponse { Token = token, User = MapToDto(user, null) });
+        }
     }
 }

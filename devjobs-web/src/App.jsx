@@ -18,6 +18,7 @@ import ManageApplicationsPage from './pages/ManageApplicationsPage';
 import ManageJobsPage from './pages/ManageJobsPage';
 import AdminApproveJobsPage from './pages/AdminApproveJobsPage';
 import AdminManageUsersPage from './pages/AdminManageUsersPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function AppContent() {
   return (
@@ -66,6 +67,11 @@ function AppContent() {
         } />
 
         {/* Admin Routes */}
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboardPage />
+          </ProtectedRoute>
+        } />
         <Route path="/admin/approve" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <AdminApproveJobsPage />

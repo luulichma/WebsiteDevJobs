@@ -85,5 +85,19 @@ namespace DevJobsAPI.Controllers
 
             return Ok(new { message = "Đã sửa dữ liệu Unicode thành công!" });
         }
+
+        [HttpPost("fix-names")]
+        public async Task<IActionResult> FixNames()
+        {
+            // Fix corrupted Vietnamese names for all seeded users
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Nguyễn Văn A' WHERE email='candidate@devjobs.vn'");
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Trần Thị Bình' WHERE email='recruiter@devjobs.vn'");
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Phạm Minh Tuấn' WHERE email='ung_vien2@devjobs.vn'");
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Hoàng Thị Mai' WHERE email='recruiter2@devjobs.vn'");
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Nguyễn Văn B (Mới)' WHERE email='candidate2026@devjobs.vn'");
+            await _db.Database.ExecuteSqlRawAsync("UPDATE USERS SET full_name = N'Trần Thị C (Mới)' WHERE email='recruiter2026@devjobs.vn'");
+
+            return Ok(new { message = "Đã sửa tên tiếng Việt thành công!" });
+        }
     }
 }
