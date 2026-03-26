@@ -1,144 +1,593 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Báo Cáo Kỹ Thuật: Phân Hệ Back-End</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            background-color: #f9f9f9;
-        }
-        .container {
-            background-color: #fff;
-            padding: 40px 50px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 15px;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #2980b9;
-            margin-top: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
-        }
-        h3 {
-            color: #34495e;
-            margin-top: 25px;
-        }
-        p {
-            margin-bottom: 15px;
-            text-align: justify;
-        }
-        ul {
-            margin-bottom: 20px;
-            padding-left: 25px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        strong {
-            color: #2c3e50;
-        }
-        .highlight {
-            background-color: #f0f7ff;
-            padding: 15px;
-            border-left: 5px solid #3498db;
-            margin: 20px 0;
-            border-radius: 4px;
-        }
-        .footer {
-            margin-top: 50px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #7f8c8d;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Báo cáo API Backend — DevJobs</title>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-light: #e0e7ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  aside {
+    width: 240px; background: #1e1b4b; color: #c7d2fe;
+    position: fixed; top: 0; left: 0; height: 100vh;
+    overflow-y: auto; padding: 24px 0; z-index: 10;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  aside .logo { color: white; font-size: 20px; font-weight: 800; padding: 0 20px 20px; border-bottom: 1px solid #3730a3; }
+  aside ul { list-style: none; margin-top: 12px; }
+  aside ul li a {
+    display: block; padding: 9px 20px; color: #c7d2fe;
+    text-decoration: none; font-size: 13.5px; transition: all 0.2s;
+  }
+  aside ul li a:hover, aside ul li a.active { background: #4338ca; color: white; }
+  aside ul .section-title { padding: 16px 20px 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #818cf8; }
+
+  main { margin-left: 240px; padding: 40px; max-width: 1000px; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; border-radius: 16px; padding: 36px 40px; margin-bottom: 32px;
+  }
+  .report-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .report-header p { opacity: 0.85; font-size: 15px; }
+  .report-meta { display: flex; gap: 24px; margin-top: 16px; }
+  .report-meta span { background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 99px; font-size: 13px; }
+
+  /* Export Buttons */
+  .export-bar { display: flex; gap: 10px; margin-bottom: 28px; }
+  .btn-export {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border: none; border-radius: 8px;
+    font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-pdf { background: #ef4444; color: white; }
+  .btn-pdf:hover { background: #dc2626; }
+  .btn-word { background: #2563eb; color: white; }
+  .btn-word:hover { background: #1d4ed8; }
+
+  /* Sections */
+  section { margin-bottom: 40px; scroll-margin-top: 24px; }
+  section h2 {
+    font-size: 20px; font-weight: 700; color: var(--primary);
+    border-left: 4px solid var(--primary); padding-left: 12px; margin-bottom: 16px;
+  }
+  section h3 { font-size: 16px; font-weight: 700; margin: 20px 0 10px; color: var(--text); }
+
+  .card { background: white; border-radius: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.07); padding: 24px; margin-bottom: 16px; }
+
+  /* Tech stack badges */
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .tech-tag { background: var(--primary-light); color: var(--primary); border-radius: 99px; padding: 4px 14px; font-size: 13px; font-weight: 600; }
+
+  /* Architecture diagram */
+  .arch-diagram {
+    background: #1e1b4b; color: #c7d2fe; border-radius: 12px;
+    padding: 24px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 2;
+  }
+  .arch-diagram .highlight { color: #a5f3fc; font-weight: bold; }
+
+  /* DB table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { background: #f3f4f6; padding: 10px 14px; text-align: left; font-weight: 700; color: var(--muted); font-size: 12px; text-transform: uppercase; }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+
+  /* Method badges */
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; }
+  .badge-get { background: #d1fae5; color: #065f46; }
+  .badge-post { background: #dbeafe; color: #1e40af; }
+  .badge-put { background: #fef3c7; color: #92400e; }
+  .badge-delete { background: #fee2e2; color: #991b1b; }
+
+  /* Auth badges */
+  .auth-badge { display: inline-flex; align-items: center; gap: 4px; background: #f3f4f6; color: var(--muted); border-radius: 99px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+  .auth-public { background: #d1fae5; color: #065f46; }
+  .auth-candidate { background: #dbeafe; color: #1e40af; }
+  .auth-recruiter { background: #fef3c7; color: #92400e; }
+  .auth-admin { background: #fee2e2; color: #991b1b; }
+  .auth-any { background: #ede9fe; color: #5b21b6; }
+
+  /* Code blocks */
+  pre {
+    background: #1e1b4b; color: #e0e7ff; border-radius: 10px;
+    padding: 18px; font-size: 13px; overflow-x: auto;
+    line-height: 1.7; margin: 10px 0;
+  }
+  pre .key { color: #a5b4fc; }
+  pre .str { color: #6ee7b7; }
+  pre .num { color: #fcd34d; }
+  pre .com { color: #64748b; }
+
+  .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .warn-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+  .success-box { background: #f0fdf4; border-left: 4px solid #10b981; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 12px 0; font-size: 14px; }
+
+  .endpoint-table td:first-child { width: 80px; }
+  .endpoint-table td:nth-child(2) { font-family: monospace; font-size: 13px; color: var(--primary); }
+  .endpoint-table td:nth-child(3) { width: 100px; }
+
+  .controller-group { margin-bottom: 32px; }
+  .controller-header {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    color: white; border-radius: 10px 10px 0 0; padding: 12px 20px;
+    font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px;
+  }
+  .controller-body { background: white; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); overflow: hidden; }
+
+  @media print {
+    aside { display: none; }
+    main { margin-left: 0; padding: 20px; }
+    .export-bar { display: none; }
+    .card, .controller-body { box-shadow: none; border: 1px solid #e5e7eb; }
+    pre { border: 1px solid #e5e7eb; background: #f8f8f8 !important; color: #333 !important; }
+    .arch-diagram { background: #f8f8f8 !important; color: #333 !important; }
+    aside { print-color-adjust: exact; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>BÁO CÁO KỸ THUẬT: PHÂN HỆ BACK-END<br><small style="font-size: 0.6em; font-weight: normal; color: #7f8c8d;">Dự án: Nền tảng Tuyển dụng DevJobs (RESTful Web API)</small></h1>
 
-        <div class="highlight">
-            <p><strong>Lưu ý:</strong> Phân hệ Back-end này được xây dựng theo mô hình <strong>RESTful Web API (API-only)</strong>, KHÔNG PHẢI là mô hình Web MVC truyền thống (trả về giao diện HTML/Razor Views). Backend chỉ nhận Request và trả về dữ liệu định dạng JSON, còn việc vẽ giao diện hoàn toàn do Frontend (ReactJS) đảm nhận.</p>
-        </div>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside>
+    <div class="logo">📋 DevJobs API</div>
+    <ul>
+      <li class="section-title">Tổng quan</li>
+      <li><a href="#overview">1. Giới thiệu dự án</a></li>
+      <li><a href="#architecture">2. Kiến trúc hệ thống</a></li>
+      <li><a href="#database">3. Cơ sở dữ liệu</a></li>
+      <li><a href="#security">4. Bảo mật & Xác thực</a></li>
+      <li class="section-title">API Endpoints</li>
+      <li><a href="#auth">Auth — /api/auth</a></li>
+      <li><a href="#jobs">Jobs — /api/jobs</a></li>
+      <li><a href="#applications">Applications</a></li>
+      <li><a href="#users">Users — /api/users</a></li>
+      <li><a href="#companies">Companies</a></li>
+      <li><a href="#skills">Skills & Admin</a></li>
+      <li class="section-title">Ví dụ & Demo</li>
+      <li><a href="#examples">5. Ví dụ thực tế</a></li>
+      <li><a href="#demo">6. Chạy & Demo</a></li>
+    </ul>
+  </aside>
 
-        <h2>1. TỔNG QUAN PHÂN HỆ BACK-END</h2>
-        <p>Phân hệ Back-end của hệ thống DevJobs đóng vai trò là lõi xử lý nghiệp vụ trung tâm, chịu trách nhiệm giao tiếp với cơ sở dữ liệu (Database), thực thi bảo mật, kiểm soát quyền truy cập và cung cấp dữ liệu cho các ứng dụng phía Client (Frontend Web/Mobile) thông qua các giao thức HTTP dưới dạng cấu trúc dữ liệu JSON.</p>
-        <p>Hệ thống được thiết kế theo kiến trúc <strong>Client-Server độc lập</strong>, trong đó Back-end hoạt động hoàn toàn dưới dạng RESTful Web API, nhằm tách biệt hoàn toàn khỏi logic hiển thị giao diện, giúp tối ưu hóa khả năng mở rộng.</p>
-
-        <h2>2. CÔNG NGHỆ VÀ NGĂN XẾP (TECH STACK)</h2>
-        <p>Hệ thống sử dụng các công nghệ hiện đại chuyên biệt để tối ưu hóa hiệu suất ứng dụng phân tán:</p>
-        <ul>
-            <li><strong>Ngôn ngữ lập trình:</strong> C# (C-Sharp).</li>
-            <li><strong>Web Framework:</strong> ASP.NET Core Web API (.NET 10.0). Đây là framework hiệu suất cực cao của Microsoft chuyên dùng để xây dựng các dịch vụ HTTP.</li>
-            <li><strong>Cơ sở dữ liệu (DBMS):</strong> Microsoft SQL Server 2022 (Sẵn sàng nền tảng để triển khai môn học Phân tán cơ sở dữ liệu trong tương lai).</li>
-            <li><strong>O/RM (Object-Relational Mapping):</strong> Entity Framework Core 10.0 thiết lập theo phương pháp <em>Database-First</em> (Tự động sinh Model từ kịch bản quy chuẩn thiết kế CSDL thực tế).</li>
-            <li><strong>Bảo mật & Xác thực:</strong>
-                <ul>
-                    <li><strong>JSON Web Token (JWT):</strong> Thiết lập cơ chế Auth dạng Bearer Token (Stateless).</li>
-                    <li><strong>BCrypt.Net:</strong> Mã hóa một chiều (Hashing) mật khẩu người dùng trước khi lưu xuống CSDL.</li>
-                </ul>
-            </li>
-            <li><strong>Tài liệu lập trình hóa (API Docs):</strong> Swashbuckle / Swagger UI.</li>
-        </ul>
-
-        <h2>3. KIẾN TRÚC VÀ CÁC THÀNH PHẦN (MODULES) CỐT LÕI</h2>
-        
-        <h3>3.1. Design Patterns (Mẫu Thiết kế) áp dụng</h3>
-        <ul>
-            <li><strong>Controller Pattern:</strong> Lớp trung gian tiếp nhận HTTP Request (GET, POST, PUT, DELETE), xác thực tham số và điều hướng xuống lớp xử lý dữ liệu.</li>
-            <li><strong>DTO (Data Transfer Object) Pattern:</strong> Tách biệt hoàn toàn bản ghi dữ liệu Model (của Entity Framework) và luồng dữ liệu trả về cho Front-end. Ngăn chặn triệt để rò rỉ dữ liệu nhạy cảm (như mục PasswordHash) và giải quyết triệt để lỗi vòng lặp tham chiếu JSON (Circular Reference).</li>
-            <li><strong>Dependency Injection (DI):</strong> Được tích hợp sẵn trong .NET, giúp đăng ký tự động và quản lý vòng đời của <code>AppDbContext</code>, <code>JwtService</code> qua <code>Program.cs</code>.</li>
-        </ul>
-
-        <h3>3.2. Chức năng phân rã Modules (API Controllers)</h3>
-        <p>Hệ thống Back-end được chia làm 6 bộ điều khiển (Controllers) chính, phản ánh trực tiếp các thực thể và chức năng trong đồ án:</p>
-        <ol>
-            <li><strong>Auth Module (Đăng nhập/Đăng ký):</strong> Cung cấp endpoint đăng ký mới và đăng nhập. Khi xác thực thành công, trả về JWT Token chứa thông tin mã hóa (UserId, Role, CompanyId) giúp Frontend định danh phiên hoạt động suốt quá trình sử dụng.</li>
-            <li><strong>Users Module (Người dùng):</strong> Xử lý nghiệp vụ cá nhân hóa (Profile) cho từng tài khoản. Bên cạnh đó, hỗ trợ hệ thống Admin các chức năng quản lý từ xa như Get All, Khóa (Suspend), hoặc Xóa (Delete) tài khoản của ứng viên/công ty cố tình vi phạm.</li>
-            <li><strong>Jobs Module (Tin tuyển dụng):</strong> 
-                <ul>
-                    <li><strong>Góc nhìn Khách/Ứng viên:</strong> Lấy danh sách việc làm công khai với tham số lọc truy vấn (Tìm kiếm theo tên, lương, vị trí, kỹ năng...). API tích hợp sẵn thuật toán phân trang (Pagination).</li>
-                    <li><strong>Góc nhìn Recruiters:</strong> Đăng tin tuyển dụng (mặc định cần chờ Admin duyệt), sửa nội dung, tắt tin và gia hạn tin (renew).</li>
-                </ul>
-            </li>
-            <li><strong>Applications Module (Hồ sơ ứng tuyển):</strong> Là cầu nối giữa Candidate và Job. Xử lý nghiệp vụ nhận CV ứng tuyển, và cung cấp bảng điều khiển để nhà tuyển dụng cập nhật luồng trạng thái ứng viên (Từ "Chờ xem xét" -> "Đang phỏng vấn" -> "Chấp nhận"/"Từ chối").</li>
-            <li><strong>Companies Module (Hồ sơ Doanh nghiệp):</strong> Cung cấp thông tin tập đoàn, trụ sở và logo hiển thị.</li>
-            <li><strong>Skills Module (Danh mục Chuyên môn):</strong> Cung cấp từ điển các kỹ năng ngành nghề (IT, Marketing,...) để phân rã chuyên môn dễ dàng.</li>
-        </ol>
-
-        <h2>4. BẢO MẬT VÀ QUẢN LÝ DATABASE</h2>
-        
-        <h3>Phương thức giao tiếp Cơ sở dữ liệu</h3>
-        <p>Quá trình map cơ sở dữ liệu tuân thủ nghiêm ngặt chuẩn hệ cơ sở dữ liệu quan hệ <strong>Database-First</strong>. Cơ sở dữ liệu <code>DevJobs</code> được thiết kế chặt chẽ trên cấu trúc SQL Server Management Studio (SSMS). Backend sử dụng lệnh <code>Scaffold-DbContext</code> để phân tích cấu trúc khóa cứng và sinh tự động các Entity C#.</p>
-        <p><em>Công nghệ EF Core đã xử lý tự động và hoàn hảo quan hệ Nhiều-Nhiều (Many-to-Many), bóc tách quan hệ Job-Skills thành mảng Collection cấp ứng dụng (trong Memory) mà không đòi hỏi thao tác can thiệp trực tiếp từ lập trình viên xuống bảng nối trung gian.</em></p>
-
-        <h3>Chính sách Phân quyền và Quy tắc kết nối (CORS)</h3>
-        <ul>
-            <li><strong>CORS Policy (Cross-Origin Resource Sharing):</strong> Hệ thống được thiết lập chế độ bảo vệ nguồn gốc chặt chẽ. Chỉ cho phép đích danh các tên miền Front-end như <code>localhost:5173</code> hoặc <code>localhost:3000</code> truy cập API. Tránh tấn công đánh cắp dữ liệu chéo từ các máy chủ lạ.</li>
-            <li><strong>Authorization Barrier (Rào chắn Ủy quyền):</strong> Mỗi phân đoạn Endpoint API đều gán rào chắn <code>[Authorize(Roles="admin")]</code>, <code>[Authorize(Roles="recruiter")]</code>,... Bất kỳ token JWT giả mạo nào gửi tới Controller cũng sẽ bị đá ra ngoài qua mã lỗi <em>401 Unauthorized</em> hoặc <em>403 Forbidden</em> trước cả khi câu query kịp chạm xuống hệ cơ sở dữ liệu SQL Server.</li>
-        </ul>
-
-        <h2>5. TỔNG KẾT</h2>
-        <p>Phân hệ Back-end RESTful Web API của dự án DevJobs mang tới một giải pháp trung tâm tinh gọn, kiến trúc bền bỉ và bảo mật cao. Việc thiết kế hệ thống C# hoàn toàn độc lập với Frontend, kết hợp hệ quản trị cơ sở dữ liệu tiêu chuẩn Microsoft SQL Server 2022 giúp đảm bảo năng lực hệ thống dễ dàng cấu hình nhân bản và triển khai môn học hệ thống CSDL Phân Tán mà không cần làm tổn tác đến lõi mã nguồn API hiện tại.</p>
-        
-        <div class="footer">
-            Báo cáo Kỹ thuật - Nhóm Tuần 3 - Nền tảng Tuyển dụng DevJobs
-        </div>
+  <!-- Main -->
+  <main>
+    <!-- Header -->
+    <div class="report-header">
+      <h1>📋 Báo cáo API Backend — DevJobs</h1>
+      <p>Tài liệu mô tả toàn bộ REST API của nền tảng tuyển dụng IT DevJobs</p>
+      <div class="report-meta">
+        <span>ASP.NET Core 8.0</span>
+        <span>Entity Framework Core</span>
+        <span>SQL Server</span>
+        <span>JWT Auth</span>
+        <span>Version 1.0</span>
+      </div>
     </div>
+
+    <!-- Export Buttons -->
+    <div class="export-bar">
+      <button class="btn-export btn-pdf" onclick="exportPDF()">🖨️ Xuất PDF</button>
+      <button class="btn-export btn-word" onclick="exportWord()">📝 Xuất Word</button>
+    </div>
+
+    <!-- 1. Overview -->
+    <section id="overview">
+      <h2>1. Giới thiệu dự án</h2>
+      <div class="card">
+        <p style="line-height:1.8; margin-bottom:12px;">
+          <strong>DevJobs</strong> là nền tảng tuyển dụng IT cho phép ứng viên tìm kiếm việc làm, nhà tuyển dụng đăng tin và quản trị viên kiểm soát toàn bộ hệ thống.
+          Backend được xây dựng theo kiến trúc <strong>REST API</strong>, hoàn toàn tách biệt khỏi frontend.
+        </p>
+        <div class="tech-tags">
+          <span class="tech-tag">ASP.NET Core 8.0</span>
+          <span class="tech-tag">Entity Framework Core 8</span>
+          <span class="tech-tag">SQL Server</span>
+          <span class="tech-tag">BCrypt.Net-Next</span>
+          <span class="tech-tag">JWT Bearer Token</span>
+          <span class="tech-tag">Swagger / OpenAPI</span>
+          <span class="tech-tag">Google OAuth 2.0</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Phân quyền người dùng (3 Role)</h3>
+        <table>
+          <thead><tr><th>Role</th><th>Tên gọi</th><th>Quyền truy cập</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">candidate</span></td><td>Ứng viên</td><td>Tìm việc, nộp hồ sơ, quản lý hồ sơ cá nhân</td></tr>
+            <tr><td><span class="badge badge-post">recruiter</span></td><td>Nhà tuyển dụng</td><td>Đăng tin, quản lý tin, xem & xử lý hồ sơ ứng viên</td></tr>
+            <tr><td><span class="badge badge-delete">admin</span></td><td>Quản trị viên</td><td>Duyệt tin, quản lý tất cả người dùng, xem thống kê</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2. Architecture -->
+    <section id="architecture">
+      <h2>2. Kiến trúc hệ thống</h2>
+      <div class="arch-diagram">
+        <span class="highlight">┌──────────────────────────────────────────────────┐</span><br/>
+        <span class="highlight">│              CLIENT (Trình duyệt)                │</span><br/>
+        <span class="highlight">│        React + Vite  —  port 5173               │</span><br/>
+        <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  HTTP / JSON<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Authorization: Bearer &lt;JWT Token&gt;<br/>
+        <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
+        <span class="highlight">│           REST API (ASP.NET Core 8.0)            │</span><br/>
+        <span class="highlight">│         http://localhost:5050/api               │</span><br/>
+        <span class="highlight">│    Swagger UI: http://localhost:5050/swagger    │</span><br/>
+        <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Entity Framework Core<br/>
+        <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
+        <span class="highlight">│              SQL Server Database                 │</span><br/>
+        <span class="highlight">│    Users · Companies · Jobs · Applications      │</span><br/>
+        <span class="highlight">└──────────────────────────────────────────────────┘</span>
+      </div>
+      <div class="info-box" style="margin-top:14px;">
+        💡 <strong>Luồng xác thực:</strong> Client gọi <code>POST /api/auth/login</code> → nhận JWT Token → gửi kèm trong header
+        <code>Authorization: Bearer {token}</code> cho các request tiếp theo.
+      </div>
+    </section>
+
+    <!-- 3. Database -->
+    <section id="database">
+      <h2>3. Cơ sở dữ liệu</h2>
+      <div class="card">
+        <table>
+          <thead><tr><th>Bảng</th><th>Mô tả</th><th>Quan hệ chính</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Users</strong></td><td>Tài khoản người dùng (3 role)</td><td>1–n với Companies, Applications</td></tr>
+            <tr><td><strong>Companies</strong></td><td>Thông tin công ty của nhà tuyển dụng</td><td>1–n với Jobs</td></tr>
+            <tr><td><strong>Jobs</strong></td><td>Tin tuyển dụng</td><td>n–n với Skills qua JobSkills; 1–n với Applications</td></tr>
+            <tr><td><strong>Applications</strong></td><td>Hồ sơ ứng tuyển</td><td>n–1 với Users (candidate) và Jobs</td></tr>
+            <tr><td><strong>Skills</strong></td><td>Danh mục kỹ năng (React, Java...)</td><td>n–n với Jobs</td></tr>
+            <tr><td><strong>JobSkills</strong></td><td>Bảng trung gian Job–Skill</td><td>FK: JobId, SkillId</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Các cột quan trọng — Bảng Users</h3>
+        <table>
+          <thead><tr><th>Cột</th><th>Kiểu</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td>user_id</td><td>int PK</td><td>Khóa chính tự tăng</td></tr>
+            <tr><td>email</td><td>nvarchar(100)</td><td>Email đăng nhập (unique)</td></tr>
+            <tr><td>password_hash</td><td>nvarchar</td><td>Mật khẩu hash BCrypt</td></tr>
+            <tr><td>full_name</td><td>nvarchar(100)</td><td>Tên hiển thị (Unicode)</td></tr>
+            <tr><td>role</td><td>varchar(20)</td><td>candidate / recruiter / admin</td></tr>
+            <tr><td>status</td><td>varchar(20)</td><td>active / suspended</td></tr>
+            <tr><td>cv_url</td><td>nvarchar</td><td>Đường dẫn CV</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 4. Security -->
+    <section id="security">
+      <h2>4. Bảo mật & Xác thực</h2>
+      <div class="card">
+        <h3>🔐 JWT Bearer Token</h3>
+        <p style="line-height:1.8; margin-bottom:10px;">Mỗi token gồm 3 phần: <strong>Header</strong> (thuật toán HS256) · <strong>Payload</strong> (UserId, Role, CompanyId) · <strong>Signature</strong>. Token có thời hạn <strong>7 ngày</strong>.</p>
+        <pre><span class="com">// Cấu hình JWT trong Program.cs</span>
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options => {
+        options.TokenValidationParameters = <span class="key">new</span> TokenValidationParameters {
+            <span class="key">ValidateIssuerSigningKey</span> = <span class="num">true</span>,
+            <span class="key">IssuerSigningKey</span> = <span class="key">new</span> SymmetricSecurityKey(key),
+            <span class="key">ValidateLifetime</span> = <span class="num">true</span>
+        };
+    });</pre>
+      </div>
+      <div class="card">
+        <h3>🔑 BCrypt Password Hashing</h3>
+        <p style="line-height:1.8; margin-bottom:10px;">Mật khẩu <strong>không bao giờ lưu dạng plaintext</strong>. Dùng BCrypt với cost factor mặc định (10 rounds). Không thể giải mã ngược.</p>
+        <pre><span class="com">// Hash khi đăng ký</span>
+user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password);
+
+<span class="com">// Verify khi đăng nhập</span>
+<span class="key">bool</span> valid = BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);</pre>
+      </div>
+      <div class="card">
+        <h3>🛡️ Phân quyền theo Role</h3>
+        <table>
+          <thead><tr><th>Decorator</th><th>Ý nghĩa</th></tr></thead>
+          <tbody>
+            <tr><td><code>[AllowAnonymous]</code></td><td>Không cần đăng nhập</td></tr>
+            <tr><td><code>[Authorize]</code></td><td>Phải đăng nhập (bất kỳ role)</td></tr>
+            <tr><td><code>[Authorize(Roles = "candidate")]</code></td><td>Chỉ Ứng viên</td></tr>
+            <tr><td><code>[Authorize(Roles = "recruiter")]</code></td><td>Chỉ Nhà tuyển dụng</td></tr>
+            <tr><td><code>[Authorize(Roles = "admin")]</code></td><td>Chỉ Admin</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>🌐 CORS Policy</h3>
+        <p>Chỉ cho phép request từ origin được whitelist. Cấu hình trong <code>Program.cs</code>:</p>
+        <pre>builder.Services.AddCors(opt => opt.AddPolicy(<span class="str">"AllowFrontend"</span>, p =>
+    p.WithOrigins(<span class="str">"http://localhost:5173"</span>, <span class="str">"http://localhost:5174"</span>)
+     .AllowAnyMethod().AllowAnyHeader()));</pre>
+      </div>
+    </section>
+
+    <!-- 5. API — Auth -->
+    <section id="auth">
+      <h2>5. API Endpoints</h2>
+      <div class="controller-group">
+        <div class="controller-header">🔐 AuthController &nbsp;<small style="opacity:.7">Base: /api/auth</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td>/api/auth/login</td>
+                <td><span class="auth-badge auth-public">Public</span></td>
+                <td>Đăng nhập bằng email/password, trả về JWT token</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td>/api/auth/register</td>
+                <td><span class="auth-badge auth-public">Public</span></td>
+                <td>Đăng ký tài khoản mới (candidate hoặc recruiter)</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-post">POST</span></td>
+                <td>/api/auth/google</td>
+                <td><span class="auth-badge auth-public">Public</span></td>
+                <td>Đăng nhập bằng Google OAuth — xác minh ID token với Google, tự tạo tài khoản nếu mới</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Jobs -->
+      <div id="jobs" class="controller-group">
+        <div class="controller-header">💼 JobsController &nbsp;<small style="opacity:.7">Base: /api/jobs</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs</td><td><span class="auth-badge auth-public">Public</span></td><td>Danh sách tin tuyển dụng (hỗ trợ filter: keyword, location, jobType, salary, skill, phân trang)</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/{id}</td><td><span class="auth-badge auth-public">Public</span></td><td>Chi tiết một tin tuyển dụng</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/my</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Danh sách tin đã đăng của nhà tuyển dụng hiện tại</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/pending</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Danh sách tin đang chờ duyệt</td></tr>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/jobs</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Đăng tin tuyển dụng mới (trạng thái pending, chờ admin duyệt)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật thông tin tin tuyển dụng</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/approve</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Phê duyệt tin (chuyển status → active)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/reject</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Từ chối tin (chuyển status → rejected)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/close</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Đóng tin tuyển dụng (chuyển status → closed)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/renew</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Gia hạn tin thêm 30 ngày (chuyển status → active)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Applications -->
+      <div id="applications" class="controller-group">
+        <div class="controller-header">📄 ApplicationsController &nbsp;<small style="opacity:.7">Base: /api/applications</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/applications</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Nộp hồ sơ ứng tuyển (kiểm tra đã ứng tuyển chưa, job có active không)</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/applications/my-applications</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Lịch sử ứng tuyển của tôi</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/applications/job/{jobId}</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Danh sách ứng viên của một tin (chỉ chủ tin mới xem được)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/applications/{id}/status</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật trạng thái hồ sơ: pending → shortlisted → interview → accepted / rejected</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Users -->
+      <div id="users" class="controller-group">
+        <div class="controller-header">👤 UsersController &nbsp;<small style="opacity:.7">Base: /api/users</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/users/me</td><td><span class="auth-badge auth-any">Bất kỳ</span></td><td>Thông tin tài khoản đang đăng nhập (kèm companyId nếu là recruiter)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/users/me</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Cập nhật hồ sơ cá nhân (tên, điện thoại, CV URL, kỹ năng)</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/users</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Danh sách toàn bộ người dùng (trừ admin)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/users/{id}/suspend</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Khóa / Mở khoá tài khoản người dùng</td></tr>
+              <tr><td><span class="badge badge-delete">DELETE</span></td><td>/api/users/{id}</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Xoá tài khoản người dùng (không thể xoá admin)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Companies -->
+      <div id="companies" class="controller-group">
+        <div class="controller-header">🏢 CompaniesController &nbsp;<small style="opacity:.7">Base: /api/companies</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/companies/{id}</td><td><span class="auth-badge auth-public">Public</span></td><td>Thông tin công ty theo ID (kèm số tin đang tuyển)</td></tr>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/companies</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Tạo công ty mới (recruiter chưa có công ty)</td></tr>
+              <tr><td><span class="badge badge-put">PUT</span></td><td>/api/companies/my</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật thông tin công ty của recruiter hiện tại</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Skills + Admin -->
+      <div id="skills" class="controller-group">
+        <div class="controller-header">🔧 Skills & Admin &nbsp;<small style="opacity:.7">/api/skills · /api/admin</small></div>
+        <div class="controller-body">
+          <table class="endpoint-table">
+            <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+            <tbody>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/skills</td><td><span class="auth-badge auth-public">Public</span></td><td>Danh sách tất cả kỹ năng (React, Java, Python...)</td></tr>
+              <tr><td><span class="badge badge-get">GET</span></td><td>/api/admin/stats</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Thống kê tổng quan: số users, jobs, applications, companies + hoạt động gần đây</td></tr>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/seed</td><td><span class="auth-badge auth-public">Public</span></td><td>Tạo dữ liệu mẫu lần 2 (chạy 1 lần)</td></tr>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/seed/fix-unicode</td><td><span class="auth-badge auth-public">Public</span></td><td>Sửa dữ liệu vị trí tiếng Việt bị lỗi encoding</td></tr>
+              <tr><td><span class="badge badge-post">POST</span></td><td>/api/seed/fix-names</td><td><span class="auth-badge auth-public">Public</span></td><td>Sửa tên người dùng tiếng Việt bị lỗi encoding</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Examples -->
+    <section id="examples">
+      <h2>6. Ví dụ Request / Response</h2>
+
+      <h3>📌 Ví dụ 1: Đăng nhập</h3>
+      <p style="margin-bottom:6px;"><span class="badge badge-post">POST</span> <code>/api/auth/login</code></p>
+      <strong>Request Body:</strong>
+      <pre>{
+  <span class="key">"email"</span>: <span class="str">"candidate@devjobs.vn"</span>,
+  <span class="key">"password"</span>: <span class="str">"123456"</span>
+}</pre>
+      <strong>Response 200:</strong>
+      <pre>{
+  <span class="key">"token"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,
+  <span class="key">"user"</span>: {
+    <span class="key">"userId"</span>: <span class="num">1</span>,
+    <span class="key">"email"</span>: <span class="str">"candidate@devjobs.vn"</span>,
+    <span class="key">"fullName"</span>: <span class="str">"Nguyễn Văn A"</span>,
+    <span class="key">"role"</span>: <span class="str">"candidate"</span>,
+    <span class="key">"status"</span>: <span class="str">"active"</span>
+  }
+}</pre>
+
+      <h3 style="margin-top:20px;">📌 Ví dụ 2: Đăng tin tuyển dụng</h3>
+      <p style="margin-bottom:6px;"><span class="badge badge-post">POST</span> <code>/api/jobs</code> &nbsp;
+        <span class="auth-badge auth-recruiter">Recruiter</span> — Header: <code>Authorization: Bearer &lt;token&gt;</code></p>
+      <strong>Request Body:</strong>
+      <pre>{
+  <span class="key">"title"</span>: <span class="str">"Senior React Developer"</span>,
+  <span class="key">"description"</span>: <span class="str">"Phát triển ứng dụng web với React 18..."</span>,
+  <span class="key">"requirements"</span>: <span class="str">"3+ năm kinh nghiệm React\nHiểu biết TypeScript"</span>,
+  <span class="key">"salaryMin"</span>: <span class="num">1500</span>,
+  <span class="key">"salaryMax"</span>: <span class="num">2500</span>,
+  <span class="key">"location"</span>: <span class="str">"Hà Nội"</span>,
+  <span class="key">"jobType"</span>: <span class="str">"full-time"</span>,
+  <span class="key">"expiryDate"</span>: <span class="str">"2026-05-01"</span>,
+  <span class="key">"skillIds"</span>: [<span class="num">1</span>, <span class="num">3</span>]
+}</pre>
+      <strong>Response 200:</strong>
+      <pre>{ <span class="key">"message"</span>: <span class="str">"Đăng tin thành công, chờ admin phê duyệt"</span>, <span class="key">"jobId"</span>: <span class="num">5</span> }</pre>
+
+      <h3 style="margin-top:20px;">📌 Ví dụ 3: Nộp hồ sơ ứng tuyển</h3>
+      <p style="margin-bottom:6px;"><span class="badge badge-post">POST</span> <code>/api/applications</code> &nbsp;
+        <span class="auth-badge auth-candidate">Candidate</span></p>
+      <strong>Request Body:</strong>
+      <pre>{
+  <span class="key">"jobId"</span>: <span class="num">1</span>,
+  <span class="key">"cvUrl"</span>: <span class="str">"/uploads/cv_nguyen_van_a.pdf"</span>,
+  <span class="key">"coverLetter"</span>: <span class="str">"Tôi có 3 năm kinh nghiệm React và rất mong muốn..."</span>
+}</pre>
+      <strong>Response 200:</strong>
+      <pre>{ <span class="key">"message"</span>: <span class="str">"Nộp hồ sơ thành công"</span>, <span class="key">"applicationId"</span>: <span class="num">7</span> }</pre>
+      <div class="warn-box" style="margin-top:6px;">⚠️ Nếu ứng viên đã nộp hồ sơ trước đó → Response 400: <em>"Bạn đã ứng tuyển vị trí này rồi"</em></div>
+
+      <h3 style="margin-top:20px;">📌 Ví dụ 4: Gọi API không đủ quyền</h3>
+      <p style="margin-bottom:6px;"><span class="badge badge-put">PUT</span> <code>/api/jobs/1/approve</code> — Gọi bằng token Candidate</p>
+      <pre>HTTP 403 Forbidden</pre>
+      <div class="success-box">✅ Hệ thống phân quyền hoạt động đúng — Endpoint <code>/approve</code> chỉ Admin mới gọi được.</div>
+    </section>
+
+    <!-- 7. Demo -->
+    <section id="demo">
+      <h2>7. Chạy dự án & Tài khoản demo</h2>
+      <div class="card">
+        <h3>🚀 Khởi động Backend</h3>
+        <pre><span class="com"># Yêu cầu: .NET 8 SDK, SQL Server</span>
+cd DevJobsAPI
+dotnet run
+
+<span class="com"># API chạy tại:</span>   http://localhost:5050
+<span class="com"># Swagger UI tại:</span>  http://localhost:5050/swagger</pre>
+      </div>
+      <div class="card">
+        <h3>🧪 Tài khoản demo (mật khẩu: 123456)</h3>
+        <table>
+          <thead><tr><th>Role</th><th>Email</th><th>Trang sau đăng nhập</th></tr></thead>
+          <tbody>
+            <tr><td><span class="auth-badge auth-candidate">Ứng viên</span></td><td>candidate@devjobs.vn</td><td>/jobs — Trang tìm việc</td></tr>
+            <tr><td><span class="auth-badge auth-recruiter">Nhà tuyển dụng</span></td><td>recruiter@devjobs.vn</td><td>/recruiter/jobs — Quản lý tin</td></tr>
+            <tr><td><span class="auth-badge auth-admin">Admin</span></td><td>admin@devjobs.vn</td><td>/admin/dashboard — Thống kê</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>📖 Hướng dẫn test API trên Swagger</h3>
+        <ol style="line-height:2.2; padding-left:20px; font-size:14px;">
+          <li>Mở <code>http://localhost:5050/swagger</code></li>
+          <li>Vào <strong>POST /api/auth/login</strong> → Try it out → Điền email/password → Execute</li>
+          <li>Copy chuỗi <code>token</code> từ Response</li>
+          <li>Bấm nút <strong>🔒 Authorize</strong> (góc trên phải) → Paste token → Authorize</li>
+          <li>Gọi bất kỳ API nào — token sẽ tự động đính kèm vào header</li>
+        </ol>
+      </div>
+    </section>
+
+    <div style="text-align:center; color:#9ca3af; font-size:13px; margin-top:40px; padding-top:20px; border-top:1px solid #e5e7eb;">
+      DevJobs Backend API — Báo cáo tự động tạo từ dự án ASP.NET Core 8.0 &nbsp;·&nbsp; 2026
+    </div>
+  </main>
+</div>
+
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('aside a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 60) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+
+  // Export PDF (use browser print)
+  function exportPDF() {
+    window.print();
+  }
+
+  // Export Word (tạo file .doc từ nội dung HTML)
+  function exportWord() {
+    const header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+      'xmlns:w="urn:schemas-microsoft-com:office:word" ' +
+      'xmlns="http://www.w3.org/TR/REC-html40"><head>' +
+      '<meta charset="utf-8"><title>Báo cáo API Backend — DevJobs</title>' +
+      '<style>body{font-family:Times New Roman,serif;font-size:12pt;} ' +
+      'table{border-collapse:collapse;width:100%;} ' +
+      'th,td{border:1pt solid #ccc;padding:6pt;} ' +
+      'th{background:#f0f0f0;} ' +
+      'h1{font-size:18pt;color:#4338ca;} h2{font-size:15pt;color:#4338ca;} h3{font-size:13pt;} ' +
+      'pre{background:#f5f5f5;padding:8pt;font-family:Courier New;font-size:10pt;border:1pt solid #ddd;} ' +
+      '</style></head><body>';
+    const content = document.querySelector('main').innerHTML;
+    const footer = '</body></html>';
+
+    const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'BaoCao_API_Backend_DevJobs.doc';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
 </body>
 </html>
