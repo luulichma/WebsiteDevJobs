@@ -99,5 +99,77 @@ namespace DevJobsAPI.Controllers
 
             return Ok(new { message = "Đã sửa tên tiếng Việt thành công!" });
         }
+
+        [HttpPost("seed-10-jobs")]
+        public async Task<IActionResult> Seed10Jobs()
+        {
+            var admin = await _db.Users.FirstOrDefaultAsync(u => u.Role == "admin");
+            var recruiters = await _db.Users.Where(u => u.Role == "recruiter").Take(2).ToListAsync();
+            var companies = await _db.Companies.ToListAsync();
+            
+            if (companies.Count == 0 || recruiters.Count == 0) 
+                return BadRequest(new { message = "Chưa có company hoặc recruiter nào trong DB" });
+
+            var skills = await _db.Skills.Take(5).ToListAsync();
+            var rand = new Random();
+            var locations = new[] { "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Remote" };
+            var jobTypes = new[] { "full-time", "part-time", "remote", "contract" };
+            
+            var newJobs = new List<Job>();
+
+            for (int i = 1; i <= 10; i++)
+            {
+                var company = companies[rand.Next(companies.Count)];
+                
+                var job = new Job {
+                    CompanyId = company.CompanyId,
+                    RecruiterId = company.CreatedBy,
+                    Title = $"Kỹ sư Phần Mềm (Mẫu #{i}) - {DateTime.Now.Ticks.ToString().Substring(0, 4)}",
+                    Description = $"Đây là bài đăng mẫu số {i} sinh tự động. Chi tiết công việc sẽ trao đổi khi phỏng vấn.",
+                    Requirements = "- Có kinh nghiệm làm việc thực tế\n- Chịu khó học hỏi, thái độ tốt\n- Có khả năng đọc hiểu tài liệu tiếng Anh",
+                    SalaryMin = rand.Next(500, 1000),
+                    SalaryMax = rand.Next(1100, 3000),
+                    Location = locations[rand.Next(locations.Length)],
+                    JobType = jobTypes[rand.Next(jobTypes.Length)],
+                    Status = "active",
+                    ExpiryDate = DateOnly.FromDateTime(DateTime.Now.AddDays(rand.Next(10, 60))),
+                    CreatedAt = DateTime.Now.AddDays(-rand.Next(0, 15)),
+                    ApprovedBy = admin?.UserId
+                };
+                
+                if (skills.Count > 0)
+                {
+                    job.Skills.Add(skills[rand.Next(skills.Count)]);
+                }
+                
+                newJobs.Add(job);
+            }
+
+            _db.Jobs.AddRange(newJobs);
+            await _db.SaveChangesAsync();
+
+            return Ok(new { message = "Seeding thành công 10 bài tuyền dụng mới!" });
+        }
+        [HttpPost("fix-all-jobs")]
+        public async Task<IActionResult> FixAllJobs()
+        {
+            var jobs = await _db.Jobs.ToListAsync();
+            var locations = new[] { "Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Remote" };
+            var rand = new Random();
+            foreach (var job in jobs)
+            {
+                if (job.Location != null && (job.Location.Contains("Ã") || job.Location.Contains("Ä") || job.Location.Contains("NÃ") || job.Location.Contains("Â")))
+                {
+                    job.Location = locations[rand.Next(locations.Length)];
+                }
+                
+                if (job.Title != null && (job.Title.Contains("Ã") || job.Title.Contains("Ä") || job.Title.Contains("NÃ") || job.Title.Contains("Â")))
+                {
+                   job.Title = "Lập trình viên (Đã sửa lỗi font)";
+                }
+            }
+            await _db.SaveChangesAsync();
+            return Ok(new { message = "Đã sửa toàn bộ lỗi font!" });
+        }
     }
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { FiSearch, FiLock, FiUnlock, FiTrash2, FiAlertTriangle } from 'react-icons/fi';
 import './DashboardPages.css';
+import Pagination from '../components/Pagination';
 
 const getStatusBadge = (status) => status === 'active' ? 'badge-success' : 'badge-danger';
 const getStatusLabel = (status) => status === 'active' ? 'Hoạt động' : 'Bị khóa';
@@ -14,10 +15,16 @@ export default function AdminManageUsersPage() {
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [confirmEmail, setConfirmEmail] = useState('');
     const [deleteError, setDeleteError] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         apiService.get('/users').then(res => setUsers(res.data)).catch(console.error).finally(() => setLoading(false));
     }, []);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, roleFilter]);
 
     const filtered = users.filter(u => {
         const matchSearch = !search || u.fullName.toLowerCase().includes(search.toLowerCase()) ||
@@ -25,6 +32,9 @@ export default function AdminManageUsersPage() {
         const matchRole = roleFilter === 'all' || u.role === roleFilter;
         return matchSearch && matchRole;
     });
+
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const paginatedUsers = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleDelete = async () => {
         if (confirmEmail !== deleteTarget?.email) {
@@ -88,7 +98,7 @@ export default function AdminManageUsersPage() {
                                 <tr><th>ID</th><th>Họ tên</th><th>Email</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th>Thao tác</th></tr>
                             </thead>
                             <tbody>
-                                {filtered.map(u => (
+                                {paginatedUsers.map(u => (
                                     <tr key={u.userId}>
                                         <td>#{u.userId}</td>
                                         <td><strong>{u.fullName}</strong></td>
@@ -111,6 +121,13 @@ export default function AdminManageUsersPage() {
                                 ))}
                             </tbody>
                         </table>
+                        {totalPages > 1 && (
+                            <Pagination 
+                                currentPage={currentPage} 
+                                totalPages={totalPages} 
+                                onPageChange={setCurrentPage} 
+                            />
+                        )}
                     </div>
                     <div className="text-muted mt-2" style={{ fontSize: 13 }}>Hiển thị {filtered.length} người dùng</div>
                 </div>

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { FiUsers, FiBriefcase, FiFileText, FiHome, FiUserCheck, FiLoader, FiCheckCircle, FiXCircle, FiClock } from 'react-icons/fi';
 import './DashboardPages.css';
 import './AdminDashboardPage.css';
 
-const StatCard = ({ icon, label, value, color, sub }) => (
-    <div className="stat-card" style={{ borderTop: `4px solid ${color}` }}>
+const StatCard = ({ icon, label, value, color, sub, onClick }) => (
+    <div className="stat-card" style={{ borderTop: `4px solid ${color}`, cursor: onClick ? 'pointer' : 'default' }} onClick={onClick}>
         <div className="stat-icon" style={{ background: `${color}18`, color }}>{icon}</div>
         <div className="stat-info">
             <span className="stat-value">{value ?? '...'}</span>
@@ -17,8 +17,14 @@ const StatCard = ({ icon, label, value, color, sub }) => (
 );
 
 export default function AdminDashboardPage() {
+    const navigate = useNavigate();
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
+    
+    // States for Modals
+    const [showCompaniesModal, setShowCompaniesModal] = useState(false);
+    const [companiesList, setCompaniesList] = useState([]);
+    const [loadingCompanies, setLoadingCompanies] = useState(false);
 
     useEffect(() => {
         apiService.get('/admin/stats')
@@ -26,6 +32,20 @@ export default function AdminDashboardPage() {
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, []);
+
+    const fetchCompanies = async () => {
+        setLoadingCompanies(true);
+        setShowCompaniesModal(true);
+        try {
+            const res = await apiService.get('/admin/companies');
+            setCompaniesList(res.data);
+        } catch (e) {
+            alert('Lỗi tải danh sách công ty');
+            setShowCompaniesModal(false);
+        } finally {
+            setLoadingCompanies(false);
+        }
+    };
 
     if (loading) return (
         <div className="dashboard-page">
@@ -49,13 +69,13 @@ export default function AdminDashboardPage() {
                 {/* Row 1 — Main KPIs */}
                 <div className="stats-grid-4">
                     <StatCard icon={<FiUsers size={24} />} label="Người dùng" value={s.users.total}
-                        color="#6366f1" sub={`${s.users.candidates} ứng viên · ${s.users.recruiters} NTD`} />
+                        color="#6366f1" sub="Xem quản lý" onClick={() => navigate('/admin/users')} />
                     <StatCard icon={<FiBriefcase size={24} />} label="Tin tuyển dụng" value={s.jobs.total}
-                        color="#10b981" sub={`${s.jobs.active} đang tuyển · ${s.jobs.pending} chờ duyệt`} />
+                        color="#10b981" sub="Duyệt tin" onClick={() => navigate('/admin/approve')} />
                     <StatCard icon={<FiFileText size={24} />} label="Hồ sơ ứng tuyển" value={s.applications.total}
-                        color="#f59e0b" sub={`${s.applications.accepted} trúng tuyển`} />
+                        color="#f59e0b" sub="Bảo mật" onClick={() => alert("Hồ sơ ứng tuyển chứa CV bảo mật. Chỉ có công ty đăng tuyển mới được quyền xem chi tiết!")} />
                     <StatCard icon={<FiHome size={24} />} label="Công ty" value={s.companies.total}
-                        color="#ec4899" sub="Đang hoạt động" />
+                        color="#ec4899" sub="Xem chi tiết" onClick={fetchCompanies} />
                 </div>
 
                 {/* Row 2 — Jobs & Applications breakdown */}
@@ -177,6 +197,47 @@ export default function AdminDashboardPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Companies Modal */}
+                {showCompaniesModal && (
+                    <div className="modal-overlay" onClick={() => setShowCompaniesModal(false)}>
+                        <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '700px', maxHeight: '85vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                                <h2>🏢 Danh sách Công ty hoạt động</h2>
+                                <button className="btn btn-secondary btn-sm" onClick={() => setShowCompaniesModal(false)}><FiXCircle size={18} /></button>
+                            </div>
+                            
+                            {loadingCompanies ? (
+                                <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
+                                    <FiLoader size={24} style={{ animation: 'spin 1s linear infinite' }} /> Vui lòng chờ...
+                                </div>
+                            ) : companiesList.length === 0 ? (
+                                <p style={{ textAlign: 'center', color: '#6b7280' }}>Chưa có công ty nào.</p>
+                            ) : (
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Tên công ty</th>
+                                            <th>Địa chỉ</th>
+                                            <th>Số Job mở</th>
+                                            <th>Trạng thái</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {companiesList.map(c => (
+                                            <tr key={c.companyId}>
+                                                <td><strong>{c.companyName}</strong></td>
+                                                <td>{c.address}</td>
+                                                <td>{c.jobCount} tin</td>
+                                                <td><span className={`badge ${c.status === 'active' ? 'badge-success' : 'badge-secondary'}`}>{c.status === 'active' ? 'Hoạt động' : c.status}</span></td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -63,5 +63,25 @@ namespace DevJobsAPI.Controllers
                 recentJobs
             });
         }
+
+        /// <summary>Danh sách công ty (admin)</summary>
+        [HttpGet("companies")]
+        public async Task<IActionResult> GetCompanies()
+        {
+            var companies = await _db.Companies
+                .OrderByDescending(c => c.CreatedAt)
+                .Select(c => new
+                {
+                    c.CompanyId,
+                    c.CompanyName,
+                    c.Address,
+                    c.Status,
+                    c.CreatedAt,
+                    JobCount = c.Jobs.Count
+                })
+                .ToListAsync();
+
+            return Ok(companies);
+        }
     }
 }

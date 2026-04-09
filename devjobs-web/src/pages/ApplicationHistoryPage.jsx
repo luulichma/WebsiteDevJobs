@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import apiService from '../services/apiService';
 import { FiUpload, FiX, FiCheckCircle } from 'react-icons/fi';
 import './DashboardPages.css';
+import Pagination from '../components/Pagination';
 
 const getStatusBadge = (status) => {
     switch (status) {
@@ -36,6 +37,8 @@ export default function ApplicationHistoryPage() {
     const [editApp, setEditApp] = useState(null);
     const [newCvFile, setNewCvFile] = useState(null);
     const [updateSuccess, setUpdateSuccess] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     useEffect(() => {
         apiService.get('/applications/my-applications')
@@ -59,6 +62,9 @@ export default function ApplicationHistoryPage() {
 
     if (loading) return <div className="container mt-3">Đang tải...</div>;
 
+    const totalPages = Math.ceil(apps.length / itemsPerPage);
+    const paginatedApps = apps.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
     return (
         <div className="dashboard-page">
             <div className="container">
@@ -79,7 +85,7 @@ export default function ApplicationHistoryPage() {
                                     <tr><th>Vị trí</th><th>Công ty</th><th>Ngày nộp</th><th>CV</th><th>Trạng thái</th><th>Thao tác</th></tr>
                                 </thead>
                                 <tbody>
-                                    {apps.map(app => {
+                                    {paginatedApps.map(app => {
                                         const cvName = app.cvUrl?.split('/').pop() || 'cv.pdf';
                                         return (
                                             <tr key={app.applicationId}>
@@ -111,6 +117,13 @@ export default function ApplicationHistoryPage() {
                                     })}
                                 </tbody>
                             </table>
+                            {totalPages > 1 && (
+                                <Pagination 
+                                    currentPage={currentPage} 
+                                    totalPages={totalPages} 
+                                    onPageChange={setCurrentPage} 
+                                />
+                            )}
                         </div>
                     )}
                 </div>

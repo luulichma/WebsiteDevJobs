@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { FiMapPin, FiBriefcase, FiClock, FiSearch } from 'react-icons/fi';
 import './SearchJobsPage.css';
+import Pagination from '../components/Pagination';
 
 export default function SearchJobsPage() {
     const [keyword, setKeyword] = useState('');
@@ -12,10 +13,12 @@ export default function SearchJobsPage() {
     
     const [jobs, setJobs] = useState([]);
     const [total, setTotal] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     const fetchJobs = async () => {
         try {
-            const params = { pageSize: 50 };
+            const params = { pageSize: itemsPerPage, page: currentPage };
             if (keyword) params.keyword = keyword;
             if (location) params.location = location;
             if (jobType) params.jobType = jobType;
@@ -37,11 +40,16 @@ export default function SearchJobsPage() {
     };
 
     useEffect(() => {
+        setCurrentPage(1);
+    }, [location, jobType, sortBy]);
+
+    useEffect(() => {
         fetchJobs();
-    }, [location, jobType, sortBy]); // keyword is triggered manually via handleSearch
+    }, [location, jobType, sortBy, currentPage]); // keyword is triggered manually via handleSearch
 
     const handleSearch = (e) => {
         e.preventDefault();
+        setCurrentPage(1);
         fetchJobs();
     };
 
@@ -129,6 +137,13 @@ export default function SearchJobsPage() {
                             </Link>
                         ))}
                     </div>
+                    {Math.ceil(total / itemsPerPage) > 1 && (
+                        <Pagination 
+                            currentPage={currentPage} 
+                            totalPages={Math.ceil(total / itemsPerPage)} 
+                            onPageChange={setCurrentPage} 
+                        />
+                    )}
                 </main>
             </div>
         </div>

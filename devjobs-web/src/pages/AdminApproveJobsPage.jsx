@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { FiCheck, FiX, FiEye } from 'react-icons/fi';
 import './DashboardPages.css';
+import Pagination from '../components/Pagination';
 
 const getStatusBadge = (status) => {
     switch (status) {
@@ -25,6 +26,10 @@ export default function AdminApproveJobsPage() {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedIds, setSelectedIds] = useState([]);
+    const [bulkAction, setBulkAction] = useState(null); // 'approve' or 'reject'
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchPendingJobs = async () => {
@@ -55,6 +60,7 @@ export default function AdminApproveJobsPage() {
         try {
             await apiService.put(`/jobs/${jobId}/reject`);
             setJobs(prev => prev.filter(j => j.jobId !== jobId));
+            setSelectedIds(prev => prev.filter(id => id !== jobId));
             setSelectedJob(null);
             alert('Đã từ chối tin');
         } catch (e) {
@@ -62,14 +68,53 @@ export default function AdminApproveJobsPage() {
         }
     };
 
+    const handleSelectAll = (e) => {
+        if (e.target.checked) {
+            const currentIds = paginatedJobs.map(j => j.jobId);
+            setSelectedIds(prev => [...new Set([...prev, ...currentIds])]);
+        } else {
+            const currentIds = paginatedJobs.map(j => j.jobId);
+            setSelectedIds(prev => prev.filter(id => !currentIds.includes(id)));
+        }
+    };
+
+    const handleSelectRow = (id) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+    };
+
+    const handleBulkAction = async () => {
+        if (!bulkAction || selectedIds.length === 0) return;
+        try {
+            const endpoint = `/jobs/bulk-${bulkAction}`;
+            await apiService.put(endpoint, selectedIds);
+            setJobs(prev => prev.filter(j => !selectedIds.includes(j.jobId)));
+            setSelectedIds([]);
+            setBulkAction(null);
+            alert(`Đã ${bulkAction === 'approve' ? 'phê duyệt' : 'từ chối'} ${selectedIds.length} mục thành công`);
+        } catch (e) {
+            alert('Lỗi khi thực hiện hành động hàng loạt');
+        }
+    };
+
     if (loading) return <div className="container mt-3">Đang tải danh sách chờ duyệt...</div>;
+
+    const totalPages = Math.ceil(jobs.length / itemsPerPage);
+    const paginatedJobs = jobs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <div className="dashboard-page">
             <div className="container">
-                <div className="page-header">
-                    <h1>Duyệt tin tuyển dụng</h1>
-                    <p>Kiểm tra và phê duyệt các tin đăng đang chờ từ nhà tuyển dụng</p>
+                <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                        <h1>Duyệt tin tuyển dụng</h1>
+                        <p>Kiểm tra và phê duyệt các tin đăng đang chờ từ nhà tuyển dụng</p>
+                    </div>
+                    {selectedIds.length > 0 && (
+                        <div style={{ display: 'flex', gap: 10 }}>
+                            <button className="btn btn-success" onClick={() => setBulkAction('approve')}>Duyệt ({selectedIds.length})</button>
+                            <button className="btn btn-danger" onClick={() => setBulkAction('reject')}>Xóa ({selectedIds.length})</button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="card">
@@ -79,11 +124,24 @@ export default function AdminApproveJobsPage() {
                         <div className="table-container">
                             <table>
                                 <thead>
-                                    <tr><th>Tiêu đề</th><th>Công ty</th><th>Ngày nộp</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                                    <tr>
+                                        <th style={{ width: 40 }}>
+                                            <input type="checkbox" 
+                                                checked={paginatedJobs.length > 0 && paginatedJobs.every(j => selectedIds.includes(j.jobId))}
+                                                onChange={handleSelectAll} 
+                                            />
+                                        </th>
+                                        <th>Tiêu đề</th><th>Công ty</th><th>Ngày nộp</th><th>Trạng thái</th><th>Thao tác</th></tr>
                                 </thead>
                                 <tbody>
-                                    {jobs.map(job => (
+                                    {paginatedJobs.map(job => (
                                         <tr key={job.jobId}>
+                                            <td>
+                                                <input type="checkbox" 
+                                                    checked={selectedIds.includes(job.jobId)}
+                                                    onChange={() => handleSelectRow(job.jobId)} 
+                                                />
+                                            </td>
                                             <td>
                                                 <button className="link-btn" onClick={() => setSelectedJob(job)}><FiEye size={13} style={{ marginRight: 4 }} />{job.title}</button>
                                             </td>
@@ -100,6 +158,13 @@ export default function AdminApproveJobsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            {totalPages > 1 && (
+                                <Pagination 
+                                    currentPage={currentPage} 
+                                    totalPages={totalPages} 
+                                    onPageChange={setCurrentPage} 
+                                />
+                            )}
                         </div>
                     )}
                 </div>
@@ -134,6 +199,30 @@ export default function AdminApproveJobsPage() {
                             </div>
                             <div className="mt-2 text-center">
                                 <button className="btn btn-secondary btn-sm" onClick={() => setSelectedJob(null)}>Huỷ</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Bulk Action Modal */}
+                {bulkAction && (
+                    <div className="modal-overlay" onClick={() => setBulkAction(null)}>
+                        <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
+                            <h2 style={{ color: bulkAction === 'approve' ? '#2ecc71' : '#e74c3c' }}>
+                                Xác nhận {bulkAction === 'approve' ? 'Duyệt' : 'Xóa'}
+                            </h2>
+                            <p style={{ margin: '15px 0' }}>
+                                Bạn có chắc chắn muốn <strong>{bulkAction === 'approve' ? 'phê duyệt' : 'từ chối/xóa'}</strong> {selectedIds.length} tin tuyển dụng đã chọn? 
+                                Hành động này không thể hoàn tác.
+                            </p>
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <button className={`btn btn-${bulkAction === 'approve' ? 'success' : 'danger'}`} 
+                                    style={{ flex: 1 }} onClick={handleBulkAction}>
+                                    Đồng ý
+                                </button>
+                                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setBulkAction(null)}>
+                                    Hủy bỏ
+                                </button>
                             </div>
                         </div>
                     </div>

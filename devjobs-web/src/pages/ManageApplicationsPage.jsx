@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
 import { FiFile, FiCalendar, FiUserCheck, FiUserX, FiX, FiExternalLink, FiMail } from 'react-icons/fi';
 import './DashboardPages.css';
+import Pagination from '../components/Pagination';
 
 const getStatusBadge = (status) => {
     switch (status) {
@@ -31,6 +32,8 @@ export default function ManageApplicationsPage() {
     const [loadingJobs, setLoadingJobs] = useState(true);
     const [loadingApps, setLoadingApps] = useState(false);
     const [viewApp, setViewApp] = useState(null); // Modal xem chi tiết ứng viên
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     useEffect(() => {
         apiService.get('/jobs/my').then(res => {
@@ -45,6 +48,7 @@ export default function ManageApplicationsPage() {
     useEffect(() => {
         if (!selectedJob) return;
         setLoadingApps(true);
+        setCurrentPage(1);
         apiService.get(`/applications/job/${selectedJob}`)
             .then(res => setApps(res.data))
             .catch(err => console.error(err))
@@ -65,6 +69,9 @@ export default function ManageApplicationsPage() {
     };
 
     if (loadingJobs) return <div className="container mt-3">Đang tải danh sách công việc...</div>;
+
+    const totalPages = Math.ceil(apps.length / itemsPerPage);
+    const paginatedApps = apps.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     return (
         <div className="dashboard-page">
@@ -95,7 +102,7 @@ export default function ManageApplicationsPage() {
                                     <tr><th>Ứng viên</th><th>Email</th><th>Ngày nộp</th><th>Trạng thái</th><th>Thao tác</th></tr>
                                 </thead>
                                 <tbody>
-                                    {apps.map(app => (
+                                    {paginatedApps.map(app => (
                                         <tr key={app.applicationId}>
                                             <td><strong>{app.candidateName}</strong></td>
                                             <td>{app.candidateEmail}</td>
@@ -112,6 +119,13 @@ export default function ManageApplicationsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            {totalPages > 1 && (
+                                <Pagination 
+                                    currentPage={currentPage} 
+                                    totalPages={totalPages} 
+                                    onPageChange={setCurrentPage} 
+                                />
+                            )}
                         </div>
                     )}
                 </div>

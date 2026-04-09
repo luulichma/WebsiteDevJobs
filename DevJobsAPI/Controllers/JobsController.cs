@@ -1,6 +1,5 @@
 using DevJobsAPI.Models;
 using DevJobsAPI.DTOs;
-using DevJobsAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +12,9 @@ namespace DevJobsAPI.Controllers
     public class JobsController : ControllerBase
     {
         private readonly AppDbContext _db;
+
+        // Collation hỗ trợ tìm kiếm tiếng Việt không phân biệt dấu (Accent Insensitive)
+        private const string ViCollation = "Vietnamese_CI_AI";
 
         public JobsController(AppDbContext db) => _db = db;
 
@@ -30,11 +32,15 @@ namespace DevJobsAPI.Controllers
                 .Where(j => j.Status == "active")
                 .AsQueryable();
 
+            // Tìm kiếm tiếng Việt không phân biệt dấu (Vietnamese_CI_AI)
             if (!string.IsNullOrEmpty(q.Keyword))
-                query = query.Where(j => j.Title.Contains(q.Keyword) || j.Description.Contains(q.Keyword));
+                query = query.Where(j =>
+                    EF.Functions.Collate(j.Title, ViCollation).Contains(q.Keyword) ||
+                    EF.Functions.Collate(j.Description, ViCollation).Contains(q.Keyword) ||
+                    EF.Functions.Collate(j.Company.CompanyName, ViCollation).Contains(q.Keyword));
 
             if (!string.IsNullOrEmpty(q.Location))
-                query = query.Where(j => j.Location.Contains(q.Location));
+                query = query.Where(j => EF.Functions.Collate(j.Location, ViCollation).Contains(q.Location));
 
             if (!string.IsNullOrEmpty(q.JobType))
                 query = query.Where(j => j.JobType == q.JobType);
@@ -46,7 +52,7 @@ namespace DevJobsAPI.Controllers
                 query = query.Where(j => j.SalaryMin <= q.SalaryMax.Value);
 
             if (!string.IsNullOrEmpty(q.Skill))
-                query = query.Where(j => j.Skills.Any(s => s.SkillName.Contains(q.Skill)));
+                query = query.Where(j => j.Skills.Any(s => EF.Functions.Collate(s.SkillName, ViCollation).Contains(q.Skill)));
 
             var total = await query.CountAsync();
             var items = await query
@@ -222,6 +228,34 @@ namespace DevJobsAPI.Controllers
             job.Status = "closed";
             await _db.SaveChangesAsync();
             return Ok(new { message = "Đã từ chối tin tuyển dụng" });
+        }
+
+        /// <summary>Duyệt hàng loạt tin tuyển dụng (admin)</summary>
+        [HttpPut("bulk-approve")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> BulkApprove([FromBody] List<int> ids)
+        {
+            var jobs = await _db.Jobs.Where(j => ids.Contains(j.JobId) && j.Status == "pending").ToListAsync();
+            foreach (var job in jobs)
+            {
+                job.Status = "active";
+            }
+            await _db.SaveChangesAsync();
+            return Ok(new { message = $"Đã duyệt {jobs.Count} tin tuyển dụng" });
+        }
+
+        /// <summary>Từ chối hàng loạt tin tuyển dụng (admin)</summary>
+        [HttpPut("bulk-reject")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> BulkReject([FromBody] List<int> ids)
+        {
+            var jobs = await _db.Jobs.Where(j => ids.Contains(j.JobId) && j.Status == "pending").ToListAsync();
+            foreach (var job in jobs)
+            {
+                job.Status = "closed";
+            }
+            await _db.SaveChangesAsync();
+            return Ok(new { message = $"Đã từ chối {jobs.Count} tin tuyển dụng" });
         }
 
         private static JobDto MapToDto(Job j) => new JobDto

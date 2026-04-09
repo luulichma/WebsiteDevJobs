@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { FiPlus, FiEdit, FiXCircle, FiRefreshCw, FiSave, FiX } from 'react-icons/fi';
 import './DashboardPages.css';
-
+import Pagination from '../components/Pagination';
 // Tái sử dụng các ui helper
 const getStatusBadge = (s) => s === 'active' ? 'badge-success' : s === 'pending' ? 'badge-warning' : 'badge-secondary';
 const getStatusLabel = (s) => s === 'active' ? 'Đang tuyển' : s === 'pending' ? 'Chờ duyệt' : s === 'closed' ? 'Đã đóng' : s === 'expired' ? 'Hết hạn' : s;
@@ -17,6 +17,8 @@ export default function ManageJobsPage() {
     const [editForm, setEditForm] = useState({});
     const [editSaved, setEditSaved] = useState(false);
     const [allSkills, setAllSkills] = useState([]); // tất cả skills để map tên → id
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     const fetchMyJobs = async () => {
         try {
@@ -34,7 +36,13 @@ export default function ManageJobsPage() {
         apiService.get('/skills').then(res => setAllSkills(res.data)).catch(console.error);
     }, []);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filter]);
+
     const filtered = filter === 'all' ? jobs : jobs.filter(j => j.status === filter);
+    const totalPages = Math.ceil(filtered.length / itemsPerPage);
+    const paginatedJobs = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const handleClose = async (jobId) => {
         try {
@@ -125,7 +133,7 @@ export default function ManageJobsPage() {
                                     <tr><th>Tiêu đề</th><th>Ứng viên</th><th>Ngày đăng</th><th>Hết hạn</th><th>Trạng thái</th><th>Thao tác</th></tr>
                                 </thead>
                                 <tbody>
-                                    {filtered.map(job => (
+                                    {paginatedJobs.map(job => (
                                         <tr key={job.jobId}>
                                             <td><Link to={`/jobs/${job.jobId}`} style={{ color: '#667eea', fontWeight: 500 }}>{job.title}</Link></td>
                                             <td>{job.applicationCount || 0} hồ sơ</td>
@@ -149,6 +157,13 @@ export default function ManageJobsPage() {
                                     ))}
                                 </tbody>
                             </table>
+                            {totalPages > 1 && (
+                                <Pagination 
+                                    currentPage={currentPage} 
+                                    totalPages={totalPages} 
+                                    onPageChange={setCurrentPage} 
+                                />
+                            )}
                         </div>
                     )}
                 </div>

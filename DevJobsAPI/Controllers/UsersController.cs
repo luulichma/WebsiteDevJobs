@@ -75,8 +75,11 @@ namespace DevJobsAPI.Controllers
             if (!string.IsNullOrEmpty(role) && role != "all")
                 query = query.Where(u => u.Role == role);
 
+            // Tìm kiếm tiếng Việt không phân biệt dấu
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(u => u.FullName.Contains(search) || u.Email.Contains(search));
+                query = query.Where(u => 
+                    EF.Functions.Collate(u.FullName, "Vietnamese_CI_AI").Contains(search) || 
+                    u.Email.Contains(search));
 
             var users = await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
             return Ok(users.Select(u => MapToDto(u, null)));
