@@ -147,6 +147,9 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
+            entity.Property(e => e.IsPromoted)
+                .HasDefaultValueSql("((0))")
+                .HasColumnName("is_promoted");
             entity.Property(e => e.Title)
                 .HasMaxLength(255)
                 .HasColumnName("title");

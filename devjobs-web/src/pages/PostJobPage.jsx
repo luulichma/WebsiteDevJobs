@@ -8,7 +8,7 @@ export default function PostJobPage() {
     const [skills, setSkills] = useState([]);
     const [form, setForm] = useState({
         title: '', description: '', requirements: '', benefits: '',
-        salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time',
+        salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time', isPromoted: false,
     });
     const [selectedSkills, setSelectedSkills] = useState([]);
     const [submitted, setSubmitted] = useState(false);
@@ -18,7 +18,10 @@ export default function PostJobPage() {
         apiService.get('/skills').then(res => setSkills(res.data)).catch(console.error);
     }, []);
 
-    const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        setForm({ ...form, [e.target.name]: value });
+    };
 
     const toggleSkill = (skillId) => {
         setSelectedSkills(prev => prev.includes(skillId) ? prev.filter(id => id !== skillId) : [...prev, skillId]);
@@ -54,7 +57,7 @@ export default function PostJobPage() {
                         <p className="text-muted mt-1">Tin của bạn đang chờ Admin duyệt. Bạn sẽ nhận thông báo khi tin được phê duyệt.</p>
                         <div className="mt-3" style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                             <button className="btn btn-primary" onClick={() => navigate('/recruiter/jobs')}>Xem danh sách tin</button>
-                            <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm({ title: '', description: '', requirements: '', benefits: '', salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time' }); setSelectedSkills([]); }}>Đăng tin mới</button>
+                            <button className="btn btn-secondary" onClick={() => { setSubmitted(false); setForm({ title: '', description: '', requirements: '', benefits: '', salaryMin: '', salaryMax: '', location: 'Hà Nội', jobType: 'full-time', isPromoted: false }); setSelectedSkills([]); }}>Đăng tin mới</button>
                         </div>
                     </div>
                 </div>
@@ -135,7 +138,11 @@ export default function PostJobPage() {
                             <textarea name="benefits" className="form-textarea" rows="4" value={form.benefits}
                                 onChange={handleChange} placeholder="Mỗi quyền lợi trên 1 dòng..." />
                         </div>
-                        <button type="submit" className="btn btn-primary btn-lg" disabled={submitting}>
+                        <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a' }}>
+                            <input type="checkbox" name="isPromoted" id="isPromoted" checked={form.isPromoted} onChange={handleChange} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                            <label htmlFor="isPromoted" style={{ margin: 0, cursor: 'pointer', color: '#92400e', fontWeight: 500 }}>🔥 Đề xuất Việc làm được yêu thích (Hiển thị nổi bật trên trang chủ)</label>
+                        </div>
+                        <button type="submit" className="btn btn-primary btn-lg" disabled={submitting} style={{ marginTop: '16px' }}>
                             {submitting ? 'Đang gửi...' : 'Đăng tin tuyển dụng'}
                         </button>
                     </form>

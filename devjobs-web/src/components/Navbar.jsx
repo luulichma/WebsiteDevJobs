@@ -46,7 +46,8 @@ export default function Navbar() {
                     {isAdmin && (
                         <>
                             <Link to="/admin/dashboard"><FiBarChart2 size={15} /> Thống kê</Link>
-                            <Link to="/admin/approve"><FiCheckSquare size={15} /> Duyệt tin</Link>
+                            <Link to="/admin/approved-jobs"><FiCheckSquare size={15} /> Đã duyệt</Link>
+                            <Link to="/admin/approve"><FiCheckSquare size={15} /> Chờ duyệt</Link>
                             <Link to="/admin/users"><FiUsers size={15} /> Users</Link>
                         </>
                     )}

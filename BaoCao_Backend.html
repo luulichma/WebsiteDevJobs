@@ -150,7 +150,7 @@
     <ul>
       <li class="section-title">Tổng quan</li>
       <li><a href="#overview">1. Giới thiệu dự án</a></li>
-      <li><a href="#architecture">2. Kiến trúc hệ thống</a></li>
+      <li><a href="#architecture">2. Mô hình & Kiến trúc</a></li>
       <li><a href="#database">3. Cơ sở dữ liệu</a></li>
       <li><a href="#security">4. Bảo mật & Xác thực</a></li>
       <li class="section-title">API Endpoints</li>
@@ -218,30 +218,54 @@
       </div>
     </section>
 
-    <!-- 2. Architecture -->
+    <!-- 2. Architecture & Model -->
     <section id="architecture">
-      <h2>2. Kiến trúc hệ thống</h2>
-      <div class="arch-diagram">
-        <span class="highlight">┌──────────────────────────────────────────────────┐</span><br/>
-        <span class="highlight">│              CLIENT (Trình duyệt)                │</span><br/>
-        <span class="highlight">│        React + Vite  —  port 5173               │</span><br/>
-        <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  HTTP / JSON<br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Authorization: Bearer &lt;JWT Token&gt;<br/>
-        <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
-        <span class="highlight">│           REST API (ASP.NET Core 8.0)            │</span><br/>
-        <span class="highlight">│         http://localhost:5050/api               │</span><br/>
-        <span class="highlight">│    Swagger UI: http://localhost:5050/swagger    │</span><br/>
-        <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Entity Framework Core<br/>
-        <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
-        <span class="highlight">│              SQL Server Database                 │</span><br/>
-        <span class="highlight">│    Users · Companies · Jobs · Applications      │</span><br/>
-        <span class="highlight">└──────────────────────────────────────────────────┘</span>
+      <h2>2. Mô hình & Kiến trúc hệ thống</h2>
+      
+      <div class="card">
+        <h3>Phân tích Mô hình Dự án</h3>
+        <ul style="line-height:1.8; padding-left:20px; font-size:14px;">
+          <li style="margin-bottom: 6px;"><strong>Mô hình Client-Server (SPA):</strong> Frontend (React) và Backend (ASP.NET Core) tách biệt hoàn toàn, giao tiếp với nhau qua chuẩn HTTP/REST API.</li>
+          <li style="margin-bottom: 6px;"><strong>Relational Data Model:</strong> Sử dụng hệ CSDL quan hệ SQL Server hỗ trợ tính vững chắc cho dữ liệu bài toán nghiệp vụ phức tạp.</li>
+          <li style="margin-bottom: 6px;"><strong>Database-First:</strong> Các entities (Models) được tự động phát sinh (Scaffold) từ database đã được thiết kế sẵn thông qua Entity Framework Core.</li>
+          <li><strong>Stateless Authentication:</strong> Cơ chế xác thực dùng JSON Web Token (Session-less), tách biệt logic phân quyền khỏi máy chủ, mang lại hiệu năng ổn định.</li>
+        </ul>
       </div>
-      <div class="info-box" style="margin-top:14px;">
-        💡 <strong>Luồng xác thực:</strong> Client gọi <code>POST /api/auth/login</code> → nhận JWT Token → gửi kèm trong header
-        <code>Authorization: Bearer {token}</code> cho các request tiếp theo.
+
+      <div class="card">
+        <h3>Kiến trúc Phân lớp Backend (Layered Architecture)</h3>
+        <ul style="line-height:1.8; padding-left:20px; font-size:14px;">
+          <li style="margin-bottom: 6px;"><strong>Presentation Layer (API Controllers):</strong> Đóng vai trò tiếp nhận HTTP requests, kiểm tra Validation, gọi Data Layer và trả về kết chuẩn JSON.</li>
+          <li style="margin-bottom: 6px;"><strong>DTO Layer (Data Transfer Objects):</strong> Lớp trung gian chuyển đổi dữ liệu. Phân tách bảng Database thực tế với dữ liệu trả qua API public, giúp bảo mật và tối ưu Response Payload.</li>
+          <li style="margin-bottom: 6px;"><strong>Data Access Layer (EF Core):</strong> Lớp <code>AppDbContext</code> chịu trách nhiệm thực thi các thao tác CRUD tới SQL Server thông qua các câu truy vấn LINQ thay vì SQL thô.</li>
+          <li><strong>Security & Middleware Layer:</strong> Sử dụng Middleware cho Cross-Origin Resource Sharing (CORS), giải mã/kiểm tra Token, và quản trị quyền hạn theo vai trò (Role-Based Access Control - RBAC).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h3>Sơ đồ luồng hoạt động tĩnh</h3>
+        <div class="arch-diagram" style="margin-top:12px;">
+          <span class="highlight">┌──────────────────────────────────────────────────┐</span><br/>
+          <span class="highlight">│              CLIENT (Trình duyệt)                │</span><br/>
+          <span class="highlight">│        React + Vite  —  port 5173               │</span><br/>
+          <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  HTTP / JSON<br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Authorization: Bearer &lt;JWT Token&gt;<br/>
+          <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
+          <span class="highlight">│           REST API (ASP.NET Core 8.0)            │</span><br/>
+          <span class="highlight">│         http://localhost:5050/api               │</span><br/>
+          <span class="highlight">│    Swagger UI: http://localhost:5050/swagger    │</span><br/>
+          <span class="highlight">└───────────────────┬──────────────────────────────┘</span><br/>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Entity Framework Core<br/>
+          <span class="highlight">┌───────────────────▼──────────────────────────────┐</span><br/>
+          <span class="highlight">│              SQL Server Database                 │</span><br/>
+          <span class="highlight">│    Users · Companies · Jobs · Applications      │</span><br/>
+          <span class="highlight">└──────────────────────────────────────────────────┘</span>
+        </div>
+        <div class="info-box" style="margin-top:16px;">
+          💡 <strong>Luồng xác thực:</strong> Client gọi <code>POST /api/auth/login</code> → nhận JWT Token → gửi kèm trong header
+          <code>Authorization: Bearer {token}</code> để được truy cập với các quyền cao hơn ở request tiếp theo.
+        </div>
       </div>
     </section>
 

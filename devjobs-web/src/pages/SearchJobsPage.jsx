@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import apiService from '../services/apiService';
 import { FiMapPin, FiBriefcase, FiClock, FiSearch } from 'react-icons/fi';
 import './SearchJobsPage.css';
 import Pagination from '../components/Pagination';
 
 export default function SearchJobsPage() {
+    const [searchParams] = useSearchParams();
     const [keyword, setKeyword] = useState('');
     const [location, setLocation] = useState('');
     const [jobType, setJobType] = useState('');
     const [sortBy, setSortBy] = useState('newest');
-    
+    const [isPromoted, setIsPromoted] = useState(searchParams.get('isPromoted') === 'true');
+
     const [jobs, setJobs] = useState([]);
     const [total, setTotal] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
@@ -22,6 +24,7 @@ export default function SearchJobsPage() {
             if (keyword) params.keyword = keyword;
             if (location) params.location = location;
             if (jobType) params.jobType = jobType;
+            if (isPromoted) params.isPromoted = true;
             // API hiện tại chưa hỗ trợ sort theo salary, ta có thể tự sort hoặc bổ sung param sau. Hiện tại dùng mặc định.
 
             const res = await apiService.get('/jobs', { params });
@@ -41,11 +44,11 @@ export default function SearchJobsPage() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [location, jobType, sortBy]);
+    }, [location, jobType, sortBy, isPromoted]);
 
     useEffect(() => {
         fetchJobs();
-    }, [location, jobType, sortBy, currentPage]); // keyword is triggered manually via handleSearch
+    }, [location, jobType, sortBy, isPromoted, currentPage]); // keyword is triggered manually via handleSearch
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -53,7 +56,7 @@ export default function SearchJobsPage() {
         fetchJobs();
     };
 
-    // Hardcode location vì không lưu bảng riêng
+
     const locations = ['Hà Nội', 'Hồ Chí Minh', 'Đà Nẵng', 'Remote'];
 
     return (
@@ -63,7 +66,7 @@ export default function SearchJobsPage() {
                     <h1>Tìm công việc IT mơ ước của bạn</h1>
                     <div className="search-bar">
                         <input type="text" className="search-input" placeholder="Vị trí, kỹ năng..."
-                            value={keyword} onChange={e => setKeyword(e.target.value)} 
+                            value={keyword} onChange={e => setKeyword(e.target.value)}
                             onKeyDown={e => e.key === 'Enter' && fetchJobs()} />
                         <select className="search-input search-select" value={location} onChange={e => setLocation(e.target.value)}>
                             <option value="">Tất cả địa điểm</option>
@@ -77,6 +80,13 @@ export default function SearchJobsPage() {
             <div className="search-container">
                 <aside className="filters card">
                     <h3>Bộ lọc</h3>
+                    <div className="filter-group">
+                        <h4>Đề xuất</h4>
+                        <label className="filter-option" style={{ color: '#d97706', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <input type="radio" name="promotedFilter" checked={isPromoted} onClick={() => setIsPromoted(!isPromoted)} readOnly />
+                            🔥 Việc làm được yêu thích
+                        </label>
+                    </div>
                     <div className="filter-group">
                         <h4>Địa điểm</h4>
                         {locations.map(l => (
@@ -113,17 +123,20 @@ export default function SearchJobsPage() {
                         {jobs.length === 0 && (
                             <div className="no-results card">
                                 <p>Không tìm thấy việc làm phù hợp với tiêu chí của bạn</p>
-                                <button className="btn btn-secondary btn-sm mt-2" onClick={() => { setKeyword(''); setLocation(''); setJobType(''); fetchJobs(); }}>
+                                <button className="btn btn-secondary btn-sm mt-2" onClick={() => { setKeyword(''); setLocation(''); setJobType(''); setIsPromoted(false); fetchJobs(); }}>
                                     Xóa tất cả bộ lọc
                                 </button>
                             </div>
                         )}
                         {jobs.map(job => (
-                            <Link to={`/jobs/${job.jobId}`} className="job-card card" key={job.jobId}>
+                            <Link to={`/jobs/${job.jobId}`} className="job-card card" key={job.jobId} style={job.isPromoted ? { borderColor: '#fde68a', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.1)' } : {}}>
                                 <div className="job-card-top">
                                     <div className="company-logo">{job.companyName?.substring(0, 3).toUpperCase()}</div>
                                     <div className="job-info">
-                                        <h3>{job.title}</h3>
+                                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            {job.title}
+                                            {job.isPromoted && <span className="badge badge-warning" style={{ fontSize: '11px', padding: '2px 6px' }}>🔥 Yêu thích</span>}
+                                        </h3>
                                         <p className="company-name">{job.companyName}</p>
                                         <div className="job-meta">
                                             <span><FiMapPin size={14} /> {job.location}</span>
@@ -138,10 +151,10 @@ export default function SearchJobsPage() {
                         ))}
                     </div>
                     {Math.ceil(total / itemsPerPage) > 1 && (
-                        <Pagination 
-                            currentPage={currentPage} 
-                            totalPages={Math.ceil(total / itemsPerPage)} 
-                            onPageChange={setCurrentPage} 
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={Math.ceil(total / itemsPerPage)}
+                            onPageChange={setCurrentPage}
                         />
                     )}
                 </main>

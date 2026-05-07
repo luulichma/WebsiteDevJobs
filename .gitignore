@@ -10,3 +10,13 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Secrets
+client_secret_*.json
+
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+node_modules/
+dist/
+.env

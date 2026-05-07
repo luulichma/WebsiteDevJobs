@@ -6,10 +6,15 @@ import './HomePage.css';
 
 export default function HomePage() {
     const [activeJobs, setActiveJobs] = useState([]);
+    const [promotedJobs, setPromotedJobs] = useState([]);
 
     useEffect(() => {
         apiService.get('/jobs?pageSize=3').then(res => {
             setActiveJobs(res.data.items);
+        }).catch(err => console.error(err));
+
+        apiService.get('/jobs?isPromoted=true&pageSize=3').then(res => {
+            setPromotedJobs(res.data.items);
         }).catch(err => console.error(err));
     }, []);
 
@@ -31,6 +36,41 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
+
+            {/* Promoted Jobs */}
+            {promotedJobs.length > 0 && (
+                <section className="section" style={{ background: '#fffbeb' }}>
+                    <div className="container">
+                        <div className="section-header">
+                            <h2 style={{ color: '#d97706', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '24px' }}>🔥</span> Việc làm được yêu thích
+                            </h2>
+                            <Link to="/jobs?isPromoted=true" className="view-all">Xem tất cả <FiArrowRight /></Link>
+                        </div>
+                        <div className="jobs-grid">
+                            {promotedJobs.map(job => (
+                                <Link to={`/jobs/${job.jobId}`} className="job-card" key={job.jobId} style={{ borderColor: '#fde68a', boxShadow: '0 4px 12px rgba(217, 119, 6, 0.1)' }}>
+                                    <div className="job-card-header">
+                                        <div className="company-logo">{job.companyName?.substring(0, 3).toUpperCase()}</div>
+                                        <div>
+                                            <h3>{job.title}</h3>
+                                            <p className="company-name">{job.companyName}</p>
+                                        </div>
+                                    </div>
+                                    <div className="job-card-meta">
+                                        <span><FiMapPin size={14} /> {job.location}</span>
+                                        <span><FiBriefcase size={14} /> {job.jobType === 'full-time' ? 'Toàn thời gian' : job.jobType === 'remote' ? 'Remote' : job.jobType}</span>
+                                        <span className="salary">${job.salaryMin?.toLocaleString()} - ${job.salaryMax?.toLocaleString()}</span>
+                                    </div>
+                                    <div className="tags">
+                                        {job.skills?.slice(0, 4).map(s => <span className="tag" key={s}>{s}</span>)}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* Featured Jobs */}
             <section className="section">

@@ -28,6 +28,7 @@ namespace DevJobsAPI.Controllers
             var activeJobs = await _db.Jobs.CountAsync(j => j.Status == "active");
             var pendingJobs = await _db.Jobs.CountAsync(j => j.Status == "pending");
             var closedJobs = await _db.Jobs.CountAsync(j => j.Status == "closed");
+            var promotedJobs = await _db.Jobs.CountAsync(j => j.IsPromoted);
 
             // Applications
             var totalApplications = await _db.Applications.CountAsync();
@@ -56,7 +57,7 @@ namespace DevJobsAPI.Controllers
             return Ok(new
             {
                 users = new { total = totalUsers, candidates = totalCandidates, recruiters = totalRecruiters, active = activeUsers },
-                jobs = new { total = totalJobs, active = activeJobs, pending = pendingJobs, closed = closedJobs },
+                jobs = new { total = totalJobs, active = activeJobs, pending = pendingJobs, closed = closedJobs, promoted = promotedJobs },
                 applications = new { total = totalApplications, pending = pendingApps, interview = interviewApps, accepted = acceptedApps, rejected = rejectedApps },
                 companies = new { total = totalCompanies },
                 recentUsers,

@@ -15,6 +15,7 @@ namespace DevJobsAPI.DTOs
         public string Location { get; set; } = string.Empty;
         public string JobType { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
+        public bool IsPromoted { get; set; }
         public DateOnly? ExpiryDate { get; set; }
         public DateTime? CreatedAt { get; set; }
         public List<string> Skills { get; set; } = new();
@@ -30,6 +31,7 @@ namespace DevJobsAPI.DTOs
         public decimal? SalaryMax { get; set; }
         public string Location { get; set; } = string.Empty;
         public string JobType { get; set; } = "full-time";
+        public bool IsPromoted { get; set; } = false;
         public DateOnly? ExpiryDate { get; set; }
         public List<int> SkillIds { get; set; } = new();
     }
@@ -43,6 +45,7 @@ namespace DevJobsAPI.DTOs
         public decimal? SalaryMax { get; set; }
         public string Location { get; set; } = string.Empty;
         public string JobType { get; set; } = "full-time";
+        public bool IsPromoted { get; set; } = false;
         public DateOnly? ExpiryDate { get; set; }
         public List<int> SkillIds { get; set; } = new();
     }
@@ -55,6 +58,7 @@ namespace DevJobsAPI.DTOs
         public decimal? SalaryMin { get; set; }
         public decimal? SalaryMax { get; set; }
         public string? Skill { get; set; }
+        public bool? IsPromoted { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

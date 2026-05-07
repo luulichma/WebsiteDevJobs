@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Báo cáo Chi tiết Use Case — DevJobs</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --primary: #6366f1;
+    --primary-light: #e0e7ff;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    --text: #111827;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --bg: #f9fafb;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; color: var(--text); background: var(--bg); }
+
+  /* Layout */
+  .layout { display: flex; min-height: 100vh; }
+  aside {
+    width: 260px; background: #1e1b4b; color: #c7d2fe;
+    position: fixed; top: 0; left: 0; height: 100vh;
+    overflow-y: auto; padding: 24px 0; z-index: 10;
+    print-color-adjust: exact; -webkit-print-color-adjust: exact;
+  }
+  aside .logo { color: white; font-size: 18px; font-weight: 800; padding: 0 20px 20px; border-bottom: 1px solid #3730a3; }
+  aside ul { list-style: none; margin-top: 12px; }
+  aside ul li a {
+    display: block; padding: 8px 20px; color: #c7d2fe;
+    text-decoration: none; font-size: 13px; transition: all 0.2s;
+  }
+  aside ul li a:hover, aside ul li a.active { background: #4338ca; color: white; }
+  aside ul .section-title { padding: 14px 20px 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #818cf8; font-weight: 700; }
+
+  main { margin-left: 260px; padding: 36px; max-width: 960px; }
+
+  /* Header */
+  .report-header {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white; border-radius: 16px; padding: 32px 36px; margin-bottom: 28px;
+  }
+  .report-header h1 { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  .report-header p { opacity: 0.85; font-size: 14px; }
+
+  /* UC Section */
+  .uc-section { margin-bottom: 48px; scroll-margin-top: 24px; border-top: 3px solid var(--primary); padding-top: 24px; }
+  .uc-section h2 {
+    font-size: 20px; font-weight: 700; color: var(--primary);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+  }
+  .uc-section h2 .uc-badge {
+    background: var(--primary); color: white; padding: 3px 12px; border-radius: 99px; font-size: 13px;
+  }
+  .uc-section h3 { font-size: 15px; font-weight: 700; margin: 20px 0 10px; color: var(--text); border-left: 3px solid var(--primary); padding-left: 10px; }
+
+  .card { background: white; border-radius: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.07); padding: 20px; margin-bottom: 14px; }
+
+  /* ERD */
+  .mermaid { background: white; border-radius: 10px; padding: 16px; margin: 10px 0; overflow-x: auto; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f3f4f6; padding: 9px 12px; text-align: left; font-weight: 700; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+
+  /* Method badges */
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 700; }
+  .badge-get { background: #d1fae5; color: #065f46; }
+  .badge-post { background: #dbeafe; color: #1e40af; }
+  .badge-put { background: #fef3c7; color: #92400e; }
+  .badge-delete { background: #fee2e2; color: #991b1b; }
+
+  .auth-badge { display: inline-flex; align-items: center; gap: 4px; background: #f3f4f6; color: var(--muted); border-radius: 99px; padding: 2px 8px; font-size: 10px; font-weight: 600; }
+  .auth-public { background: #d1fae5; color: #065f46; }
+  .auth-candidate { background: #dbeafe; color: #1e40af; }
+  .auth-recruiter { background: #fef3c7; color: #92400e; }
+  .auth-admin { background: #fee2e2; color: #991b1b; }
+  .auth-any { background: #ede9fe; color: #5b21b6; }
+
+  .endpoint-table td:first-child { width: 70px; }
+  .endpoint-table td:nth-child(2) { font-family: monospace; font-size: 12px; color: var(--primary); }
+  .endpoint-table td:nth-child(3) { width: 90px; }
+
+  /* Screenshots */
+  .screenshot-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 10px; }
+  .screenshot-grid img { width: 100%; border-radius: 10px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  .screenshot-caption { font-size: 12px; color: var(--muted); text-align: center; margin-top: 4px; }
+
+  /* Export */
+  .export-bar { display: flex; gap: 10px; margin-bottom: 24px; }
+  .btn-export { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+  .btn-pdf { background: #ef4444; color: white; }
+  .btn-pdf:hover { background: #dc2626; }
+  .btn-word { background: #2563eb; color: white; }
+  .btn-word:hover { background: #1d4ed8; }
+
+  @media print {
+    aside { display: none; }
+    main { margin-left: 0; padding: 20px; max-width: 100%; }
+    .export-bar { display: none; }
+    .uc-section { page-break-inside: avoid; }
+    .card { box-shadow: none; border: 1px solid #e5e7eb; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <aside>
+    <div class="logo">📋 DevJobs — Chi tiết UC</div>
+    <ul>
+      <li class="section-title">Quản lý Tài khoản</li>
+      <li><a href="#uc01">UC01: Đăng nhập & Phân quyền</a></li>
+      <li class="section-title">Phân hệ Ứng viên</li>
+      <li><a href="#uc02">UC02: Tìm kiếm việc làm</a></li>
+      <li><a href="#uc03">UC03: Ứng tuyển</a></li>
+      <li><a href="#uc04">UC04: Hồ sơ cá nhân</a></li>
+      <li class="section-title">Phân hệ Nhà tuyển dụng</li>
+      <li><a href="#uc05">UC05: Quản lý công ty</a></li>
+      <li><a href="#uc06">UC06: Đăng tin tuyển dụng</a></li>
+      <li><a href="#uc07">UC07: Quản lý hồ sơ ứng viên</a></li>
+      <li><a href="#uc08">UC08: Quản lý bài đăng</a></li>
+      <li class="section-title">Phân hệ Quản trị</li>
+      <li><a href="#uc09">UC09: Duyệt tin tuyển dụng</a></li>
+      <li><a href="#uc10">UC10: Quản lý người dùng</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main>
+    <div class="report-header">
+      <h1>📋 Báo cáo Chi tiết Use Case — DevJobs</h1>
+      <p>Trình bày ERD liên quan, API Endpoints và kết quả giao diện cho mỗi Use Case</p>
+      <p style="margin-top:8px; font-size:13px; opacity:0.7">Nguyễn Thế Chiến — B23DCCN095 — D23CQCN11-B</p>
+    </div>
+
+    <div class="export-bar">
+      <button class="btn-export btn-pdf" onclick="window.print()">🖨️ Xuất PDF</button>
+      <button class="btn-export btn-word" onclick="exportWord()">📝 Xuất Word</button>
+    </div>
+
+    <!-- ==================== UC01 ==================== -->
+    <section id="uc01" class="uc-section">
+      <h2><span class="uc-badge">UC01</span> Đăng nhập & Phân quyền</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS {
+        int user_id PK
+        varchar email UK
+        varchar password_hash
+        varchar full_name
+        varchar role
+        varchar status
+        datetime created_at
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC01 chỉ truy cập bảng <strong>USERS</strong> để xác thực email/password và kiểm tra role + status.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/login</td><td><span class="auth-badge auth-public">Public</span></td><td>Đăng nhập bằng email/password → trả về JWT Token + user info</td></tr>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/register</td><td><span class="auth-badge auth-public">Public</span></td><td>Đăng ký tài khoản mới (candidate/recruiter)</td></tr>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/auth/google</td><td><span class="auth-badge auth-public">Public</span></td><td>Đăng nhập bằng Google OAuth — tự tạo tài khoản nếu mới</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="login_page_1775094728962.png" alt="Trang đăng nhập" />
+            <p class="screenshot-caption">Trang đăng nhập với form Email/Password và Google OAuth</p>
+          </div>
+          <div>
+            <img src="candidate_dashboard_1775094752710.png" alt="Dashboard Ứng viên" />
+            <p class="screenshot-caption">Sau khi đăng nhập với role Candidate → chuyển đến trang Tìm việc</p>
+          </div>
+          <div>
+            <img src="recruiter_dashboard_1775094782263.png" alt="Dashboard Nhà tuyển dụng" />
+            <p class="screenshot-caption">Sau khi đăng nhập với role Recruiter → chuyển đến trang Quản lý tin</p>
+          </div>
+          <div>
+            <img src="admin_dashboard_1775094805929.png" alt="Dashboard Admin" />
+            <p class="screenshot-caption">Sau khi đăng nhập với role Admin → chuyển đến trang Duyệt tin</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC02 ==================== -->
+    <section id="uc02" class="uc-section">
+      <h2><span class="uc-badge">UC02</span> Tìm kiếm việc làm</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    JOBS ||--o{ JOB_SKILLS : "có"
+    SKILLS ||--o{ JOB_SKILLS : "thuộc"
+    COMPANIES ||--o{ JOBS : "đăng"
+
+    JOBS {
+        int job_id PK
+        int company_id FK
+        varchar title
+        text description
+        varchar location
+        varchar job_type
+        decimal salary_min
+        decimal salary_max
+        varchar status
+    }
+    COMPANIES {
+        int company_id PK
+        varchar company_name
+        varchar logo_url
+    }
+    SKILLS {
+        int skill_id PK
+        varchar skill_name UK
+    }
+    JOB_SKILLS {
+        int job_id PK_FK
+        int skill_id PK_FK
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC02 truy vấn bảng <strong>JOBS</strong> kết hợp JOIN với <strong>COMPANIES</strong> và <strong>SKILLS</strong> (qua JOB_SKILLS) để lọc theo keyword, location, jobType, salary, skill. Hỗ trợ tìm kiếm tiếng Việt không dấu (Vietnamese_CI_AI Collation).</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs?keyword=&location=&jobType=&skill=&salaryMin=&salaryMax=&page=&pageSize=</td><td><span class="auth-badge auth-public">Public</span></td><td>Tìm kiếm tin tuyển dụng với bộ lọc và phân trang. Hỗ trợ tìm tiếng Việt không dấu</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="homepage_1775094704158.png" alt="Trang chủ" />
+            <p class="screenshot-caption">Trang chủ DevJobs với thanh tìm kiếm và việc làm nổi bật</p>
+          </div>
+          <div>
+            <img src="uc02_search_jobs_1775094854672.png" alt="Trang tìm kiếm" />
+            <p class="screenshot-caption">Trang tìm kiếm việc làm với bộ lọc Địa điểm, Loại hình và sắp xếp</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC03 ==================== -->
+    <section id="uc03" class="uc-section">
+      <h2><span class="uc-badge">UC03</span> Xem chi tiết & Ứng tuyển</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS ||--o{ APPLICATIONS : "nộp đơn"
+    JOBS ||--o{ APPLICATIONS : "nhận đơn"
+
+    JOBS {
+        int job_id PK
+        int company_id FK
+        varchar title
+        text description
+        text requirements
+        varchar status
+    }
+    APPLICATIONS {
+        int application_id PK
+        int job_id FK
+        int candidate_id FK
+        varchar cv_url
+        text cover_letter
+        varchar status
+        datetime applied_at
+    }
+    USERS {
+        int user_id PK
+        varchar email
+        varchar full_name
+        varchar role
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC03 đọc chi tiết từ <strong>JOBS</strong>, sau đó tạo bản ghi mới trong <strong>APPLICATIONS</strong> liên kết candidate_id (USERS) với job_id. Ràng buộc UNIQUE (job_id, candidate_id) đảm bảo không trùng.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/{id}</td><td><span class="auth-badge auth-public">Public</span></td><td>Lấy chi tiết một tin tuyển dụng</td></tr>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/applications</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Nộp hồ sơ ứng tuyển (kiểm tra trùng, job active)</td></tr>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/applications/my-applications</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Lịch sử ứng tuyển của tôi</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="uc03_job_detail_1775094865626.png" alt="Chi tiết Job" />
+            <p class="screenshot-caption">Trang chi tiết công việc với mô tả, yêu cầu, nút Ứng tuyển</p>
+          </div>
+          <div>
+            <img src="uc03_application_history_candidate_1775094901601.png" alt="Lịch sử ứng tuyển" />
+            <p class="screenshot-caption">Trang lịch sử ứng tuyển của ứng viên — hiển thị trạng thái hồ sơ</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC04 ==================== -->
+    <section id="uc04" class="uc-section">
+      <h2><span class="uc-badge">UC04</span> Quản lý hồ sơ cá nhân</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS {
+        int user_id PK
+        varchar email UK
+        varchar full_name
+        varchar phone
+        varchar cv_url
+        text skills
+        varchar role
+        datetime created_at
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC04 đọc và cập nhật thông tin cá nhân trong bảng <strong>USERS</strong> (full_name, phone, cv_url, skills).</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/users/me</td><td><span class="auth-badge auth-any">Bất kỳ</span></td><td>Lấy thông tin user đang đăng nhập</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/users/me</td><td><span class="auth-badge auth-candidate">Candidate</span></td><td>Cập nhật hồ sơ cá nhân (tên, SĐT, CV, kỹ năng)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="uc04_candidate_profile_1775094894544.png" alt="Hồ sơ ứng viên" />
+            <p class="screenshot-caption">Trang chỉnh sửa hồ sơ cá nhân ứng viên</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC05 ==================== -->
+    <section id="uc05" class="uc-section">
+      <h2><span class="uc-badge">UC05</span> Quản lý thông tin công ty</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS ||--o{ COMPANIES : "tạo"
+
+    COMPANIES {
+        int company_id PK
+        varchar company_name
+        text description
+        varchar website
+        varchar logo_url
+        varchar address
+        varchar status
+        int created_by FK
+        datetime created_at
+    }
+    USERS {
+        int user_id PK
+        varchar email
+        varchar role
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC05 truy cập bảng <strong>COMPANIES</strong> liên kết với <strong>USERS</strong> qua created_by. Mỗi Recruiter sở hữu duy nhất 1 công ty.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/companies/{id}</td><td><span class="auth-badge auth-public">Public</span></td><td>Xem thông tin công ty theo ID</td></tr>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/companies</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Tạo công ty mới (nếu chưa có)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/companies/my</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật thông tin công ty hiện tại</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <p style="font-size:13px; color:var(--muted); font-style:italic;">Trang cho phép Recruiter nhập/sửa: Tên công ty, Mô tả, Website, Logo URL, Địa chỉ.</p>
+      </div>
+    </section>
+
+    <!-- ==================== UC06 ==================== -->
+    <section id="uc06" class="uc-section">
+      <h2><span class="uc-badge">UC06</span> Đăng tin tuyển dụng</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    COMPANIES ||--o{ JOBS : "đăng"
+    USERS ||--o{ JOBS : "tạo"
+    JOBS ||--o{ JOB_SKILLS : "yêu cầu"
+    SKILLS ||--o{ JOB_SKILLS : "được yêu cầu"
+
+    JOBS {
+        int job_id PK
+        int company_id FK
+        int recruiter_id FK
+        varchar title
+        text description
+        text requirements
+        decimal salary_min
+        decimal salary_max
+        varchar location
+        varchar job_type
+        varchar status
+        date expiry_date
+        datetime created_at
+    }
+    JOB_SKILLS {
+        int job_id PK_FK
+        int skill_id PK_FK
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC06 tạo bản ghi mới trong <strong>JOBS</strong> (status='pending') và liên kết kỹ năng qua <strong>JOB_SKILLS</strong>. Tin cần Admin duyệt.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-post">POST</span></td><td>/api/jobs</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Đăng tin tuyển dụng mới (status=pending, chờ admin duyệt)</td></tr>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/skills</td><td><span class="auth-badge auth-public">Public</span></td><td>Lấy danh sách kỹ năng để chọn tag</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <p style="font-size:13px; color:var(--muted); font-style:italic;">Form đăng tin gồm: Tiêu đề, Mô tả, Yêu cầu, Mức lương (min-max), Địa điểm, Loại hình, Kỹ năng (chọn tags), Ngày hết hạn.</p>
+      </div>
+    </section>
+
+    <!-- ==================== UC07 ==================== -->
+    <section id="uc07" class="uc-section">
+      <h2><span class="uc-badge">UC07</span> Quản lý hồ sơ ứng viên</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    JOBS ||--o{ APPLICATIONS : "nhận"
+    USERS ||--o{ APPLICATIONS : "nộp"
+    USERS ||--o{ APPLICATIONS : "duyệt"
+
+    APPLICATIONS {
+        int application_id PK
+        int job_id FK
+        int candidate_id FK
+        varchar cv_url
+        text cover_letter
+        varchar status
+        datetime applied_at
+        int reviewed_by FK
+    }
+    JOBS {
+        int job_id PK
+        varchar title
+        int recruiter_id FK
+    }
+    USERS {
+        int user_id PK
+        varchar full_name
+        varchar email
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC07 cho phép Recruiter xem danh sách <strong>APPLICATIONS</strong> theo job_id, sau đó cập nhật status (pending → shortlisted → interview → accepted/rejected).</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/applications/job/{jobId}</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Danh sách ứng viên cho tin tuyển dụng (chỉ chủ tin)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/applications/{id}/status</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật trạng thái hồ sơ ứng viên</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <p style="font-size:13px; color:var(--muted); font-style:italic;">Recruiter xem danh sách ứng viên theo từng tin đăng. Có thể click xem CV, đổi trạng thái (Mời phỏng vấn, Chấp nhận, Từ chối).</p>
+      </div>
+    </section>
+
+    <!-- ==================== UC08 ==================== -->
+    <section id="uc08" class="uc-section">
+      <h2><span class="uc-badge">UC08</span> Quản lý bài đăng tuyển dụng</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS ||--o{ JOBS : "quản lý"
+    COMPANIES ||--o{ JOBS : "sở hữu"
+    JOBS ||--o{ JOB_SKILLS : "yêu cầu"
+    JOBS ||--o{ APPLICATIONS : "nhận"
+
+    JOBS {
+        int job_id PK
+        int company_id FK
+        int recruiter_id FK
+        varchar title
+        varchar status
+        date expiry_date
+        datetime created_at
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC08 cho phép Recruiter xem tất cả <strong>JOBS</strong> của mình, chỉnh sửa nội dung, đóng tin (status→closed) hoặc gia hạn (expiry_date +30 ngày).</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/my</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Danh sách tin tuyển dụng đã đăng</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Cập nhật nội dung tin tuyển dụng</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/close</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Đóng tin (status → closed)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/renew</td><td><span class="auth-badge auth-recruiter">Recruiter</span></td><td>Gia hạn tin +30 ngày (status → active)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="recruiter_dashboard_1775094782263.png" alt="Quản lý tin Recruiter" />
+            <p class="screenshot-caption">Trang Quản lý tin tuyển dụng của Recruiter — Sửa, Đóng, Gia hạn, Xem ứng viên</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC09 ==================== -->
+    <section id="uc09" class="uc-section">
+      <h2><span class="uc-badge">UC09</span> Duyệt tin tuyển dụng (Admin)</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS ||--o{ JOBS : "duyệt"
+    COMPANIES ||--o{ JOBS : "đăng"
+
+    JOBS {
+        int job_id PK
+        int company_id FK
+        int recruiter_id FK
+        varchar title
+        varchar status
+        int approved_by FK
+        datetime created_at
+    }
+    USERS {
+        int user_id PK
+        varchar role
+    }
+    COMPANIES {
+        int company_id PK
+        varchar company_name
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC09: Admin xem các <strong>JOBS</strong> có status='pending' và cập nhật thành 'active' (duyệt) hoặc 'closed' (từ chối). Trường approved_by ghi lại admin nào đã duyệt.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/jobs/pending</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Danh sách tin chờ duyệt</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/approve</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Phê duyệt tin (status → active)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/{id}/reject</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Từ chối tin (status → closed)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/bulk-approve</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Duyệt hàng loạt</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/jobs/bulk-reject</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Từ chối hàng loạt</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <div class="screenshot-grid">
+          <div>
+            <img src="admin_dashboard_1775094805929.png" alt="Admin Duyệt tin" />
+            <p class="screenshot-caption">Trang Admin duyệt tin — Xem danh sách tin chờ, nút Duyệt/Từ chối cho từng tin</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== UC10 ==================== -->
+    <section id="uc10" class="uc-section">
+      <h2><span class="uc-badge">UC10</span> Quản lý người dùng (Admin)</h2>
+
+      <h3>a) ERD liên quan</h3>
+      <div class="card">
+        <div class="mermaid">
+erDiagram
+    USERS {
+        int user_id PK
+        varchar email UK
+        varchar full_name
+        varchar phone
+        varchar role
+        varchar status
+        datetime created_at
+    }
+        </div>
+        <p style="font-size:13px; color:#6b7280; margin-top:8px;">UC10: Admin truy vấn toàn bộ bảng <strong>USERS</strong> (trừ admin), có thể khóa (status→suspended) hoặc xoá tài khoản vi phạm. Tìm kiếm tiếng Việt không dấu qua Vietnamese_CI_AI Collation.</p>
+      </div>
+
+      <h3>b) API Endpoints</h3>
+      <div class="card">
+        <table class="endpoint-table">
+          <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/users?role=&search=</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Danh sách người dùng (lọc theo role/tìm kiếm)</td></tr>
+            <tr><td><span class="badge badge-put">PUT</span></td><td>/api/users/{id}/suspend</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Khóa / Mở khóa tài khoản</td></tr>
+            <tr><td><span class="badge badge-delete">DELETE</span></td><td>/api/users/{id}</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Xóa tài khoản (không xóa được admin)</td></tr>
+            <tr><td><span class="badge badge-get">GET</span></td><td>/api/admin/stats</td><td><span class="auth-badge auth-admin">Admin</span></td><td>Thống kê tổng quan: số users, jobs, applications, companies</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>c) Kết quả giao diện</h3>
+      <div class="card">
+        <p style="font-size:13px; color:var(--muted); font-style:italic;">Trang Admin quản lý người dùng: Bảng danh sách (ID, Tên, Email, Role, Status), các nút Khóa/Mở khóa và Xóa với xác nhận email.</p>
+      </div>
+    </section>
+
+    <div style="text-align:center; color:#9ca3af; font-size:12px; margin-top:40px; padding-top:20px; border-top:1px solid #e5e7eb;">
+      DevJobs — Báo cáo Chi tiết Use Case &nbsp;·&nbsp; Nguyễn Thế Chiến — B23DCCN095 &nbsp;·&nbsp; 2026
+    </div>
+  </main>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'default', securityLevel: 'loose' });
+
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('.uc-section');
+  const navLinks = document.querySelectorAll('aside a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 60) current = s.id; });
+    navLinks.forEach(a => {
+      a.classList.remove('active');
+      if (a.getAttribute('href') === '#' + current) a.classList.add('active');
+    });
+  });
+
+  // Export Word
+  function exportWord() {
+    const header = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Báo cáo Chi tiết UC — DevJobs</title><style>body{font-family:Times New Roman,serif;font-size:12pt;} table{border-collapse:collapse;width:100%;} th,td{border:1pt solid #ccc;padding:6pt;} th{background:#f0f0f0;} h1{font-size:18pt;color:#4338ca;} h2{font-size:15pt;color:#4338ca;} h3{font-size:13pt;}</style></head><body>';
+    const content = document.querySelector('main').innerHTML;
+    const footer = '</body></html>';
+    const blob = new Blob(['\ufeff', header + content + footer], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'BaoCao_UseCase_ChiTiet_DevJobs.doc';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+</script>
+</body>
+</html>
+</CodeContent>
+<parameter name="Description">Complete HTML report with Mermaid ERD diagrams, API endpoint tables, and screenshots for all 10 use cases of the DevJobs project.

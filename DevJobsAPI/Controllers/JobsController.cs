@@ -54,6 +54,9 @@ namespace DevJobsAPI.Controllers
             if (!string.IsNullOrEmpty(q.Skill))
                 query = query.Where(j => j.Skills.Any(s => EF.Functions.Collate(s.SkillName, ViCollation).Contains(q.Skill)));
 
+            if (q.IsPromoted.HasValue)
+                query = query.Where(j => j.IsPromoted == q.IsPromoted.Value);
+
             var total = await query.CountAsync();
             var items = await query
                 .OrderByDescending(j => j.CreatedAt)
@@ -124,6 +127,7 @@ namespace DevJobsAPI.Controllers
                 Location = dto.Location,
                 JobType = dto.JobType,
                 Status = "pending", // cần admin duyệt
+                IsPromoted = dto.IsPromoted,
                 ExpiryDate = dto.ExpiryDate,
                 Skills = skills
             };
@@ -149,6 +153,7 @@ namespace DevJobsAPI.Controllers
             job.SalaryMax = dto.SalaryMax;
             job.Location = dto.Location;
             job.JobType = dto.JobType;
+            job.IsPromoted = dto.IsPromoted;
             job.ExpiryDate = dto.ExpiryDate;
 
             job.Skills.Clear();
@@ -188,20 +193,46 @@ namespace DevJobsAPI.Controllers
             return Ok(new { message = "Gia hạn tin thành công thêm 30 ngày" });
         }
 
-        /// <summary>Danh sách tin chờ duyệt (admin)</summary>
-        [HttpGet("pending")]
+        /// <summary>Danh sách tin tuyển dụng cho admin (có lọc và phân trang)</summary>
+        [HttpGet("admin-list")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> GetPendingJobs()
+        public async Task<IActionResult> GetAdminJobs([FromQuery] JobQueryParams q, [FromQuery] string status = "pending")
         {
-            var jobs = await _db.Jobs
+            var query = _db.Jobs
                 .Include(j => j.Company)
                 .Include(j => j.Skills)
                 .Include(j => j.Applications)
-                .Where(j => j.Status == "pending")
+                .Where(j => j.Status == status)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(q.Keyword))
+                query = query.Where(j =>
+                    EF.Functions.Collate(j.Title, ViCollation).Contains(q.Keyword) ||
+                    EF.Functions.Collate(j.Company.CompanyName, ViCollation).Contains(q.Keyword));
+
+            if (!string.IsNullOrEmpty(q.Location))
+                query = query.Where(j => EF.Functions.Collate(j.Location, ViCollation).Contains(q.Location));
+
+            if (!string.IsNullOrEmpty(q.JobType))
+                query = query.Where(j => j.JobType == q.JobType);
+
+            if (q.IsPromoted.HasValue)
+                query = query.Where(j => j.IsPromoted == q.IsPromoted.Value);
+
+            var total = await query.CountAsync();
+            var items = await query
                 .OrderByDescending(j => j.CreatedAt)
+                .Skip((q.Page - 1) * q.PageSize)
+                .Take(q.PageSize)
                 .ToListAsync();
 
-            return Ok(jobs.Select(MapToDto));
+            return Ok(new PagedResult<JobDto>
+            {
+                Total = total,
+                Page = q.Page,
+                PageSize = q.PageSize,
+                Items = items.Select(MapToDto).ToList()
+            });
         }
 
         /// <summary>Duyệt tin tuyển dụng (admin)</summary>
@@ -258,6 +289,19 @@ namespace DevJobsAPI.Controllers
             return Ok(new { message = $"Đã từ chối {jobs.Count} tin tuyển dụng" });
         }
 
+        /// <summary>Bật/tắt trạng thái Promote (admin)</summary>
+        [HttpPut("{id}/toggle-promote")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> TogglePromote(int id)
+        {
+            var job = await _db.Jobs.FindAsync(id);
+            if (job == null) return NotFound();
+
+            job.IsPromoted = !job.IsPromoted;
+            await _db.SaveChangesAsync();
+            return Ok(new { message = job.IsPromoted ? "Đã bật Promote" : "Đã tắt Promote", isPromoted = job.IsPromoted });
+        }
+
         private static JobDto MapToDto(Job j) => new JobDto
         {
             JobId = j.JobId,
@@ -273,6 +317,7 @@ namespace DevJobsAPI.Controllers
             Location = j.Location,
             JobType = j.JobType,
             Status = j.Status,
+            IsPromoted = j.IsPromoted,
             ExpiryDate = j.ExpiryDate,
             CreatedAt = j.CreatedAt,
             Skills = j.Skills?.Select(s => s.SkillName ?? "").ToList() ?? new(),

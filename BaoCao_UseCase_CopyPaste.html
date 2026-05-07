@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Báo cáo Chi tiết Use Case - Copy-Paste Friendly</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+<style>
+  body {
+    font-family: "Times New Roman", Times, serif;
+    line-height: 1.6;
+    color: #000;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background: #fff;
+  }
+
+  h1 { font-size: 24pt; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px; text-align: center; }
+  h2 { font-size: 18pt; margin-top: 30px; border-bottom: 1px solid #ccc; }
+  h3 { font-size: 14pt; margin-top: 20px; color: #333; }
+
+  .doc-info { margin-bottom: 40px; font-style: italic; text-align: center; color: #555; }
+
+  /* Table styling for easy copy-paste */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 11pt;
+  }
+  th, td {
+    border: 1px solid #000;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background-color: #f2f2f2; font-weight: bold; }
+
+  /* API Method Styling */
+  .method { font-weight: bold; font-family: monospace; }
+  .method-get { color: #007bff; }
+  .method-post { color: #28a745; }
+  .method-put { color: #ffc107; }
+  .method-delete { color: #dc3545; }
+
+  /* Screenshot display */
+  .screenshot-container {
+    text-align: center;
+    margin: 20px 0;
+    page-break-inside: avoid;
+  }
+  .screenshot-container img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+  }
+  .caption {
+    font-size: 10pt;
+    color: #666;
+    margin-top: 5px;
+    display: block;
+  }
+
+  .mermaid-caption {
+     font-size: 10pt;
+     color: #888;
+     text-align: center;
+     margin-bottom: 20px;
+  }
+
+  /* Badge styling simplified for Docs */
+  .auth-label {
+    display: inline-block;
+    padding: 2px 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 9pt;
+    background: #fafafa;
+  }
+
+  /* Print optimization */
+  @media print {
+    body { width: 100%; margin: 0; padding: 15mm; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Báo cáo Chi tiết Use Case — DevJobs</h1>
+<div class="doc-info">
+  Tài liệu phụ lục: Trình bày ERD, API và Giao diện 10 Use Case<br>
+  <strong>Nguyễn Thế Chiến — B23DCCN095</strong>
+</div>
+
+<div class="no-print" style="background:#fff9c4; padding: 15px; border: 1px solid #fbc02d; border-radius: 8px; margin-bottom: 30px;">
+  <strong>💡 Tip sao chép vào Google Docs:</strong> 
+  Sử dụng <code>Ctrl + A</code>, sau đó <code>Ctrl + C</code> trong trình duyệt và <code>Ctrl + V</code> vào Docs của bạn. Các bảng và định dạng chữ sẽ được giữ nguyên. Với các biểu đồ Mermaid, bạn nên chụp ảnh màn hình (screenshot) rồi chèn vào để có hiển thị tốt nhất.
+</div>
+
+<!-- ==================== UC01 ==================== -->
+<h2>1. UC01: Đăng nhập &amp; Phân quyền</h2>
+
+<h3>a. Sơ đồ dữ liệu (ERD)</h3>
+<div class="mermaid">
+erDiagram
+    USERS {
+        int user_id PK
+        varchar email UK
+        varchar password_hash
+        varchar full_name
+        varchar role
+        varchar status
+        datetime created_at
+    }
+</div>
+<div class="mermaid-caption">(Sơ đồ mô tả cấu trúc bảng USERS phục vụ xác thực và phân quyền)</div>
+
+<h3>b. Danh sách API Endpoints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Phương thức</th>
+      <th>Đường dẫn (Endpoint)</th>
+      <th>Quyền (Auth)</th>
+      <th>Mô tả chức năng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="method method-post">POST</td>
+      <td>/api/auth/login</td>
+      <td><span class="auth-label">Public</span></td>
+      <td>Đăng nhập qua email/password, trả về Token JWT.</td>
+    </tr>
+    <tr>
+      <td class="method method-post">POST</td>
+      <td>/api/auth/register</td>
+      <td><span class="auth-label">Public</span></td>
+      <td>Đăng ký tài khoản mới cho Ứng viên hoặc Nhà tuyển dụng.</td>
+    </tr>
+    <tr>
+      <td class="method method-post">POST</td>
+      <td>/api/auth/google</td>
+      <td><span class="auth-label">Public</span></td>
+      <td>Xác thực qua Google OAuth và tự động tạo tài khoản.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>c. Kết quả giao diện</h3>
+<div class="screenshot-container">
+  <img src="login_page_1775094728962.png" alt="Trang đăng nhập" />
+  <span class="caption">Hình 1.1: Giao diện Trang Đăng nhập và Lựa chọn OAuth</span>
+</div>
+
+<!-- ==================== UC02 ==================== -->
+<h2>2. UC02: Tìm kiếm việc làm</h2>
+
+<h3>a. Sơ đồ dữ liệu (ERD)</h3>
+<div class="mermaid">
+erDiagram
+    JOBS ||--o{ JOB_SKILLS : "yêu cầu"
+    SKILLS ||--o{ JOB_SKILLS : "thuộc về"
+    COMPANIES ||--o{ JOBS : "đăng tuyển"
+
+    JOBS {
+        int job_id PK
+        varchar title
+        varchar location
+        decimal salary_min
+        decimal salary_max
+        varchar status
+    }
+</div>
+
+<h3>b. Danh sách API Endpoints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Phương thức</th>
+      <th>Đường dẫn (Endpoint)</th>
+      <th>Quyền (Auth)</th>
+      <th>Mô tả chức năng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="method method-get">GET</td>
+      <td>/api/jobs</td>
+      <td><span class="auth-label">Public</span></td>
+      <td>Tìm kiếm và lọc tin tuyển dụng (Hỗ trợ tiếng Việt không dấu).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>c. Kết quả giao diện</h3>
+<div class="screenshot-container">
+  <img src="uc02_search_jobs_1775094854672.png" alt="Trang tìm kiếm" />
+  <span class="caption">Hình 2.1: Giao diện tìm kiếm việc làm với bộ lọc đa năng</span>
+</div>
+
+<!-- ==================== UC03 ==================== -->
+<h2>3. UC03: Xem chi tiết &amp; Ứng tuyển</h2>
+
+<h3>a. Sơ đồ dữ liệu (ERD)</h3>
+<div class="mermaid">
+erDiagram
+    USERS ||--o{ APPLICATIONS : "nộp đơn"
+    JOBS ||--o{ APPLICATIONS : "nhận hồ sơ"
+
+    APPLICATIONS {
+        int application_id PK
+        int job_id FK
+        int candidate_id FK
+        varchar cv_url
+        varchar status
+        datetime applied_at
+    }
+</div>
+
+<h3>b. Danh sách API Endpoints</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Phương thức</th>
+      <th>Đường dẫn (Endpoint)</th>
+      <th>Quyền (Auth)</th>
+      <th>Mô tả chức năng</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="method method-get">GET</td>
+      <td>/api/jobs/{id}</td>
+      <td><span class="auth-label">Public</span></td>
+      <td>Lấy thông tin chi tiết một công việc cụ thể.</td>
+    </tr>
+    <tr>
+      <td class="method method-post">POST</td>
+      <td>/api/applications</td>
+      <td><span class="auth-label">Candidate</span></td>
+      <td>Gửi hồ sơ ứng tuyển (bao gồm link CV và Cover Letter).</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>c. Kết quả giao diện</h3>
+<div class="screenshot-container">
+  <img src="uc03_job_detail_1775094865626.png" alt="Chi tiết Job" />
+  <span class="caption">Hình 3.1: Chi tiết công việc và nút Ứng tuyển nhanh</span>
+</div>
+
+<!-- ==================== UC04 ==================== -->
+<h2>4. UC04: Quản lý hồ sơ cá nhân</h2>
+
+<h3>a. API Endpoints</h3>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-put">PUT</td><td>/api/users/me</td><td><span class="auth-label">Candidate</span></td><td>Cập nhật CV, SĐT và kỹ năng cá nhân.</td></tr>
+  </tbody>
+</table>
+
+<h3>b. Kết quả giao diện</h3>
+<div class="screenshot-container">
+  <img src="uc04_candidate_profile_1775094894544.png" alt="Profile" />
+  <span class="caption">Hình 4.1: Trang quản lý thông tin và hồ sơ năng lực ứng viên</span>
+</div>
+
+<!-- ==================== UC05 ==================== -->
+<h2>5. UC05: Quản lý thông tin công ty</h2>
+<p>Dành cho Nhà tuyển dụng cập nhật Profile doanh nghiệp.</p>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-put">PUT</td><td>/api/companies/my</td><td><span class="auth-label">Recruiter</span></td><td>Sửa tên, logo, địa chỉ và mô tả công ty.</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== UC06 ==================== -->
+<h2>6. UC06: Đăng tin tuyển dụng</h2>
+<div class="mermaid">
+erDiagram
+    COMPANIES ||--o{ JOBS : "thuộc về"
+    JOBS {
+        varchar title
+        text description
+        varchar status
+    }
+</div>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-post">POST</td><td>/api/jobs</td><td><span class="auth-label">Recruiter</span></td><td>Tạo tin tuyển dụng mới với trạng thái Chờ Duyệt (Pending).</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== UC07 ==================== -->
+<h2>7. UC07: Quản lý hồ sơ ứng viên</h2>
+<p>Nhà tuyển dụng xét duyệt danh sách các ứng viên đã nộp đơn vào bài đăng của mình.</p>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-get">GET</td><td>/api/applications/job/{id}</td><td><span class="auth-label">Recruiter</span></td><td>Xem danh sách chi tiết các ứng viên nộp đơn.</td></tr>
+    <tr><td class="method method-put">PUT</td><td>/api/applications/{id}/status</td><td><span class="auth-label">Recruiter</span></td><td>Cập nhật trạng thái (Mời phỏng vấn, Chấp nhận, Từ chối).</td></tr>
+  </tbody>
+</table>
+
+<!-- ==================== UC08 ==================== -->
+<h2>8. UC08: Quản lý bài đăng tuyển dụng</h2>
+<div class="screenshot-container">
+  <img src="recruiter_dashboard_1775094782263.png" alt="Recruiter Dash" />
+  <span class="caption">Hình 8.1: Dashboard Nhà tuyển dụng - Quản lý danh sách tin đã đăng</span>
+</div>
+
+<!-- ==================== UC09 ==================== -->
+<h2>9. UC09: Duyệt tin tuyển dụng (Admin)</h2>
+<p>Admin kiểm duyệt nội dung tin đăng trước khi cho phép hiển thị công khai trên hệ thống.</p>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-put">PUT</td><td>/api/jobs/{id}/approve</td><td><span class="auth-label">Admin</span></td><td>Phê duyệt bài đăng (Pending -> Active).</td></tr>
+  </tbody>
+</table>
+<div class="screenshot-container">
+  <img src="admin_dashboard_1775094805929.png" alt="Admin Dash" />
+  <span class="caption">Hình 9.1: Giao diện Admin phê duyệt bài viết hàng loạt</span>
+</div>
+
+<!-- ==================== UC10 ==================== -->
+<h2>10. UC10: Quản lý người dùng (Admin)</h2>
+<p>Admin có quyền khóa (Suspend) các tài khoản vi phạm hoặc đăng tin spam.</p>
+<table>
+  <thead>
+    <tr><th>Phương thức</th><th>Endpoint</th><th>Auth</th><th>Mô tả</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="method method-put">PUT</td><td>/api/users/{id}/suspend</td><td><span class="auth-label">Admin</span></td><td>Tạm khóa hoặc mở khóa tài khoản người dùng.</td></tr>
+    <tr><td class="method method-get">GET</td><td>/api/admin/stats</td><td><span class="auth-label">Admin</span></td><td>Thống kê tổng lượng User, Job và Application.</td></tr>
+  </tbody>
+</table>
+
+<div style="margin-top:50px; text-align:right; font-size:12pt;">
+  <em>Người thực hiện báo cáo:</em><br><br>
+  <strong>Nguyễn Thế Chiến</strong><br>
+  (Hệ thống DevJobs — Dự án Phát triển Website)
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+</script>
+</body>
+</html>

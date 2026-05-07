@@ -105,6 +105,13 @@ export default function AdminDashboardPage() {
                                 </div>
                                 <strong>{s.jobs.closed}</strong>
                             </div>
+                            <div className="breakdown-row" style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed #e5e7eb' }}>
+                                <span><strong style={{ color: '#d97706' }}>🔥 Việc làm Promote</strong></span>
+                                <div className="breakdown-bar-wrap">
+                                    <div className="breakdown-bar" style={{ width: `${s.jobs.total ? (s.jobs.promoted / s.jobs.total) * 100 : 0}%`, background: '#fcd34d' }} />
+                                </div>
+                                <strong style={{ color: '#d97706' }}>{s.jobs.promoted}</strong>
+                            </div>
                         </div>
                         <div className="card-footer-link">
                             <Link to="/admin/approve">Duyệt tin chờ xử lý →</Link>

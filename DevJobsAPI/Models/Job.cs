@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DevJobsAPI.Models;
@@ -26,6 +26,8 @@ public partial class Job
     public string? JobType { get; set; }
 
     public string? Status { get; set; }
+
+    public bool IsPromoted { get; set; } = false;
 
     public DateOnly? ExpiryDate { get; set; }
 

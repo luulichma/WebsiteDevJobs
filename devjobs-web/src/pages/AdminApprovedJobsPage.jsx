@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiService from '../services/apiService';
-import { FiCheck, FiX, FiEye, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiX, FiEye, FiSearch, FiFilter } from 'react-icons/fi';
 import './DashboardPages.css';
 import Pagination from '../components/Pagination';
 
@@ -9,6 +9,7 @@ const getStatusBadge = (status) => {
         case 'pending': return 'badge-warning';
         case 'active': return 'badge-success';
         case 'rejected': return 'badge-danger';
+        case 'closed': return 'badge-secondary';
         default: return 'badge-secondary';
     }
 };
@@ -18,18 +19,19 @@ const getStatusLabel = (status) => {
         case 'pending': return 'Chờ duyệt';
         case 'active': return 'Đã duyệt';
         case 'rejected': return 'Từ chối';
+        case 'closed': return 'Đã đóng';
         default: return status;
     }
 };
 
-export default function AdminApproveJobsPage() {
+export default function AdminApprovedJobsPage() {
     const [jobs, setJobs] = useState([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedIds, setSelectedIds] = useState([]);
-    const [bulkAction, setBulkAction] = useState(null); // 'approve' or 'reject'
+    const [bulkAction, setBulkAction] = useState(null); // 'close'
     const itemsPerPage = 10;
 
     // Filters
@@ -41,11 +43,11 @@ export default function AdminApproveJobsPage() {
 
     const locations = ['Hà Nội', 'TP Hồ Chí Minh', 'Đà Nẵng'];
 
-    const fetchPendingJobs = async () => {
+    const fetchApprovedJobs = async () => {
         setLoading(true);
         try {
             const params = {
-                status: 'pending',
+                status: 'active',
                 page: currentPage,
                 pageSize: itemsPerPage,
                 keyword,
@@ -65,7 +67,7 @@ export default function AdminApproveJobsPage() {
     };
 
     useEffect(() => {
-        fetchPendingJobs();
+        fetchApprovedJobs();
     }, [currentPage, keyword, location, jobType, isPromotedFilter]);
 
     const handleSearch = () => {
@@ -73,26 +75,16 @@ export default function AdminApproveJobsPage() {
         setCurrentPage(1);
     };
 
-    const handleApprove = async (jobId) => {
+    const handleCloseJob = async (jobId) => {
+        if (!window.confirm("Bạn có chắc chắn muốn đóng tin này? Nó sẽ không còn hiển thị cho người dùng nữa.")) return;
         try {
-            await apiService.put(`/jobs/${jobId}/approve`);
-            setJobs(prev => prev.filter(j => j.jobId !== jobId));
-            setSelectedJob(null);
-            alert('Đã duyệt tin thành công');
-        } catch (e) {
-            alert('Lỗi phê duyệt');
-        }
-    };
-
-    const handleReject = async (jobId) => {
-        try {
-            await apiService.put(`/jobs/${jobId}/reject`);
+            await apiService.put(`/jobs/${jobId}/reject`); // reject endpoint sets status to 'closed'
             setJobs(prev => prev.filter(j => j.jobId !== jobId));
             setSelectedIds(prev => prev.filter(id => id !== jobId));
             setSelectedJob(null);
-            alert('Đã từ chối tin');
+            alert('Đã đóng tin tuyển dụng thành công');
         } catch (e) {
-            alert('Lỗi từ chối');
+            alert('Lỗi đóng tin');
         }
     };
 
@@ -123,21 +115,7 @@ export default function AdminApproveJobsPage() {
         setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
     };
 
-    const handleBulkAction = async () => {
-        if (!bulkAction || selectedIds.length === 0) return;
-        try {
-            const endpoint = `/jobs/bulk-${bulkAction}`;
-            await apiService.put(endpoint, selectedIds);
-            setJobs(prev => prev.filter(j => !selectedIds.includes(j.jobId)));
-            setSelectedIds([]);
-            setBulkAction(null);
-            alert(`Đã ${bulkAction === 'approve' ? 'phê duyệt' : 'từ chối'} ${selectedIds.length} mục thành công`);
-        } catch (e) {
-            alert('Lỗi khi thực hiện hành động hàng loạt');
-        }
-    };
-
-    if (loading) return <div className="container mt-3">Đang tải danh sách chờ duyệt...</div>;
+    if (loading) return <div className="container mt-3">Đang tải danh sách tin đã duyệt...</div>;
 
     const totalPages = Math.ceil(total / itemsPerPage);
     const paginatedJobs = jobs; // Dữ liệu đã phân trang từ backend
@@ -147,15 +125,9 @@ export default function AdminApproveJobsPage() {
             <div className="container">
                 <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                        <h1>Tin đang chờ duyệt</h1>
-                        <p>Kiểm tra và phê duyệt các tin đăng đang chờ từ nhà tuyển dụng</p>
+                        <h1>Tin đã duyệt</h1>
+                        <p>Quản lý các tin đăng đang hoạt động trên hệ thống</p>
                     </div>
-                    {selectedIds.length > 0 && (
-                        <div style={{ display: 'flex', gap: 10 }}>
-                            <button className="btn btn-success" onClick={() => setBulkAction('approve')}>Duyệt ({selectedIds.length})</button>
-                            <button className="btn btn-danger" onClick={() => setBulkAction('reject')}>Xóa ({selectedIds.length})</button>
-                        </div>
-                    )}
                 </div>
 
                 {/* Filters */}
@@ -194,7 +166,7 @@ export default function AdminApproveJobsPage() {
 
                 <div className="card">
                     {jobs.length === 0 ? (
-                        <div className="empty-state"><p>Không có tin nào đang chờ duyệt</p></div>
+                        <div className="empty-state"><p>Không có tin nào đang hoạt động</p></div>
                     ) : (
                         <div className="table-container">
                             <table>
@@ -226,8 +198,7 @@ export default function AdminApproveJobsPage() {
                                             <td><span className={`badge ${getStatusBadge(job.status)}`}>{getStatusLabel(job.status)}</span></td>
                                             <td>
                                                 <div style={{ display: 'flex', gap: 8 }}>
-                                                    <button className="btn btn-sm btn-success" onClick={() => handleApprove(job.jobId)}><FiCheck size={14} /> Duyệt</button>
-                                                    <button className="btn btn-sm btn-danger" onClick={() => handleReject(job.jobId)}><FiX size={14} /> Từ chối</button>
+                                                    <button className="btn btn-sm btn-danger" onClick={() => handleCloseJob(job.jobId)}><FiX size={14} /> Đóng tin</button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -266,52 +237,25 @@ export default function AdminApproveJobsPage() {
                                 <div className="tags mt-1">{selectedJob.skills?.map(s => <span className="tag" key={s}>{s}</span>)}</div>
                             </div>
                             <div className="mb-3">
-                                                <strong>Mức lương (dự kiến):</strong> ${selectedJob.salaryMin?.toLocaleString()} - ${selectedJob.salaryMax?.toLocaleString()}
-                                            </div>
-                                            
-                                            <div className="mb-3" style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <div>
-                                                    <strong style={{ color: '#92400e' }}>🔥 Đề xuất hiển thị nổi bật</strong>
-                                                    <p className="text-muted" style={{ fontSize: '13px', margin: 0 }}>Khi duyệt, tin này sẽ được đưa lên mục Việc làm yêu thích ở trang chủ.</p>
-                                                </div>
-                                                <button 
-                                                    className={`btn ${selectedJob.isPromoted ? 'btn-danger' : 'btn-secondary'}`} 
-                                                    onClick={() => handleTogglePromote(selectedJob.jobId)}
-                                                >
-                                                    {selectedJob.isPromoted ? 'Tắt Promote' : 'Bật Promote'}
-                                                </button>
-                                            </div>
+                                <strong>Mức lương (dự kiến):</strong> ${selectedJob.salaryMin?.toLocaleString()} - ${selectedJob.salaryMax?.toLocaleString()}
+                            </div>
+                            
+                            <div className="mb-3" style={{ background: '#fffbeb', padding: '12px', borderRadius: '8px', border: '1px solid #fde68a', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                <div>
+                                    <strong style={{ color: '#92400e' }}>🔥 Trạng thái Promote</strong>
+                                    <p className="text-muted" style={{ fontSize: '13px', margin: 0 }}>Việc làm yêu thích hiển thị ưu tiên.</p>
+                                </div>
+                                <button 
+                                    className={`btn ${selectedJob.isPromoted ? 'btn-danger' : 'btn-secondary'}`} 
+                                    onClick={() => handleTogglePromote(selectedJob.jobId)}
+                                >
+                                    {selectedJob.isPromoted ? 'Tắt Promote' : 'Bật Promote'}
+                                </button>
+                            </div>
 
                             <div style={{ display: 'flex', gap: 12 }}>
-                                <button className="btn btn-success btn-lg" style={{ flex: 1 }} onClick={() => handleApprove(selectedJob.jobId)}><FiCheck /> Duyệt tin</button>
-                                <button className="btn btn-danger btn-lg" style={{ flex: 1 }} onClick={() => handleReject(selectedJob.jobId)}><FiX /> Từ chối</button>
-                            </div>
-                            <div className="mt-2 text-center">
-                                <button className="btn btn-secondary btn-sm" onClick={() => setSelectedJob(null)}>Huỷ</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Bulk Action Modal */}
-                {bulkAction && (
-                    <div className="modal-overlay" onClick={() => setBulkAction(null)}>
-                        <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '400px' }}>
-                            <h2 style={{ color: bulkAction === 'approve' ? '#2ecc71' : '#e74c3c' }}>
-                                Xác nhận {bulkAction === 'approve' ? 'Duyệt' : 'Xóa'}
-                            </h2>
-                            <p style={{ margin: '15px 0' }}>
-                                Bạn có chắc chắn muốn <strong>{bulkAction === 'approve' ? 'phê duyệt' : 'từ chối/xóa'}</strong> {selectedIds.length} tin tuyển dụng đã chọn? 
-                                Hành động này không thể hoàn tác.
-                            </p>
-                            <div style={{ display: 'flex', gap: 12 }}>
-                                <button className={`btn btn-${bulkAction === 'approve' ? 'success' : 'danger'}`} 
-                                    style={{ flex: 1 }} onClick={handleBulkAction}>
-                                    Đồng ý
-                                </button>
-                                <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setBulkAction(null)}>
-                                    Hủy bỏ
-                                </button>
+                                <button className="btn btn-danger btn-lg" style={{ flex: 1 }} onClick={() => handleCloseJob(selectedJob.jobId)}><FiX /> Đóng tin</button>
+                                <button className="btn btn-secondary btn-lg" style={{ flex: 1 }} onClick={() => setSelectedJob(null)}>Đóng</button>
                             </div>
                         </div>
                     </div>
